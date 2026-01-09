@@ -16,6 +16,7 @@
 /*============================================================================*/
 #include "app_main.h"
 #include "app_config.h"
+#include "app_config_mgmt.h"
 #include "app_errors.h"
 #include "bsp_gpio.h"
 #include "bsp_adc.h"
@@ -29,6 +30,7 @@
 #include "pm_monitor.h"
 #include "temp_sensor.h"
 #include "fram_driver.h"
+#include "can_protocol.h"
 #include "timestamp.h"
 #include <string.h>
 
@@ -57,8 +59,18 @@ static uint32_t slow_task_last_ms = 0U;
 
 static Status_t app_init_peripherals(void);
 static Status_t app_init_modules(void);
+static Status_t app_register_callbacks(void);
 static void app_update_status(void);
 static void app_state_machine(void);
+
+/* Callback handlers */
+static void app_lem_overcurrent_handler(uint8_t sensorId, Current_mA_t current);
+static void app_btt_fault_handler(uint8_t channel, BTT6200_FaultType_t faultType);
+static void app_power_fault_handler(uint8_t railId, PM_RailStatus_t status);
+static void app_temp_alarm_handler(TempSensor_AlarmType_t alarmType, int32_t temp_mC);
+static void app_error_handler(ErrorCode_t code, uint32_t p1, uint32_t p2, uint32_t p3);
+static void app_safety_fault_handler(SafetyLevel_t level, const char *pName);
+static void app_di_state_change_handler(uint8_t inputId, bool state);
 
 /*============================================================================*/
 /* PUBLIC FUNCTIONS                                                           */
@@ -235,7 +247,8 @@ void App_SlowTasks(void)
     (void)TempSensor_ReadTemperature(&temperature_mC);
 
     /* CAN communication */
-    /* TODO: Transmit status messages (CAN protocol layer needed) */
+    (void)CANProto_ProcessRxMessages();    /* Process incoming CAN messages */
+    (void)CANProto_TransmitPeriodic();     /* Transmit periodic status messages */
 
     /* Diagnostics */
     (void)ErrorHandler_Update();  /* Age DTCs */
@@ -470,16 +483,34 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
+        /* Initialize configuration management (loads from FRAM) */
+        status = ConfigMgmt_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
         /* Initialize LEM HOYS sensors */
         status = LEM_Init();
 
         if (status == STATUS_OK)
         {
-            /* TODO: Load calibration from FRAM */
-            /* For now, perform zero-current calibration */
-            for (uint8_t i = 0U; i < LEM_SENSOR_COUNT; i++)
+            /* Load calibration from configuration */
+            SystemConfig_t config;
+            if (ConfigMgmt_Load(&config) == STATUS_OK)
             {
-                (void)LEM_CalibrateSensor(i);
+                /* Apply LEM calibration from config */
+                for (uint8_t i = 0U; i < LEM_SENSOR_COUNT; i++)
+                {
+                    if (config.lem_calibration[i].valid)
+                    {
+                        (void)LEM_SetCalibration(i, &config.lem_calibration[i]);
+                    }
+                    else
+                    {
+                        /* Perform zero-current calibration */
+                        (void)LEM_CalibrateSensor(i);
+                    }
+                }
             }
         }
     }
@@ -524,6 +555,18 @@ static Status_t app_init_modules(void)
         {
             (void)BSP_CAN_Init(BSP_CAN_INSTANCE_2, &canConfig);
         }
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize CAN protocol stack */
+        status = CANProto_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Register all callbacks */
+        status = app_register_callbacks();
     }
 
     return status;
@@ -601,6 +644,155 @@ static void app_state_machine(void)
             App_EnterSafeState();
             break;
     }
+}
+
+/*============================================================================*/
+/* CALLBACK FUNCTIONS                                                         */
+/*============================================================================*/
+
+/**
+ * @brief Register all module callbacks
+ */
+static Status_t app_register_callbacks(void)
+{
+    /* Register LEM overcurrent callback */
+    (void)LEM_RegisterOvercurrentCallback(app_lem_overcurrent_handler);
+
+    /* Register BTT6200 fault callback */
+    (void)BTT6200_RegisterFaultCallback(app_btt_fault_handler);
+
+    /* Register power monitoring fault callback */
+    (void)PM_Monitor_RegisterFaultCallback(app_power_fault_handler);
+
+    /* Register temperature alarm callback */
+    (void)TempSensor_RegisterAlarmCallback(app_temp_alarm_handler);
+
+    /* Register error handler callback */
+    (void)ErrorHandler_RegisterCallback(app_error_handler);
+
+    /* Register safety monitor fault callback */
+    (void)SafetyMonitor_RegisterFaultCallback(app_safety_fault_handler);
+
+    /* Register digital input callbacks (example for first 5 inputs) */
+    for (uint8_t i = 0U; i < 5U; i++)
+    {
+        (void)DI_RegisterCallback(i, app_di_state_change_handler);
+    }
+
+    return STATUS_OK;
+}
+
+/**
+ * @brief LEM overcurrent callback handler
+ */
+static void app_lem_overcurrent_handler(uint8_t sensorId, Current_mA_t current)
+{
+    /* Log overcurrent fault */
+    ErrorHandler_LogError(ERROR_SENSOR_FAULT, (uint32_t)sensorId, (uint32_t)current, 0U);
+
+    /* Turn on warning LED */
+    (void)BSP_GPIO_WritePin(GPIOH, GPIO_PIN_10, GPIO_STATE_HIGH);
+}
+
+/**
+ * @brief BTT6200 fault callback handler
+ */
+static void app_btt_fault_handler(uint8_t channel, BTT6200_FaultType_t faultType)
+{
+    /* Log actuator fault */
+    ErrorHandler_LogError(ERROR_ACTUATOR_FAULT, (uint32_t)channel, (uint32_t)faultType, 0U);
+
+    /* For short circuit, enter safe state */
+    if (faultType == BTT6200_FAULT_SHORT_CIRCUIT)
+    {
+        App_EnterSafeState();
+    }
+}
+
+/**
+ * @brief Power monitoring fault callback handler
+ */
+static void app_power_fault_handler(uint8_t railId, PM_RailStatus_t status)
+{
+    /* Log power fault */
+    ErrorHandler_LogError(ERROR_POWER_FAULT, (uint32_t)railId, (uint32_t)status, 0U);
+
+    /* For critical rails (12V input, 3V3 digital), enter safe state */
+    if ((railId == PM_RAIL_INPUT_12V) || (railId == PM_RAIL_3V3_DIGITAL))
+    {
+        if ((status == PM_RAIL_STATUS_UNDERVOLTAGE) || (status == PM_RAIL_STATUS_OVERVOLTAGE))
+        {
+            App_EnterSafeState();
+        }
+    }
+}
+
+/**
+ * @brief Temperature alarm callback handler
+ */
+static void app_temp_alarm_handler(TempSensor_AlarmType_t alarmType, int32_t temp_mC)
+{
+    /* Log temperature fault */
+    ErrorHandler_LogError(ERROR_TEMPERATURE_FAULT, (uint32_t)alarmType, (uint32_t)temp_mC, 0U);
+
+    /* For overtemperature, enter safe state */
+    if (alarmType == TEMP_ALARM_HIGH)
+    {
+        App_EnterSafeState();
+    }
+}
+
+/**
+ * @brief Error handler callback
+ */
+static void app_error_handler(ErrorCode_t code, uint32_t p1, uint32_t p2, uint32_t p3)
+{
+    /* Transmit fault message via CAN */
+    (void)CANProto_SendFaults();
+
+    /* For critical errors, blink error LED faster */
+    if ((code >= ERROR_SAFETY_WATCHDOG) && (code <= ERROR_SAFETY_CRITICAL_FAULT))
+    {
+        /* Rapid blink */
+        for (uint8_t i = 0U; i < 6U; i++)
+        {
+            (void)BSP_GPIO_TogglePin(GPIOH, GPIO_PIN_10);
+            HAL_Delay(50);
+        }
+    }
+
+    (void)p1;  /* Suppress unused warnings */
+    (void)p2;
+    (void)p3;
+}
+
+/**
+ * @brief Safety monitor fault callback handler
+ */
+static void app_safety_fault_handler(SafetyLevel_t level, const char *pName)
+{
+    /* Log safety monitor fault */
+    ErrorHandler_LogError(ERROR_SAFETY_MONITOR_FAULT, (uint32_t)level, 0U, 0U);
+
+    /* For critical level, enter safe state */
+    if (level == SAFETY_LEVEL_CRITICAL)
+    {
+        App_EnterSafeState();
+    }
+
+    (void)pName;  /* Suppress unused warning */
+}
+
+/**
+ * @brief Digital input state change callback handler
+ */
+static void app_di_state_change_handler(uint8_t inputId, bool state)
+{
+    /* Example: Log state changes for important inputs */
+    /* This can be used for emergency stop, ignition key, etc. */
+
+    (void)inputId;  /* Suppress unused warnings */
+    (void)state;
 }
 
 /*============================================================================*/
