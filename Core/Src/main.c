@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "app_main.h"
+#include "app_config.h"
+#include "app_errors.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +50,7 @@ CAN_HandleTypeDef hcan2;
 I2C_HandleTypeDef hi2c2;
 
 SPI_HandleTypeDef hspi4;
+DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_spi4_rx;
 DMA_HandleTypeDef hdma_spi4_tx;
 
@@ -114,10 +117,24 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  /* Initialize BCU application */
+  Status_t status = App_Init();
+
+  if (status != STATUS_OK)
+  {
+    /* Initialization failed - enter safe state */
+    ErrorHandler_SafeState();
+  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  /* Start main application loop (never returns) */
+  App_MainLoop();
+
+  /* Should never reach here */
   while (1)
   {
     /* USER CODE END WHILE */
