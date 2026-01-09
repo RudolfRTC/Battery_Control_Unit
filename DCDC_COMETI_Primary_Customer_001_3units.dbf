@@ -1,0 +1,930 @@
+//******************************BUSMASTER Messages and signals Database ******************************//
+
+[DATABASE_VERSION] 1.3
+
+[PROTOCOL] CAN
+
+[BUSMASTER_VERSION] [3.2.2]
+[NUMBER_OF_MESSAGES] 45
+
+[START_MSG] DCDC_ControlInformation,126877696,4,3,1,X,DCDC_Primary
+[START_SIGNALS] currentLimit,16,3,0,U,65535,0,1,0,0.1,A,,SUPERVISER
+[START_SIGNALS] converterMode,8,1,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "Bidirectional",3
+[VALUE_DESCRIPTION] "Bus2ToBus1",2
+[VALUE_DESCRIPTION] "Bus1ToBus2",1
+[VALUE_DESCRIPTION] "notSet",0
+[START_SIGNALS] controlType,8,2,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "iBus2",3
+[VALUE_DESCRIPTION] "iBus1",4
+[VALUE_DESCRIPTION] "vBus2ILim",7
+[VALUE_DESCRIPTION] "vBus1ILim",8
+[VALUE_DESCRIPTION] "vBus2",1
+[VALUE_DESCRIPTION] "vBus1",2
+[VALUE_DESCRIPTION] "pBus2",5
+[VALUE_DESCRIPTION] "pBus1",6
+[VALUE_DESCRIPTION] "notSet",0
+[END_MSG]
+
+[START_MSG] DCDC_ControlInformation_1,126877697,4,3,1,X,DCDC_Primary_1
+[START_SIGNALS] currentLimit,16,3,0,U,65535,0,1,0,0.1,A,,SUPERVISER
+[START_SIGNALS] converterMode,8,1,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "Bidirectional",3
+[VALUE_DESCRIPTION] "Bus2ToBus1",2
+[VALUE_DESCRIPTION] "Bus1ToBus2",1
+[VALUE_DESCRIPTION] "notSet",0
+[START_SIGNALS] controlType,8,2,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "iBus2",3
+[VALUE_DESCRIPTION] "iBus1",4
+[VALUE_DESCRIPTION] "vBus2ILim",7
+[VALUE_DESCRIPTION] "vBus1ILim",8
+[VALUE_DESCRIPTION] "vBus2",1
+[VALUE_DESCRIPTION] "vBus1",2
+[VALUE_DESCRIPTION] "pBus2",5
+[VALUE_DESCRIPTION] "pBus1",6
+[VALUE_DESCRIPTION] "notSet",0
+[END_MSG]
+
+[START_MSG] DCDC_ControlInformation_2,126877698,4,3,1,X,DCDC_Primary_2
+[START_SIGNALS] currentLimit,16,3,0,U,65535,0,1,0,0.1,A,,SUPERVISER
+[START_SIGNALS] converterMode,8,1,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "Bidirectional",3
+[VALUE_DESCRIPTION] "Bus2ToBus1",2
+[VALUE_DESCRIPTION] "Bus1ToBus2",1
+[VALUE_DESCRIPTION] "notSet",0
+[START_SIGNALS] controlType,8,2,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "iBus2",3
+[VALUE_DESCRIPTION] "iBus1",4
+[VALUE_DESCRIPTION] "vBus2ILim",7
+[VALUE_DESCRIPTION] "vBus1ILim",8
+[VALUE_DESCRIPTION] "vBus2",1
+[VALUE_DESCRIPTION] "vBus1",2
+[VALUE_DESCRIPTION] "pBus2",5
+[VALUE_DESCRIPTION] "pBus1",6
+[VALUE_DESCRIPTION] "notSet",0
+[END_MSG]
+
+[START_MSG] DCDC_SettingsModeRequest,158334976,1,1,1,X,SUPERVISER
+[START_SIGNALS] request,8,1,0,U,255,0,1,0,1,,,DCDC_Primary
+[VALUE_DESCRIPTION] "enterSettingsMode",1
+[VALUE_DESCRIPTION] "exitSettingsMode",0
+[END_MSG]
+
+[START_MSG] DCDC_SettingsModeRequest_1,158334977,1,1,1,X,SUPERVISER
+[START_SIGNALS] request,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_1
+[VALUE_DESCRIPTION] "enterSettingsMode",1
+[VALUE_DESCRIPTION] "exitSettingsMode",0
+[END_MSG]
+
+[START_MSG] DCDC_SettingsModeRequest_2,158334978,1,1,1,X,SUPERVISER
+[START_SIGNALS] request,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_2
+[VALUE_DESCRIPTION] "enterSettingsMode",1
+[VALUE_DESCRIPTION] "exitSettingsMode",0
+[END_MSG]
+
+[START_MSG] DCDC_ErrorResetRequest,95420416,0,0,1,X,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_ErrorResetRequest_1,95420417,0,0,1,X,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_ErrorResetRequest_2,95420418,0,0,1,X,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_ParameterRequest,137363456,7,3,1,X,SUPERVISER
+[START_SIGNALS] paramValueReq,32,4,0,U,4294967295,0,1,0,1,,,DCDC_Primary
+[START_SIGNALS] paramIdReq,16,2,0,U,65535,0,1,0,1,,,DCDC_Primary
+[START_SIGNALS] action,8,1,0,U,255,0,1,0,1,,,DCDC_Primary
+[VALUE_DESCRIPTION] "save",3
+[VALUE_DESCRIPTION] "update",2
+[VALUE_DESCRIPTION] "read",1
+[VALUE_DESCRIPTION] "noAction",0
+[END_MSG]
+
+[START_MSG] DCDC_ParameterRequest_1,137363457,7,3,1,X,SUPERVISER
+[START_SIGNALS] paramValueReq,32,4,0,U,4294967295,0,1,0,1,,,DCDC_Primary_1
+[START_SIGNALS] paramIdReq,16,2,0,U,65535,0,1,0,1,,,DCDC_Primary_1
+[START_SIGNALS] action,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_1
+[VALUE_DESCRIPTION] "save",3
+[VALUE_DESCRIPTION] "update",2
+[VALUE_DESCRIPTION] "read",1
+[VALUE_DESCRIPTION] "noAction",0
+[END_MSG]
+
+[START_MSG] DCDC_ParameterRequest_2,137363458,7,3,1,X,SUPERVISER
+[START_SIGNALS] paramValueReq,32,4,0,U,4294967295,0,1,0,1,,,DCDC_Primary_2
+[START_SIGNALS] paramIdReq,16,2,0,U,65535,0,1,0,1,,,DCDC_Primary_2
+[START_SIGNALS] action,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_2
+[VALUE_DESCRIPTION] "save",3
+[VALUE_DESCRIPTION] "update",2
+[VALUE_DESCRIPTION] "read",1
+[VALUE_DESCRIPTION] "noAction",0
+[END_MSG]
+
+[START_MSG] DCDC_InformationRequest,42991616,1,1,1,X,SUPERVISER
+[START_SIGNALS] requestdInfo,8,1,0,U,255,0,1,0,1,,,DCDC_Primary
+[VALUE_DESCRIPTION] "controlInformation",9
+[VALUE_DESCRIPTION] "regulationInformation",8
+[VALUE_DESCRIPTION] "temperatureMeasures",6
+[VALUE_DESCRIPTION] "voltageMeasures",5
+[VALUE_DESCRIPTION] "powerMeasures",4
+[VALUE_DESCRIPTION] "currentMeasures",3
+[VALUE_DESCRIPTION] "warnings",2
+[VALUE_DESCRIPTION] "errors",1
+[END_MSG]
+
+[START_MSG] DCDC_InformationRequest_1,42991617,1,1,1,X,SUPERVISER
+[START_SIGNALS] requestdInfo,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_1
+[VALUE_DESCRIPTION] "controlInformation",9
+[VALUE_DESCRIPTION] "regulationInformation",8
+[VALUE_DESCRIPTION] "temperatureMeasures",6
+[VALUE_DESCRIPTION] "voltageMeasures",5
+[VALUE_DESCRIPTION] "powerMeasures",4
+[VALUE_DESCRIPTION] "currentMeasures",3
+[VALUE_DESCRIPTION] "warnings",2
+[VALUE_DESCRIPTION] "errors",1
+[END_MSG]
+
+[START_MSG] DCDC_InformationRequest_2,42991618,1,1,1,X,SUPERVISER
+[START_SIGNALS] requestdInfo,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_2
+[VALUE_DESCRIPTION] "controlInformation",9
+[VALUE_DESCRIPTION] "regulationInformation",8
+[VALUE_DESCRIPTION] "temperatureMeasures",6
+[VALUE_DESCRIPTION] "voltageMeasures",5
+[VALUE_DESCRIPTION] "powerMeasures",4
+[VALUE_DESCRIPTION] "currentMeasures",3
+[VALUE_DESCRIPTION] "warnings",2
+[VALUE_DESCRIPTION] "errors",1
+[END_MSG]
+
+[START_MSG] DCDC_ModeRequest,5242880,2,2,1,X,SUPERVISER
+[START_SIGNALS] converterModeReq,8,1,0,U,255,0,1,0,1,,,DCDC_Primary
+[VALUE_DESCRIPTION] "Bidirectional",3
+[VALUE_DESCRIPTION] "Bus2ToBus1",2
+[VALUE_DESCRIPTION] "Bus1ToBus2",1
+[VALUE_DESCRIPTION] "notSet",0
+[START_SIGNALS] controlTypeReq,8,2,0,U,255,0,1,0,1,,,DCDC_Primary
+[VALUE_DESCRIPTION] "iBus2",3
+[VALUE_DESCRIPTION] "iBus1",4
+[VALUE_DESCRIPTION] "vBus2ILim",7
+[VALUE_DESCRIPTION] "vBus1ILim",8
+[VALUE_DESCRIPTION] "vBus2",1
+[VALUE_DESCRIPTION] "vBus1",2
+[VALUE_DESCRIPTION] "pBus2",5
+[VALUE_DESCRIPTION] "pBus1",6
+[VALUE_DESCRIPTION] "notSet",0
+[END_MSG]
+
+[START_MSG] DCDC_ModeRequest_1,5242881,2,2,1,X,SUPERVISER
+[START_SIGNALS] converterModeReq,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_1
+[VALUE_DESCRIPTION] "Bidirectional",3
+[VALUE_DESCRIPTION] "Bus2ToBus1",2
+[VALUE_DESCRIPTION] "Bus1ToBus2",1
+[VALUE_DESCRIPTION] "notSet",0
+[START_SIGNALS] controlTypeReq,8,2,0,U,255,0,1,0,1,,,DCDC_Primary_1
+[VALUE_DESCRIPTION] "iBus2",3
+[VALUE_DESCRIPTION] "iBus1",4
+[VALUE_DESCRIPTION] "vBus2ILim",7
+[VALUE_DESCRIPTION] "vBus1ILim",8
+[VALUE_DESCRIPTION] "vBus2",1
+[VALUE_DESCRIPTION] "vBus1",2
+[VALUE_DESCRIPTION] "pBus2",5
+[VALUE_DESCRIPTION] "pBus1",6
+[VALUE_DESCRIPTION] "notSet",0
+[END_MSG]
+
+[START_MSG] DCDC_ModeRequest_2,5242882,2,2,1,X,SUPERVISER
+[START_SIGNALS] converterModeReq,8,1,0,U,255,0,1,0,1,,,DCDC_Primary_2
+[VALUE_DESCRIPTION] "Bidirectional",3
+[VALUE_DESCRIPTION] "Bus2ToBus1",2
+[VALUE_DESCRIPTION] "Bus1ToBus2",1
+[VALUE_DESCRIPTION] "notSet",0
+[START_SIGNALS] controlTypeReq,8,2,0,U,255,0,1,0,1,,,DCDC_Primary_2
+[VALUE_DESCRIPTION] "iBus2",3
+[VALUE_DESCRIPTION] "iBus1",4
+[VALUE_DESCRIPTION] "vBus2ILim",7
+[VALUE_DESCRIPTION] "vBus1ILim",8
+[VALUE_DESCRIPTION] "vBus2",1
+[VALUE_DESCRIPTION] "vBus1",2
+[VALUE_DESCRIPTION] "pBus2",5
+[VALUE_DESCRIPTION] "pBus1",6
+[VALUE_DESCRIPTION] "notSet",0
+[END_MSG]
+
+[START_MSG] DCDC_ControlRequest,1048576,7,3,1,X,SUPERVISER
+[START_SIGNALS] currentLimitReq,16,6,0,U,65535,0,1,0,0.1,A,,DCDC_Primary
+[START_SIGNALS] setpointReq,32,2,0,U,12000,0,1,0,1,,,DCDC_Primary
+[START_SIGNALS] startCommand,8,1,0,U,1,0,1,0,1,,,DCDC_Primary
+[END_MSG]
+
+[START_MSG] DCDC_ControlRequest_1,1048577,7,3,1,X,SUPERVISER
+[START_SIGNALS] currentLimitReq,16,6,0,U,65535,0,1,0,0.1,A,,DCDC_Primary_1
+[START_SIGNALS] setpointReq,32,2,0,U,12000,0,1,0,1,,,DCDC_Primary_1
+[START_SIGNALS] startCommand,8,1,0,U,1,0,1,0,1,,,DCDC_Primary_1
+[END_MSG]
+
+[START_MSG] DCDC_ControlRequest_2,1048578,7,3,1,X,SUPERVISER
+[START_SIGNALS] currentLimitReq,16,6,0,U,65535,0,1,0,0.1,A,,DCDC_Primary_2
+[START_SIGNALS] setpointReq,32,2,0,U,12000,0,1,0,1,,,DCDC_Primary_2
+[START_SIGNALS] startCommand,8,1,0,U,1,0,1,0,1,,,DCDC_Primary_2
+[END_MSG]
+
+[START_MSG] DCDC_ParameterResponse,147849216,7,3,1,X,DCDC_Primary
+[START_SIGNALS] status,8,7,0,U,1,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "Success",1
+[VALUE_DESCRIPTION] "Failure",0
+[START_SIGNALS] paramValue,32,3,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] paramId,16,1,0,U,65535,0,1,0,1,,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_ParameterResponse_1,147849217,7,3,1,X,DCDC_Primary_1
+[START_SIGNALS] status,8,7,0,U,1,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "Success",1
+[VALUE_DESCRIPTION] "Failure",0
+[START_SIGNALS] paramValue,32,3,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] paramId,16,1,0,U,65535,0,1,0,1,,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_ParameterResponse_2,147849218,7,3,1,X,DCDC_Primary_2
+[START_SIGNALS] status,8,7,0,U,1,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "Success",1
+[VALUE_DESCRIPTION] "Failure",0
+[START_SIGNALS] paramValue,32,3,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] paramId,16,1,0,U,65535,0,1,0,1,,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_Warnings,89128960,4,1,1,X,DCDC_Primary
+[START_SIGNALS] warnings,32,1,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "noWarning",0
+[VALUE_DESCRIPTION] "highOutCoolantTemp",1
+[VALUE_DESCRIPTION] "highInCoolantTemp",2
+[VALUE_DESCRIPTION] "highAmbientTemp",4
+[VALUE_DESCRIPTION] "highMosfetTemp",8
+[VALUE_DESCRIPTION] "highTransformerTemp",16
+[VALUE_DESCRIPTION] "highSelfTemp",32
+[VALUE_DESCRIPTION] "highCoolantDeltaTemp",64
+[VALUE_DESCRIPTION] "setPointUnreachableTooLow",128
+[VALUE_DESCRIPTION] "setPointUnreachableTooHigh",256
+[VALUE_DESCRIPTION] "controlTypeChangeNotAllowed",512
+[VALUE_DESCRIPTION] "backupApplicationStarted",1024
+[VALUE_DESCRIPTION] "backupParametersLoaded",2048
+[END_MSG]
+
+[START_MSG] DCDC_Warnings_1,89128961,4,1,1,X,DCDC_Primary_1
+[START_SIGNALS] warnings,32,1,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "noWarning",0
+[VALUE_DESCRIPTION] "highOutCoolantTemp",1
+[VALUE_DESCRIPTION] "highInCoolantTemp",2
+[VALUE_DESCRIPTION] "highAmbientTemp",4
+[VALUE_DESCRIPTION] "highMosfetTemp",8
+[VALUE_DESCRIPTION] "highTransformerTemp",16
+[VALUE_DESCRIPTION] "highSelfTemp",32
+[VALUE_DESCRIPTION] "highCoolantDeltaTemp",64
+[VALUE_DESCRIPTION] "setPointUnreachableTooLow",128
+[VALUE_DESCRIPTION] "setPointUnreachableTooHigh",256
+[VALUE_DESCRIPTION] "controlTypeChangeNotAllowed",512
+[VALUE_DESCRIPTION] "backupApplicationStarted",1024
+[VALUE_DESCRIPTION] "backupParametersLoaded",2048
+[END_MSG]
+
+[START_MSG] DCDC_Warnings_2,89128962,4,1,1,X,DCDC_Primary_2
+[START_SIGNALS] warnings,32,1,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "noWarning",0
+[VALUE_DESCRIPTION] "highOutCoolantTemp",1
+[VALUE_DESCRIPTION] "highInCoolantTemp",2
+[VALUE_DESCRIPTION] "highAmbientTemp",4
+[VALUE_DESCRIPTION] "highMosfetTemp",8
+[VALUE_DESCRIPTION] "highTransformerTemp",16
+[VALUE_DESCRIPTION] "highSelfTemp",32
+[VALUE_DESCRIPTION] "highCoolantDeltaTemp",64
+[VALUE_DESCRIPTION] "setPointUnreachableTooLow",128
+[VALUE_DESCRIPTION] "setPointUnreachableTooHigh",256
+[VALUE_DESCRIPTION] "controlTypeChangeNotAllowed",512
+[VALUE_DESCRIPTION] "backupApplicationStarted",1024
+[VALUE_DESCRIPTION] "backupParametersLoaded",2048
+[END_MSG]
+
+[START_MSG] DCDC_Errors,32505856,8,2,1,X,DCDC_Primary
+[START_SIGNALS] functionalErrors,32,5,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "noError",0
+[VALUE_DESCRIPTION] "uBus1Min",1
+[VALUE_DESCRIPTION] "uBus1Max",2
+[VALUE_DESCRIPTION] "uBus2Min",4
+[VALUE_DESCRIPTION] "uBus2Max",8
+[VALUE_DESCRIPTION] "iBus2Leg1Max",16
+[VALUE_DESCRIPTION] "iBus2Leg2Max",32
+[VALUE_DESCRIPTION] "outCoolantTempMinCritical",64
+[VALUE_DESCRIPTION] "outCoolantTempMaxCritical",128
+[VALUE_DESCRIPTION] "inCoolantTempMinCritical",256
+[VALUE_DESCRIPTION] "inCoolantTempMaxCritical",512
+[VALUE_DESCRIPTION] "ambientTempMinCritical",1024
+[VALUE_DESCRIPTION] "ambientTempMaxCritical",2048
+[VALUE_DESCRIPTION] "mosfetTempMaxCritical",4096
+[VALUE_DESCRIPTION] "transformerTempMaxCritical",8192
+[VALUE_DESCRIPTION] "selfTempMaxCritical",16384
+[VALUE_DESCRIPTION] "coolantDeltaTempMaxCritical",32768
+[VALUE_DESCRIPTION] "comIsLost",65536
+[VALUE_DESCRIPTION] "unknownControlMode",131072
+[VALUE_DESCRIPTION] "unknownControlType",262144
+[VALUE_DESCRIPTION] "incompatibleCtrlModeType",524288
+[VALUE_DESCRIPTION] "controlLoopNotSet",1048576
+[VALUE_DESCRIPTION] "powerLimitReached",2097152
+[VALUE_DESCRIPTION] "inoperationalTemperatureSensor",4194304
+[START_SIGNALS] criticalErrors,32,1,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "uBusAuxMaxCritical",65536
+[VALUE_DESCRIPTION] "noError",0
+[VALUE_DESCRIPTION] "uBus1MaxCritical",1
+[VALUE_DESCRIPTION] "uBus2MaxCritical",2
+[VALUE_DESCRIPTION] "iBus1Leg1MaxCritical",4
+[VALUE_DESCRIPTION] "iBus1Leg2MaxCritical",8
+[VALUE_DESCRIPTION] "iBus2Leg1MaxCritical",16
+[VALUE_DESCRIPTION] "iBus2Leg2MaxCritical",32
+[VALUE_DESCRIPTION] "parameters",64
+[VALUE_DESCRIPTION] "powerMap",128
+[VALUE_DESCRIPTION] "fpgaLost",256
+[VALUE_DESCRIPTION] "mcuClockUnsync",512
+[VALUE_DESCRIPTION] "fpgaClockUnsync",1024
+[VALUE_DESCRIPTION] "servicePowerSupplyLostMcu",2048
+[VALUE_DESCRIPTION] "servicePowerSupplyLostFpga",4096
+[VALUE_DESCRIPTION] "mosfetDriverFault",8192
+[VALUE_DESCRIPTION] "inoperationalCurrentSensor",16384
+[VALUE_DESCRIPTION] "inoperationalVoltageSensor",32768
+[END_MSG]
+
+[START_MSG] DCDC_Errors_1,32505857,8,2,1,X,DCDC_Primary_1
+[START_SIGNALS] functionalErrors,32,5,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "noError",0
+[VALUE_DESCRIPTION] "uBus1Min",1
+[VALUE_DESCRIPTION] "uBus1Max",2
+[VALUE_DESCRIPTION] "uBus2Min",4
+[VALUE_DESCRIPTION] "uBus2Max",8
+[VALUE_DESCRIPTION] "iBus2Leg1Max",16
+[VALUE_DESCRIPTION] "iBus2Leg2Max",32
+[VALUE_DESCRIPTION] "outCoolantTempMinCritical",64
+[VALUE_DESCRIPTION] "outCoolantTempMaxCritical",128
+[VALUE_DESCRIPTION] "inCoolantTempMinCritical",256
+[VALUE_DESCRIPTION] "inCoolantTempMaxCritical",512
+[VALUE_DESCRIPTION] "ambientTempMinCritical",1024
+[VALUE_DESCRIPTION] "ambientTempMaxCritical",2048
+[VALUE_DESCRIPTION] "mosfetTempMaxCritical",4096
+[VALUE_DESCRIPTION] "transformerTempMaxCritical",8192
+[VALUE_DESCRIPTION] "selfTempMaxCritical",16384
+[VALUE_DESCRIPTION] "coolantDeltaTempMaxCritical",32768
+[VALUE_DESCRIPTION] "comIsLost",65536
+[VALUE_DESCRIPTION] "unknownControlMode",131072
+[VALUE_DESCRIPTION] "unknownControlType",262144
+[VALUE_DESCRIPTION] "incompatibleCtrlModeType",524288
+[VALUE_DESCRIPTION] "controlLoopNotSet",1048576
+[VALUE_DESCRIPTION] "powerLimitReached",2097152
+[VALUE_DESCRIPTION] "inoperationalTemperatureSensor",4194304
+[START_SIGNALS] criticalErrors,32,1,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "uBusAuxMaxCritical",65536
+[VALUE_DESCRIPTION] "noError",0
+[VALUE_DESCRIPTION] "uBus1MaxCritical",1
+[VALUE_DESCRIPTION] "uBus2MaxCritical",2
+[VALUE_DESCRIPTION] "iBus1Leg1MaxCritical",4
+[VALUE_DESCRIPTION] "iBus1Leg2MaxCritical",8
+[VALUE_DESCRIPTION] "iBus2Leg1MaxCritical",16
+[VALUE_DESCRIPTION] "iBus2Leg2MaxCritical",32
+[VALUE_DESCRIPTION] "parameters",64
+[VALUE_DESCRIPTION] "powerMap",128
+[VALUE_DESCRIPTION] "fpgaLost",256
+[VALUE_DESCRIPTION] "mcuClockUnsync",512
+[VALUE_DESCRIPTION] "fpgaClockUnsync",1024
+[VALUE_DESCRIPTION] "servicePowerSupplyLostMcu",2048
+[VALUE_DESCRIPTION] "servicePowerSupplyLostFpga",4096
+[VALUE_DESCRIPTION] "mosfetDriverFault",8192
+[VALUE_DESCRIPTION] "inoperationalCurrentSensor",16384
+[VALUE_DESCRIPTION] "inoperationalVoltageSensor",32768
+[END_MSG]
+
+[START_MSG] DCDC_Errors_2,32505858,8,2,1,X,DCDC_Primary_2
+[START_SIGNALS] functionalErrors,32,5,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "noError",0
+[VALUE_DESCRIPTION] "uBus1Min",1
+[VALUE_DESCRIPTION] "uBus1Max",2
+[VALUE_DESCRIPTION] "uBus2Min",4
+[VALUE_DESCRIPTION] "uBus2Max",8
+[VALUE_DESCRIPTION] "iBus2Leg1Max",16
+[VALUE_DESCRIPTION] "iBus2Leg2Max",32
+[VALUE_DESCRIPTION] "outCoolantTempMinCritical",64
+[VALUE_DESCRIPTION] "outCoolantTempMaxCritical",128
+[VALUE_DESCRIPTION] "inCoolantTempMinCritical",256
+[VALUE_DESCRIPTION] "inCoolantTempMaxCritical",512
+[VALUE_DESCRIPTION] "ambientTempMinCritical",1024
+[VALUE_DESCRIPTION] "ambientTempMaxCritical",2048
+[VALUE_DESCRIPTION] "mosfetTempMaxCritical",4096
+[VALUE_DESCRIPTION] "transformerTempMaxCritical",8192
+[VALUE_DESCRIPTION] "selfTempMaxCritical",16384
+[VALUE_DESCRIPTION] "coolantDeltaTempMaxCritical",32768
+[VALUE_DESCRIPTION] "comIsLost",65536
+[VALUE_DESCRIPTION] "unknownControlMode",131072
+[VALUE_DESCRIPTION] "unknownControlType",262144
+[VALUE_DESCRIPTION] "incompatibleCtrlModeType",524288
+[VALUE_DESCRIPTION] "controlLoopNotSet",1048576
+[VALUE_DESCRIPTION] "powerLimitReached",2097152
+[VALUE_DESCRIPTION] "inoperationalTemperatureSensor",4194304
+[START_SIGNALS] criticalErrors,32,1,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "uBusAuxMaxCritical",65536
+[VALUE_DESCRIPTION] "noError",0
+[VALUE_DESCRIPTION] "uBus1MaxCritical",1
+[VALUE_DESCRIPTION] "uBus2MaxCritical",2
+[VALUE_DESCRIPTION] "iBus1Leg1MaxCritical",4
+[VALUE_DESCRIPTION] "iBus1Leg2MaxCritical",8
+[VALUE_DESCRIPTION] "iBus2Leg1MaxCritical",16
+[VALUE_DESCRIPTION] "iBus2Leg2MaxCritical",32
+[VALUE_DESCRIPTION] "parameters",64
+[VALUE_DESCRIPTION] "powerMap",128
+[VALUE_DESCRIPTION] "fpgaLost",256
+[VALUE_DESCRIPTION] "mcuClockUnsync",512
+[VALUE_DESCRIPTION] "fpgaClockUnsync",1024
+[VALUE_DESCRIPTION] "servicePowerSupplyLostMcu",2048
+[VALUE_DESCRIPTION] "servicePowerSupplyLostFpga",4096
+[VALUE_DESCRIPTION] "mosfetDriverFault",8192
+[VALUE_DESCRIPTION] "inoperationalCurrentSensor",16384
+[VALUE_DESCRIPTION] "inoperationalVoltageSensor",32768
+[END_MSG]
+
+[START_MSG] DCDC_RegulationInformation,116391936,6,3,1,X,DCDC_Primary
+[START_SIGNALS] Reserved,8,6,0,U,255,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] setpoint,32,2,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] softwareMode,8,1,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "maintenance",5
+[VALUE_DESCRIPTION] "settings",4
+[VALUE_DESCRIPTION] "powerdown",3
+[VALUE_DESCRIPTION] "running",2
+[VALUE_DESCRIPTION] "standby",1
+[VALUE_DESCRIPTION] "emergency",0
+[END_MSG]
+
+[START_MSG] DCDC_RegulationInformation_1,116391937,6,3,1,X,DCDC_Primary_1
+[START_SIGNALS] Reserved,8,6,0,U,255,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] setpoint,32,2,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] softwareMode,8,1,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "maintenance",5
+[VALUE_DESCRIPTION] "settings",4
+[VALUE_DESCRIPTION] "powerdown",3
+[VALUE_DESCRIPTION] "running",2
+[VALUE_DESCRIPTION] "standby",1
+[VALUE_DESCRIPTION] "emergency",0
+[END_MSG]
+
+[START_MSG] DCDC_RegulationInformation_2,116391938,6,3,1,X,DCDC_Primary_2
+[START_SIGNALS] Reserved,8,6,0,U,255,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] setpoint,32,2,0,U,4294967295,0,1,0,1,,,SUPERVISER
+[START_SIGNALS] softwareMode,8,1,0,U,255,0,1,0,1,,,SUPERVISER
+[VALUE_DESCRIPTION] "maintenance",5
+[VALUE_DESCRIPTION] "settings",4
+[VALUE_DESCRIPTION] "powerdown",3
+[VALUE_DESCRIPTION] "running",2
+[VALUE_DESCRIPTION] "standby",1
+[VALUE_DESCRIPTION] "emergency",0
+[END_MSG]
+
+[START_MSG] DCDC_VoltageMeasures,75497472,4,2,1,X,DCDC_Primary
+[START_SIGNALS] vBus2,16,3,0,U,600,0,1,0,0.1,V,,SUPERVISER
+[START_SIGNALS] vBus1,16,1,0,U,10000,0,1,0,0.1,V,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_VoltageMeasures_1,75497473,4,2,1,X,DCDC_Primary_1
+[START_SIGNALS] vBus2,16,3,0,U,600,0,1,0,0.1,V,,SUPERVISER
+[START_SIGNALS] vBus1,16,1,0,U,10000,0,1,0,0.1,V,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_VoltageMeasures_2,75497474,4,2,1,X,DCDC_Primary_2
+[START_SIGNALS] vBus2,16,3,0,U,600,0,1,0,0.1,V,,SUPERVISER
+[START_SIGNALS] vBus1,16,1,0,U,10000,0,1,0,0.1,V,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_TemperatureMeasures,74448896,8,8,1,X,DCDC_Primary
+[START_SIGNALS] TempAmbiant,8,8,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxCooling,8,7,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxMosfetSecondary,8,6,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxSelfBoost,8,5,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] tempMaxMosfetBoost,8,4,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxMosfetPSFB,8,3,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxBoost,8,2,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxTransfo,8,1,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_TemperatureMeasures_1,74448897,8,8,1,X,DCDC_Primary_1
+[START_SIGNALS] TempAmbiant,8,8,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxCooling,8,7,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxMosfetSecondary,8,6,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxSelfBoost,8,5,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] tempMaxMosfetBoost,8,4,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxMosfetPSFB,8,3,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxBoost,8,2,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxTransfo,8,1,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_TemperatureMeasures_2,74448898,8,8,1,X,DCDC_Primary_2
+[START_SIGNALS] TempAmbiant,8,8,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxCooling,8,7,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxMosfetSecondary,8,6,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxSelfBoost,8,5,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] tempMaxMosfetBoost,8,4,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxMosfetPSFB,8,3,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxBoost,8,2,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[START_SIGNALS] TempMaxTransfo,8,1,0,U,255,0,1,-50,1,degC,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_PowerMeasures,63963136,8,2,1,X,DCDC_Primary
+[START_SIGNALS] pBus2,32,1,0,U,4294967295,0,1,0,1,W,,SUPERVISER
+[START_SIGNALS] pBus1,32,5,0,U,4294967295,0,1,0,1,W,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_PowerMeasures_1,63963137,8,2,1,X,DCDC_Primary_1
+[START_SIGNALS] pBus2,32,1,0,U,4294967295,0,1,0,1,W,,SUPERVISER
+[START_SIGNALS] pBus1,32,5,0,U,4294967295,0,1,0,1,W,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_PowerMeasures_2,63963138,8,2,1,X,DCDC_Primary_2
+[START_SIGNALS] pBus2,32,1,0,U,4294967295,0,1,0,1,W,,SUPERVISER
+[START_SIGNALS] pBus1,32,5,0,U,4294967295,0,1,0,1,W,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_CurrentMeasures,53477376,4,2,1,X,DCDC_Primary
+[START_SIGNALS] iBus2,16,3,0,U,35268,30268,1,-3276.8,0.1,A,,SUPERVISER
+[START_SIGNALS] iBus1,16,1,0,U,65535,0,1,-3276.8,0.1,A,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_CurrentMeasures_1,53477377,4,2,1,X,DCDC_Primary_1
+[START_SIGNALS] iBus2,16,3,0,U,35268,30268,1,-3276.8,0.1,A,,SUPERVISER
+[START_SIGNALS] iBus1,16,1,0,U,65535,0,1,-3276.8,0.1,A,,SUPERVISER
+[END_MSG]
+
+[START_MSG] DCDC_CurrentMeasures_2,53477378,4,2,1,X,DCDC_Primary_2
+[START_SIGNALS] iBus2,16,3,0,U,35268,30268,1,-3276.8,0.1,A,,SUPERVISER
+[START_SIGNALS] iBus1,16,1,0,U,65535,0,1,-3276.8,0.1,A,,SUPERVISER
+[END_MSG]
+
+[START_VALUE_TABLE]
+[END_VALUE_TABLE]
+
+[NODE] SUPERVISER,DCDC_Primary,DCDC_Primary_1,DCDC_Primary_2
+
+[START_DESC]
+[START_DESC_NET]
+[END_DESC_NET]
+
+[START_DESC_NODE]
+SUPERVISER "Superviser";
+DCDC_Primary "DCDC_Converter Primary CAN interface";
+DCDC_Primary_1 "DCDC_Converter Primary_1 CAN interface";
+DCDC_Primary_2 "DCDC_Converter Primary_2 CAN interface";
+[END_DESC_NODE]
+
+[START_DESC_MSG]
+126877696 X "DCDC_Converter Control InformationCM_ BO_ 2274361345 "DCDC_Converter Control InformationCM_ BO_ 2274361346 "DCDC_Converter Control InformationThis frame is sent by the converter to inform about the actual regulation mode, converter mode, and current limitation.";
+158334976 X "DCDC_Converter settings modeCM_ BO_ 2305818625 "DCDC_Converter settings modeCM_ BO_ 2305818626 "DCDC_Converter settings modeThis frame is sent to the converter in order to enter/exit settings mode";
+95420416 X "DCDC_Converter Error Reset RequestCM_ BO_ 2242904065 "DCDC_Converter Error Reset RequestCM_ BO_ 2242904066 "DCDC_Converter Error Reset RequestThis frame is sent to the converter to request a reset of the errors (see DCDC_Errors)";
+137363456 X "DCDC_Converter Paramenter RequestCM_ BO_ 2284847105 "DCDC_Converter Paramenter RequestCM_ BO_ 2284847106 "DCDC_Converter Paramenter RequestThis frame is sent to converter to request to read/edit a parameter, or to save the parameters modifications into the converters non-volatile memory";
+42991616 X "DCDC_Converter Information RequestCM_ BO_ 2190475265 "DCDC_Converter Information RequestCM_ BO_ 2190475266 "DCDC_Converter Information RequestThis frame is sent to the converter in to request information about actual converter state (measures, control status, errors, warnings...)";
+5242880 X "DCDC_Converter Mode RequestCM_ BO_ 2152726529 "DCDC_Converter Mode RequestCM_ BO_ 2152726530 "DCDC_Converter Mode RequestThis frame is sent to the converter in order to set the control type and converter mode ";
+1048576 X "DCDC_Converter Regulation control CM_ BO_ 2148532225 "DCDC_Converter Regulation control CM_ BO_ 2148532226 "DCDC_Converter Regulation control This frame is sent as a request to the converter in order to set the setpoint value, and the current limitation if applied (see DCDC_ModeRequest) and the start/stop conversion command.";
+147849216 X "DCDC_Converter Parameter ResponseCM_ BO_ 2295332865 "DCDC_Converter Parameter ResponseCM_ BO_ 2295332866 "DCDC_Converter Parameter ResponseThis frame is sent as a response to a parameter request (see DCDC_ParameterRequest)";
+89128960 X "DCDC_Converter WarningsCM_ BO_ 2236612609 "DCDC_Converter WarningsCM_ BO_ 2236612610 "DCDC_Converter WarningsThis frame is sent by the converter to inform about system warnings";
+32505856 X "DCDC_Converter ErrorsCM_ BO_ 2179989505 "DCDC_Converter ErrorsCM_ BO_ 2179989506 "DCDC_Converter ErrorsThis frame is sent by the converter to inform about DCDC errors status";
+116391936 X "DCDC_Converter Regulation InformationCM_ BO_ 2263875585 "DCDC_Converter Regulation InformationCM_ BO_ 2263875586 "DCDC_Converter Regulation InformationThis frame is sent by the converter to inform about the actual values of its software state, setpoint, applied conversion limitation";
+75497472 X "DCDC_Converter voltage measures";
+75497473 X "DCDC_Converter voltage measures";
+75497474 X "DCDC_Converter voltage measures";
+74448896 X "DCDC_Converter temperature measures 1CM_ BO_ 2221932545 "DCDC_Converter temperature measures 1CM_ BO_ 2221932546 "DCDC_Converter temperature measures 1This frame is sent by the converter to inform about the temperature measures (temperature measures 1 to 8)";
+63963136 X "DCDC_Converter power measures";
+63963137 X "DCDC_Converter power measures";
+63963138 X "DCDC_Converter power measures";
+53477376 X "DCDC_Converter current measures";
+53477377 X "DCDC_Converter current measures";
+53477378 X "DCDC_Converter current measures";
+[END_DESC_MSG]
+
+[START_DESC_SIG]
+126877696 X currentLimit "DCDC_Converter current limit setpoint";
+126877697 X currentLimit "DCDC_Converter current limit setpoint";
+126877698 X currentLimit "DCDC_Converter current limit setpoint";
+126877696 X converterMode "DCDC_Converter converter mode";
+126877697 X converterMode "DCDC_Converter converter mode";
+126877698 X converterMode "DCDC_Converter converter mode";
+126877696 X controlType "DCDC_Converter regulation mode";
+126877697 X controlType "DCDC_Converter regulation mode";
+126877698 X controlType "DCDC_Converter regulation mode";
+158334976 X request "DCDC_Converter request settings mode";
+158334977 X request "DCDC_Converter request settings mode";
+158334978 X request "DCDC_Converter request settings mode";
+137363456 X paramValueReq "DCDC_Converter parameter value";
+137363457 X paramValueReq "DCDC_Converter parameter value";
+137363458 X paramValueReq "DCDC_Converter parameter value";
+137363456 X paramIdReq "DCDC_Converter parameter ID";
+137363457 X paramIdReq "DCDC_Converter parameter ID";
+137363458 X paramIdReq "DCDC_Converter parameter ID";
+137363456 X action "DCDC_Converter action request";
+137363457 X action "DCDC_Converter action request";
+137363458 X action "DCDC_Converter action request";
+42991616 X requestdInfo "DCDC_Converter requested info";
+42991617 X requestdInfo "DCDC_Converter requested info";
+42991618 X requestdInfo "DCDC_Converter requested info";
+5242880 X converterModeReq "DCDC_Converter converter mode requestCM_ SG_ 2152726529 converterModeReq "DCDC_Converter converter mode requestCM_ SG_ 2152726530 converterModeReq "DCDC_Converter converter mode request";
+5242880 X controlTypeReq "DCDC_Converter Regulation Mode Request";
+5242881 X controlTypeReq "DCDC_Converter Regulation Mode Request";
+5242882 X controlTypeReq "DCDC_Converter Regulation Mode Request";
+1048576 X currentLimitReq "DCDC_Converter current limit setpoint request";
+1048577 X currentLimitReq "DCDC_Converter current limit setpoint request";
+1048578 X currentLimitReq "DCDC_Converter current limit setpoint request";
+1048576 X setpointReq "DCDC_Converter setpoint requestCM_ SG_ 2148532225 setpointReq "DCDC_Converter setpoint requestCM_ SG_ 2148532226 setpointReq "DCDC_Converter setpoint requestunit: 0.1V/0.1A/1W depending on regulation mode";
+1048576 X startCommand "DCDC_Converter start command";
+1048577 X startCommand "DCDC_Converter start command";
+1048578 X startCommand "DCDC_Converter start command";
+147849216 X status "HVHVDCDC parameter status";
+147849217 X status "HVHVDCDC parameter status";
+147849218 X status "HVHVDCDC parameter status";
+147849216 X paramValue "DCDC_Converter parameter value";
+147849217 X paramValue "DCDC_Converter parameter value";
+147849218 X paramValue "DCDC_Converter parameter value";
+147849216 X paramId "DCDC_Converter parameter ID";
+147849217 X paramId "DCDC_Converter parameter ID";
+147849218 X paramId "DCDC_Converter parameter ID";
+89128960 X warnings "DCDC_Converter warnings";
+89128961 X warnings "DCDC_Converter warnings";
+89128962 X warnings "DCDC_Converter warnings";
+32505856 X functionalErrors "DCDC_Converter fucntional errors ";
+32505857 X functionalErrors "DCDC_Converter fucntional errors ";
+32505858 X functionalErrors "DCDC_Converter fucntional errors ";
+32505856 X criticalErrors "DCDC_Converter critical errors";
+32505857 X criticalErrors "DCDC_Converter critical errors";
+32505858 X criticalErrors "DCDC_Converter critical errors";
+116391936 X Reserved "DCDC_Converter limitation type";
+116391937 X Reserved "DCDC_Converter limitation type";
+116391938 X Reserved "DCDC_Converter limitation type";
+116391936 X setpoint "DCDC_Converter setpointCM_ SG_ 2263875585 setpoint "DCDC_Converter setpointCM_ SG_ 2263875586 setpoint "DCDC_Converter setpointunit: 0.1V/0.1A/1W depending on regulation mode";
+116391936 X softwareMode "DCDC_Converter software mode set point";
+116391937 X softwareMode "DCDC_Converter software mode set point";
+116391938 X softwareMode "DCDC_Converter software mode set point";
+75497472 X vBus2 "DCDC_Converter voltage measures PBus2";
+75497473 X vBus2 "DCDC_Converter voltage measures PBus2";
+75497474 X vBus2 "DCDC_Converter voltage measures PBus2";
+75497472 X vBus1 "DCDC_Converter voltage measures PBus1";
+75497473 X vBus1 "DCDC_Converter voltage measures PBus1";
+75497474 X vBus1 "DCDC_Converter voltage measures PBus1";
+74448896 X TempAmbiant "DCDC_Converter temperature measure 8";
+74448897 X TempAmbiant "DCDC_Converter temperature measure 8";
+74448898 X TempAmbiant "DCDC_Converter temperature measure 8";
+74448896 X TempMaxCooling "DCDC_Converter temperature measure 7";
+74448897 X TempMaxCooling "DCDC_Converter temperature measure 7";
+74448898 X TempMaxCooling "DCDC_Converter temperature measure 7";
+74448896 X TempMaxMosfetSecondary "DCDC_Converter temperature measure 6";
+74448897 X TempMaxMosfetSecondary "DCDC_Converter temperature measure 6";
+74448898 X TempMaxMosfetSecondary "DCDC_Converter temperature measure 6";
+74448896 X TempMaxSelfBoost "DCDC_Converter temperature measure 5";
+74448897 X TempMaxSelfBoost "DCDC_Converter temperature measure 5";
+74448898 X TempMaxSelfBoost "DCDC_Converter temperature measure 5";
+74448896 X tempMaxMosfetBoost "DCDC_Converter temperature measure 4";
+74448897 X tempMaxMosfetBoost "DCDC_Converter temperature measure 4";
+74448898 X tempMaxMosfetBoost "DCDC_Converter temperature measure 4";
+74448896 X TempMaxMosfetPSFB "DCDC_Converter temperature measure 3";
+74448897 X TempMaxMosfetPSFB "DCDC_Converter temperature measure 3";
+74448898 X TempMaxMosfetPSFB "DCDC_Converter temperature measure 3";
+74448896 X TempMaxBoost "DCDC_Converter temperature measure 2";
+74448897 X TempMaxBoost "DCDC_Converter temperature measure 2";
+74448898 X TempMaxBoost "DCDC_Converter temperature measure 2";
+74448896 X TempMaxTransfo "DCDC_Converter temperature measure 1";
+74448897 X TempMaxTransfo "DCDC_Converter temperature measure 1";
+74448898 X TempMaxTransfo "DCDC_Converter temperature measure 1";
+63963136 X pBus2 "DCDC_Converter power measures PBus2";
+63963137 X pBus2 "DCDC_Converter power measures PBus2";
+63963138 X pBus2 "DCDC_Converter power measures PBus2";
+63963136 X pBus1 "DCDC_Converter power measures PBus1";
+63963137 X pBus1 "DCDC_Converter power measures PBus1";
+63963138 X pBus1 "DCDC_Converter power measures PBus1";
+53477376 X iBus2 "DCDC_Converter current measures PBus1 power board 1";
+53477377 X iBus2 "DCDC_Converter current measures PBus1 power board 1";
+53477378 X iBus2 "DCDC_Converter current measures PBus1 power board 1";
+53477376 X iBus1 "DCDC_Converter current measure PBus1 board 1";
+53477377 X iBus1 "DCDC_Converter current measure PBus1 board 1";
+53477378 X iBus1 "DCDC_Converter current measure PBus1 board 1";
+[END_DESC_SIG]
+[END_DESC]
+
+[START_PARAM]
+[START_PARAM_NET]
+"Manufacturer",ENUM,"GENERIC","GENERIC"
+"Version",STRING,"1.00"
+"BusType",STRING,"CAN"
+"DBName",STRING,""
+"BusSpeed",STRING,"500k"
+[END_PARAM_NET]
+
+[START_PARAM_NODE]
+"NetId",INT,0,0,63
+"NodeLongName",STRING,""
+"NmStationAddress",HEX,0,0,4294967295
+[END_PARAM_NODE]
+
+[START_PARAM_MSG]
+"VFrameFormat",ENUM,"ExtendedCAN_FD","StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD"
+"MsgLongName",STRING,""
+"DiagRequest",ENUM,"No","No","Yes"
+"DiagResponse",ENUM,"No","No","Yes"
+"GenMsgCycleTimeFast",INT,0,0,100000
+"GenMsgSendType",ENUM,"","Cyclic","not_used","not_used","not_used","not_used","Cyclic","not_used","IfActive","NoMsgSendType"
+"GenMsgCycleTime",INT,0,0,0
+[END_PARAM_MSG]
+
+[START_PARAM_SIG]
+"State2",STRING,"Description"
+"State1",STRING,"Description"
+"State0",STRING,"Description"
+"Timeout",INT,0,0,100000
+"DataType",ENUM,"","ASC","BLN","ENM","BCD","SNM","UNM","SFP","PKT"
+"SigLongName",STRING,""
+"VNSigHSLocalIgnitionDelayed",ENUM,"Yes","No","Yes"
+"VNSigHSLocalIgnitionOff",ENUM,"No","No","Yes"
+"VNSigHSLocalIgnitionOn",ENUM,"Yes","No","Yes"
+"VNSigHSLocalDiagnostics",ENUM,"No","No","Yes"
+"GenSigInactiveValue",INT,0,0,0
+"GenSigSendType",ENUM,"Cyclic","Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType"
+[END_PARAM_SIG]
+
+[START_PARAM_NODE_RX_SIG]
+[END_PARAM_NODE_RX_SIG]
+
+[START_PARAM_NODE_TX_MSG]
+[END_PARAM_NODE_TX_MSG]
+[END_PARAM]
+
+[START_PARAM_VAL]
+[START_PARAM_NET_VAL]
+"Manufacturer","0"
+"BusType","CAN
+"DBName","HVCAN_Primary"
+[END_PARAM_NET_VAL]
+
+[START_PARAM_NODE_VAL]
+DCDC_Primary,"NmStationAddress",0
+DCDC_Primary_1,"NmStationAddress",1
+DCDC_Primary_2,"NmStationAddress",2
+[END_PARAM_NODE_VAL]
+
+[START_PARAM_MSG_VAL]
+126877696,X,"VFrameFormat","1"
+126877697,X,"VFrameFormat","1"
+126877698,X,"VFrameFormat","1"
+158334976,X,"VFrameFormat","1"
+158334977,X,"VFrameFormat","1"
+158334978,X,"VFrameFormat","1"
+95420416,X,"VFrameFormat","1"
+95420417,X,"VFrameFormat","1"
+95420418,X,"VFrameFormat","1"
+137363456,X,"VFrameFormat","1"
+137363457,X,"VFrameFormat","1"
+137363458,X,"VFrameFormat","1"
+42991616,X,"VFrameFormat","1"
+42991617,X,"VFrameFormat","1"
+42991618,X,"VFrameFormat","1"
+5242880,X,"VFrameFormat","1"
+5242881,X,"VFrameFormat","1"
+5242882,X,"VFrameFormat","1"
+1048576,X,"VFrameFormat","1"
+1048577,X,"VFrameFormat","1"
+1048578,X,"VFrameFormat","1"
+147849216,X,"VFrameFormat","1"
+147849217,X,"VFrameFormat","1"
+147849218,X,"VFrameFormat","1"
+89128960,X,"VFrameFormat","1"
+89128961,X,"VFrameFormat","1"
+89128962,X,"VFrameFormat","1"
+32505856,X,"VFrameFormat","1"
+32505857,X,"VFrameFormat","1"
+32505858,X,"VFrameFormat","1"
+116391936,X,"VFrameFormat","1"
+116391937,X,"VFrameFormat","1"
+116391938,X,"VFrameFormat","1"
+75497472,X,"VFrameFormat","1"
+75497473,X,"VFrameFormat","1"
+75497474,X,"VFrameFormat","1"
+74448896,X,"VFrameFormat","1"
+74448897,X,"VFrameFormat","1"
+74448898,X,"VFrameFormat","1"
+63963136,X,"VFrameFormat","1"
+63963137,X,"VFrameFormat","1"
+63963138,X,"VFrameFormat","1"
+53477376,X,"VFrameFormat","1"
+53477377,X,"VFrameFormat","1"
+53477378,X,"VFrameFormat","1"
+126877696,X,"GenMsgSendType","0"
+126877697,X,"GenMsgSendType","0"
+126877698,X,"GenMsgSendType","0"
+158334976,X,"GenMsgSendType","0"
+158334977,X,"GenMsgSendType","0"
+158334978,X,"GenMsgSendType","0"
+95420416,X,"GenMsgSendType","0"
+95420417,X,"GenMsgSendType","0"
+95420418,X,"GenMsgSendType","0"
+137363456,X,"GenMsgSendType","0"
+137363457,X,"GenMsgSendType","0"
+137363458,X,"GenMsgSendType","0"
+42991616,X,"GenMsgSendType","0"
+42991617,X,"GenMsgSendType","0"
+42991618,X,"GenMsgSendType","0"
+5242880,X,"GenMsgSendType","0"
+5242881,X,"GenMsgSendType","0"
+5242882,X,"GenMsgSendType","0"
+1048576,X,"GenMsgSendType","0"
+1048577,X,"GenMsgSendType","0"
+1048578,X,"GenMsgSendType","0"
+147849216,X,"GenMsgSendType","0"
+147849217,X,"GenMsgSendType","0"
+147849218,X,"GenMsgSendType","0"
+89128960,X,"GenMsgSendType","0"
+89128961,X,"GenMsgSendType","0"
+89128962,X,"GenMsgSendType","0"
+32505856,X,"GenMsgSendType","0"
+32505857,X,"GenMsgSendType","0"
+32505858,X,"GenMsgSendType","0"
+116391936,X,"GenMsgSendType","0"
+116391937,X,"GenMsgSendType","0"
+116391938,X,"GenMsgSendType","0"
+75497472,X,"GenMsgSendType","0"
+75497473,X,"GenMsgSendType","0"
+75497474,X,"GenMsgSendType","0"
+74448896,X,"GenMsgSendType","0"
+74448897,X,"GenMsgSendType","0"
+74448898,X,"GenMsgSendType","0"
+63963136,X,"GenMsgSendType","0"
+63963137,X,"GenMsgSendType","0"
+63963138,X,"GenMsgSendType","0"
+53477376,X,"GenMsgSendType","0"
+53477377,X,"GenMsgSendType","0"
+53477378,X,"GenMsgSendType","0"
+126877696,X,"GenMsgCycleTime",20
+126877697,X,"GenMsgCycleTime",20
+126877698,X,"GenMsgCycleTime",20
+1048576,X,"GenMsgCycleTime",20
+1048577,X,"GenMsgCycleTime",20
+1048578,X,"GenMsgCycleTime",20
+147849216,X,"GenMsgCycleTime",0
+147849217,X,"GenMsgCycleTime",0
+147849218,X,"GenMsgCycleTime",0
+89128960,X,"GenMsgCycleTime",20
+89128961,X,"GenMsgCycleTime",20
+89128962,X,"GenMsgCycleTime",20
+32505856,X,"GenMsgCycleTime",20
+32505857,X,"GenMsgCycleTime",20
+32505858,X,"GenMsgCycleTime",20
+116391936,X,"GenMsgCycleTime",20
+116391937,X,"GenMsgCycleTime",20
+116391938,X,"GenMsgCycleTime",20
+75497472,X,"GenMsgCycleTime",20
+75497473,X,"GenMsgCycleTime",20
+75497474,X,"GenMsgCycleTime",20
+74448896,X,"GenMsgCycleTime",20
+74448897,X,"GenMsgCycleTime",20
+74448898,X,"GenMsgCycleTime",20
+63963136,X,"GenMsgCycleTime",20
+63963137,X,"GenMsgCycleTime",20
+63963138,X,"GenMsgCycleTime",20
+53477376,X,"GenMsgCycleTime",20
+53477377,X,"GenMsgCycleTime",20
+53477378,X,"GenMsgCycleTime",20
+[END_PARAM_MSG_VAL]
+
+[START_PARAM_SIG_VAL]
+[END_PARAM_SIG_VAL]
+
+[END_PARAM_VAL]
+
+
+[START_NOT_SUPPORTED]
+[END_NOT_SUPPORTED]
+
+[START_NOT_PROCESSED]
+	PZ_
+	ON_QRS_
+	ON_
+	INY_
+	PNG_QRS_
+	PNG_
+	SVYGRE
+	ON_QRS_QRS_
+	RI_QNGN_
+	RAIINE_QNGN_
+	FTGLCR_
+	FTGLCR_INY_
+	ON_QRS_FTGLCR_
+	ON_FTGLCR_
+	FVT_GLCR_ERS_
+	INY_GNOYR_
+	FVT_TEBHC_
+	FVT_INYGLCR_
+	FVTGLCR_INYGLCR_
+	OB_GK_OH_
+	ON_QRS_ERY_
+	ON_ERY_
+	ON_QRS_QRS_ERY_
+	OH_FT_ERY_
+	OH_RI_ERY_
+	OH_OB_ERY_
+	FT_ZHY_INY_
+OF_:
+
+[END_NOT_PROCESSED]
