@@ -1,0 +1,15 @@
+# STM32CubeIDE
+Debug/
+Release/
+.build/
+.settings/
+*.launch
+*.ioc.bak
+
+# CubeMX generated
+*.mxproject
+
+# OS / editor
+.vscode/
+*.swp
+*.log
