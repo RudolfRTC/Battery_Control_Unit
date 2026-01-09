@@ -110,6 +110,7 @@ typedef enum {
     ERROR_SAFETY_REDUNDANCY         = 0x0805U,  /**< Redundancy check failed */
     ERROR_SAFETY_MEMORY_CORRUPTION  = 0x0806U,  /**< Memory corruption */
     ERROR_SAFETY_CRITICAL_FAULT     = 0x0807U,  /**< Critical safety fault */
+    ERROR_SELF_TEST_FAILED          = 0x0808U,  /**< Self-test (POST) failed */
 
     /* BSP/Hardware errors (0x09xx) */
     ERROR_BSP_GPIO_CONFIG           = 0x0901U,  /**< GPIO configuration error */

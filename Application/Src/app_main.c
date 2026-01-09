@@ -24,6 +24,7 @@
 #include "bsp_can.h"
 #include "watchdog.h"
 #include "safety_monitor.h"
+#include "self_test.h"
 #include "lem_sensor.h"
 #include "digital_input.h"
 #include "btt6200.h"
@@ -477,6 +478,12 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
+        /* Initialize self-test module */
+        status = SelfTest_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
         /* Initialize FRAM storage */
         status = FRAM_Init();
     }
@@ -603,8 +610,40 @@ static void app_state_machine(void)
 
         case APP_STATE_STARTUP:
             /* Startup sequence */
-            /* TODO: Power sequencing, self-tests */
-            (void)App_RequestStateChange(APP_STATE_POWER_ON);
+            /* Execute Power-On Self-Test (POST) */
+            {
+                static bool postExecuted = false;
+
+                if (!postExecuted)
+                {
+                    POSTResults_t postResults = {0};
+                    Status_t postStatus = SelfTest_RunPOST(&postResults);
+
+                    postExecuted = true;
+
+                    if (postStatus != STATUS_OK)
+                    {
+                        /* POST failed - log critical error */
+                        ErrorHandler_LogError(ERROR_SELF_TEST_FAILED, 0U,
+                                            postResults.failedTests,
+                                            postResults.executionTime);
+
+                        /* Enter safe state if critical tests failed */
+                        uint32_t criticalMask = (1U << POST_TEST_RAM) |
+                                              (1U << POST_TEST_FLASH) |
+                                              (1U << POST_TEST_WATCHDOG);
+
+                        if ((postResults.failedTests & criticalMask) != 0U)
+                        {
+                            App_EnterSafeState();
+                            break;
+                        }
+                    }
+                }
+
+                /* Transition to power-on state */
+                (void)App_RequestStateChange(APP_STATE_POWER_ON);
+            }
             break;
 
         case APP_STATE_POWER_ON:
