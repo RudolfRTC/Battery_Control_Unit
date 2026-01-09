@@ -22,6 +22,8 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "timestamp.h"
+#include "app_errors.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,10 +90,17 @@ void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
 
+  /* Disable interrupts */
+  __disable_irq();
+
+  /* Log hard fault error */
+  ErrorHandler_HardFault();
+
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    /* Wait for watchdog reset */
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -190,6 +199,9 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* Call timestamp module handler */
+  Timestamp_SysTick_Handler();
 
   /* USER CODE END SysTick_IRQn 1 */
 }
