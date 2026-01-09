@@ -20,8 +20,15 @@
 #include "bsp_gpio.h"
 #include "bsp_adc.h"
 #include "bsp_i2c.h"
+#include "bsp_can.h"
 #include "watchdog.h"
+#include "safety_monitor.h"
 #include "lem_sensor.h"
+#include "digital_input.h"
+#include "btt6200.h"
+#include "pm_monitor.h"
+#include "temp_sensor.h"
+#include "fram_driver.h"
 #include "timestamp.h"
 #include <string.h>
 
@@ -194,7 +201,7 @@ void App_MainLoop(void)
 void App_FastTasks(void)
 {
     /* Safety monitor - highest priority */
-    /* TODO: Add safety monitor checks */
+    (void)SafetyMonitor_Execute();
 
     /* Refresh watchdogs */
     (void)Watchdog_RefreshAll();
@@ -209,13 +216,13 @@ void App_FastTasks(void)
 void App_MediumTasks(void)
 {
     /* Sensor acquisition */
-    /* TODO: Read digital inputs, BTT6200 current sense */
+    (void)DI_Update();  /* Digital inputs with debouncing */
 
     /* Output control */
-    /* TODO: Update BTT6200 outputs */
+    (void)BTT6200_Update();  /* BTT6200 diagnostics */
 
     /* Power monitoring */
-    /* TODO: Monitor power rails */
+    (void)PM_Monitor_Update();  /* Power rails and LM74900 */
 }
 
 /**
@@ -223,14 +230,21 @@ void App_MediumTasks(void)
  */
 void App_SlowTasks(void)
 {
+    /* Temperature monitoring */
+    int32_t temperature_mC;
+    (void)TempSensor_ReadTemperature(&temperature_mC);
+
     /* CAN communication */
-    /* TODO: Transmit status messages */
+    /* TODO: Transmit status messages (CAN protocol layer needed) */
 
     /* Diagnostics */
-    /* TODO: Check faults, update DTCs */
+    (void)ErrorHandler_Update();  /* Age DTCs */
+
+    /* Update timing for safety monitor */
+    (void)SafetyMonitor_UpdateTiming(app_status.cycleTime_us);
 
     /* Data logging */
-    /* TODO: Log to FRAM */
+    /* TODO: Periodic data logging to FRAM */
 
     /* LED indicators */
     static uint32_t led_toggle_count = 0U;
@@ -439,21 +453,78 @@ static Status_t app_init_modules(void)
 {
     Status_t status = STATUS_OK;
 
-    /* Initialize LEM HOYS sensors */
-    status = LEM_Init();
+    /* Initialize error handler first */
+    status = ErrorHandler_Init();
 
     if (status == STATUS_OK)
     {
-        /* Calibrate all LEM sensors at startup */
-        /* TODO: Load calibration from FRAM instead */
-        /* for (uint8_t i = 0; i < LEM_SENSOR_COUNT; i++)
-        {
-            (void)LEM_CalibrateSensor(i);
-        } */
+        /* Initialize safety monitor */
+        status = SafetyMonitor_Init();
     }
 
-    /* Initialize other modules */
-    /* TODO: Initialize BTT6200, digital inputs, FRAM, etc. */
+    if (status == STATUS_OK)
+    {
+        /* Initialize FRAM storage */
+        status = FRAM_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize LEM HOYS sensors */
+        status = LEM_Init();
+
+        if (status == STATUS_OK)
+        {
+            /* TODO: Load calibration from FRAM */
+            /* For now, perform zero-current calibration */
+            for (uint8_t i = 0U; i < LEM_SENSOR_COUNT; i++)
+            {
+                (void)LEM_CalibrateSensor(i);
+            }
+        }
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize BTT6200 output driver */
+        status = BTT6200_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize digital inputs */
+        status = DI_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize power monitoring */
+        status = PM_Monitor_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize temperature sensor */
+        status = TempSensor_Init();
+    }
+
+    if (status == STATUS_OK)
+    {
+        /* Initialize CAN bus */
+        CAN_Config_t canConfig = {
+            .baudrate = 500000U,
+            .loopback = false,
+            .autoRetransmit = true,
+            .autoBusOff = true
+        };
+        status = BSP_CAN_Init(BSP_CAN_INSTANCE_1, &canConfig);
+
+        /* CAN2 is optional */
+        if (status == STATUS_OK)
+        {
+            (void)BSP_CAN_Init(BSP_CAN_INSTANCE_2, &canConfig);
+        }
+    }
 
     return status;
 }
@@ -467,11 +538,13 @@ static void app_update_status(void)
     app_status.uptime_ms = Timestamp_GetMillis();
 
     /* Check power good */
-    /* TODO: Read power monitoring status */
-    app_status.powerGood = true;  /* Placeholder */
+    (void)PM_Monitor_IsSystemPowerGood(&app_status.powerGood);
 
     /* Check safety OK */
-    app_status.safetyOK = true;  /* Placeholder */
+    app_status.safetyOK = SafetyMonitor_IsSafe();
+
+    /* Get active error count */
+    (void)ErrorHandler_GetActiveDTCCount(&app_status.activeErrors);
 }
 
 /**
