@@ -447,7 +447,18 @@ static void adc_process_dma_buffer(void)
         for (sample = 0U; sample < BSP_ADC_OVERSAMPLE_RATIO; sample++)
         {
             uint16_t index = (sample * ADC_NUM_CHANNELS) + ch;
-            sum += (uint32_t)adc_dma_buffer[index];
+
+            /* Bounds check to prevent buffer overflow */
+            if (index < ADC_DMA_BUFFER_SIZE)
+            {
+                sum += (uint32_t)adc_dma_buffer[index];
+            }
+            else
+            {
+                /* Log error and skip invalid samples */
+                adc_stats.errorCount++;
+                break;
+            }
         }
 
         adc_values[ch] = (uint16_t)(sum / BSP_ADC_OVERSAMPLE_RATIO);
