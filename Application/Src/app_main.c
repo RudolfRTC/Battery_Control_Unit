@@ -40,20 +40,20 @@
 /* PRIVATE VARIABLES                                                          */
 /*============================================================================*/
 
-/** @brief Application state */
-static AppState_t app_state = APP_STATE_INIT;
+/** @brief Application state (volatile - accessed from callbacks and tasks) */
+static volatile AppState_t app_state = APP_STATE_INIT;
 
-/** @brief Application status */
-static AppStatus_t app_status = {0};
+/** @brief Application status (volatile - accessed from multiple contexts) */
+static volatile AppStatus_t app_status = {0};
 
-/** @brief Fast task timestamp (1ms) */
-static uint32_t fast_task_last_ms = 0U;
+/** @brief Fast task timestamp (1ms, volatile - timing critical) */
+static volatile uint32_t fast_task_last_ms = 0U;
 
-/** @brief Medium task timestamp (10ms) */
-static uint32_t medium_task_last_ms = 0U;
+/** @brief Medium task timestamp (10ms, volatile - timing critical) */
+static volatile uint32_t medium_task_last_ms = 0U;
 
-/** @brief Slow task timestamp (100ms) */
-static uint32_t slow_task_last_ms = 0U;
+/** @brief Slow task timestamp (100ms, volatile - timing critical) */
+static volatile uint32_t slow_task_last_ms = 0U;
 
 /*============================================================================*/
 /* PRIVATE FUNCTION PROTOTYPES                                                */
@@ -121,9 +121,19 @@ Status_t App_Init(void)
             ErrorHandler_LogError(ERROR_SAFETY_WATCHDOG, 0U, __LINE__, 0U);
         }
 
-        /* Start watchdogs */
-        (void)Watchdog_StartIWDG();
-        (void)Watchdog_StartWWDG();
+        /* Start watchdogs (critical for safety) */
+        Status_t wdStatus;
+        wdStatus = Watchdog_StartIWDG();
+        if (wdStatus != STATUS_OK)
+        {
+            ErrorHandler_LogError(ERROR_SAFETY_WATCHDOG, 0U, __LINE__, 0U);
+        }
+
+        wdStatus = Watchdog_StartWWDG();
+        if (wdStatus != STATUS_OK)
+        {
+            ErrorHandler_LogError(ERROR_SAFETY_WATCHDOG, 1U, __LINE__, 0U);
+        }
 
         /* Initialize status */
         app_status.state = APP_STATE_STARTUP;
@@ -214,14 +224,29 @@ void App_MainLoop(void)
  */
 void App_FastTasks(void)
 {
-    /* Safety monitor - highest priority */
-    (void)SafetyMonitor_Execute();
+    Status_t status;
 
-    /* Refresh watchdogs */
-    (void)Watchdog_RefreshAll();
+    /* Safety monitor - highest priority */
+    status = SafetyMonitor_Execute();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_SAFETY_MONITOR_FAIL, 0U, __LINE__, 0U);
+    }
+
+    /* Refresh watchdogs (critical) */
+    status = Watchdog_RefreshAll();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_SAFETY_WATCHDOG, 2U, __LINE__, 0U);
+    }
 
     /* Read LEM sensors (1 kHz sampling) */
-    (void)LEM_Update();
+    status = LEM_Update();
+    if (status != STATUS_OK)
+    {
+        /* Log but don't halt - sensor errors handled internally */
+        ErrorHandler_LogError(ERROR_LEM_COMMUNICATION, 0U, __LINE__, 0U);
+    }
 }
 
 /**
@@ -229,14 +254,33 @@ void App_FastTasks(void)
  */
 void App_MediumTasks(void)
 {
+    Status_t status;
+
     /* Sensor acquisition */
-    (void)DI_Update();  /* Digital inputs with debouncing */
+    status = DI_Update();  /* Digital inputs with debouncing */
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_DI_UPDATE_FAIL, 0U, __LINE__, 0U);
+    }
 
     /* Output control */
-    (void)BTT6200_Update();  /* BTT6200 diagnostics */
+    status = BTT6200_Update();  /* BTT6200 diagnostics */
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_BTT6200_FAULT, 0U, __LINE__, 0U);
+    }
 
-    /* Power monitoring */
-    (void)PM_Monitor_Update();  /* Power rails and LM74900 */
+    /* Power monitoring (critical for safety) */
+    status = PM_Monitor_Update();  /* Power rails and LM74900 */
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_POWER_MONITOR_FAIL, 0U, __LINE__, 0U);
+        /* Power monitoring failure is critical */
+        if (!app_status.safetyOK)
+        {
+            App_EnterSafeState();
+        }
+    }
 }
 
 /**
@@ -385,6 +429,9 @@ Status_t App_Shutdown(void)
  */
 void App_EnterSafeState(void)
 {
+    /* Refresh watchdog to prevent reset during safe state entry */
+    (void)Watchdog_RefreshAll();
+
     /* Disable all outputs */
     (void)BTT6200_SetSafeState();
 

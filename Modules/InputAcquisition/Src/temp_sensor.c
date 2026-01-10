@@ -110,9 +110,9 @@ Status_t TempSensor_Init(void)
 
         if (status == STATUS_OK)
         {
-            /* Set temperature limits */
-            int16_t tlowRaw = (int16_t)((temp_config.lowLimit_mC * 16) / 1000);
-            int16_t thighRaw = (int16_t)((temp_config.highLimit_mC * 16) / 1000);
+            /* Set temperature limits (convert mC to TMP1075 register format) */
+            int16_t tlowRaw = (int16_t)((temp_config.lowLimit_mC * TMP1075_TEMP_SCALE_FACTOR) / 1000);
+            int16_t thighRaw = (int16_t)((temp_config.highLimit_mC * TMP1075_TEMP_SCALE_FACTOR) / 1000);
 
             (void)tmp1075_write_register(TMP1075_REG_TLOW, (uint16_t)tlowRaw);
             (void)tmp1075_write_register(TMP1075_REG_THIGH, (uint16_t)thighRaw);

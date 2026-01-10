@@ -34,6 +34,10 @@ extern "C" {
 #define TEMP_SENSOR_MIN_LIMIT_MC   (-40000)  /**< -40°C in milliCelsius */
 #define TEMP_SENSOR_MAX_LIMIT_MC   (85000)   /**< +85°C in milliCelsius */
 
+/** @brief TMP1075 conversion constants */
+#define TMP1075_TEMP_SCALE_FACTOR  (16U)     /**< LSB to °C conversion factor (2^4) */
+#define TMP1075_MC_PER_LSB         (62.5f)   /**< milliCelsius per LSB (1000/16) */
+
 /*============================================================================*/
 /* TYPE DEFINITIONS                                                           */
 /*============================================================================*/

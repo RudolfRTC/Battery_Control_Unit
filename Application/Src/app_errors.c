@@ -390,6 +390,9 @@ Status_t ErrorHandler_GetStatistics(ErrorStatistics_t *pStats)
  */
 void ErrorHandler_SafeState(void)
 {
+    /* Refresh watchdog before entering critical section */
+    Watchdog_RefreshAll();
+
     /* Disable interrupts */
     __disable_irq();
 

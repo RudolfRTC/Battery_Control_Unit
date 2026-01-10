@@ -425,11 +425,11 @@ static bool safety_check_stack(void)
         extern uint32_t _estack;  /* From linker script */
         volatile uint32_t *pStack = &_estack;
 
-        /* Check if stack pointer is within valid range */
+        /* Check if stack pointer is within valid RAM range */
         uint32_t currentSP;
         __asm volatile ("MRS %0, MSP" : "=r" (currentSP));
 
-        if ((currentSP < 0x20000000U) || (currentSP > 0x20050000U))
+        if ((currentSP < MCU_RAM_START) || (currentSP > MCU_RAM_END))
         {
             passed = false;
         }
