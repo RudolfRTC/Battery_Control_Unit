@@ -19,6 +19,13 @@ extern "C" {
 #endif
 
 /*============================================================================*/
+/* INCLUDES                                                                   */
+/*============================================================================*/
+#include "app_types.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+/*============================================================================*/
 /* FIRMWARE VERSION                                                           */
 /*============================================================================*/
 #define FIRMWARE_VERSION_MAJOR    (1U)
@@ -221,6 +228,36 @@ extern "C" {
 #define FEATURE_OUTPUT_PWM            (1U)        /**< Enable PWM outputs */
 #define FEATURE_FAULT_LOGGING         (1U)        /**< Enable fault logging */
 #define FEATURE_CALIBRATION           (1U)        /**< Enable calibration */
+
+/*============================================================================*/
+/* FUNCTION PROTOTYPES                                                        */
+/*============================================================================*/
+
+/**
+ * @brief Get firmware version
+ * @param[out] pVersion Pointer to store version information
+ * @return STATUS_OK on success, STATUS_ERROR_PARAM if pVersion is NULL
+ */
+Status_t AppConfig_GetFirmwareVersion(Version_t *pVersion);
+
+/**
+ * @brief Get firmware version as string
+ * @return Pointer to firmware version string
+ */
+const char* AppConfig_GetVersionString(void);
+
+/**
+ * @brief Validate configuration parameters at runtime
+ * @return STATUS_OK if all configurations are valid
+ */
+Status_t AppConfig_Validate(void);
+
+/**
+ * @brief Check if a feature is enabled
+ * @param[in] featureMask Feature bit mask
+ * @return true if enabled, false otherwise
+ */
+bool AppConfig_IsFeatureEnabled(uint32_t featureMask);
 
 #ifdef __cplusplus
 }

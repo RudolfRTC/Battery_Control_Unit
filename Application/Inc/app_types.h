@@ -186,6 +186,123 @@ _Static_assert(sizeof(int32_t) == 4U, "int32_t must be 4 bytes");
 /* Ensure bool is correct size */
 _Static_assert(sizeof(bool) == 1U, "bool must be 1 byte");
 
+/*============================================================================*/
+/* FUNCTION PROTOTYPES                                                        */
+/*============================================================================*/
+
+/**
+ * @brief Convert status code to string
+ * @param[in] status Status code
+ * @return Pointer to status string
+ */
+const char* Status_ToString(Status_t status);
+
+/**
+ * @brief Check if status indicates success
+ * @param[in] status Status code
+ * @return true if success, false otherwise
+ */
+bool Status_IsOK(Status_t status);
+
+/**
+ * @brief Check if status indicates error
+ * @param[in] status Status code
+ * @return true if error, false otherwise
+ */
+bool Status_IsError(Status_t status);
+
+/**
+ * @brief Initialize version structure
+ * @param[out] pVersion Pointer to version structure
+ * @param[in]  major    Major version number
+ * @param[in]  minor    Minor version number
+ * @param[in]  patch    Patch version number
+ * @return STATUS_OK on success, STATUS_ERROR_PARAM if pVersion is NULL
+ */
+Status_t Version_Init(Version_t *pVersion, uint8_t major, uint8_t minor, uint8_t patch);
+
+/**
+ * @brief Compare two version structures
+ * @param[in] pVersion1 First version
+ * @param[in] pVersion2 Second version
+ * @return -1 if version1 < version2, 0 if equal, 1 if version1 > version2
+ */
+int8_t Version_Compare(const Version_t *pVersion1, const Version_t *pVersion2);
+
+/**
+ * @brief Initialize timestamp
+ * @param[out] pTimestamp Pointer to timestamp structure
+ * @param[in]  ms         Milliseconds value
+ * @return STATUS_OK on success, STATUS_ERROR_PARAM if pTimestamp is NULL
+ */
+Status_t Timestamp_Init(Timestamp_t *pTimestamp, uint32_t ms);
+
+/**
+ * @brief Calculate time difference between timestamps
+ * @param[in] pStart Start timestamp
+ * @param[in] pEnd   End timestamp
+ * @return Time difference in milliseconds
+ */
+uint32_t Timestamp_Diff(const Timestamp_t *pStart, const Timestamp_t *pEnd);
+
+/**
+ * @brief Check if value is within range
+ * @param[in] value Value to check
+ * @param[in] pRange Range structure
+ * @return true if within range, false otherwise
+ */
+bool Range_IsWithin(int32_t value, const Range_t *pRange);
+
+/**
+ * @brief Clamp value to range
+ * @param[in] value Value to clamp
+ * @param[in] pRange Range structure
+ * @return Clamped value
+ */
+int32_t Range_Clamp(int32_t value, const Range_t *pRange);
+
+/**
+ * @brief Convert voltage from millivolts to volts
+ * @param[in] voltage_mV Voltage in millivolts
+ * @return Voltage in volts
+ */
+float Voltage_mVtoV(Voltage_mV_t voltage_mV);
+
+/**
+ * @brief Convert current from milliamperes to amperes
+ * @param[in] current_mA Current in milliamperes
+ * @return Current in amperes
+ */
+float Current_mAtoA(Current_mA_t current_mA);
+
+/**
+ * @brief Convert temperature to Celsius
+ * @param[in] temp Temperature in 0.01°C units
+ * @return Temperature in °C
+ */
+float Temperature_toCelsius(Temperature_t temp);
+
+/**
+ * @brief Convert power from milliwatts to watts
+ * @param[in] power_mW Power in milliwatts
+ * @return Power in watts
+ */
+float Power_mWtoW(Power_mW_t power_mW);
+
+/**
+ * @brief Convert percentage to float (0.0 - 1.0)
+ * @param[in] percentage Percentage in 0.01% units (0-10000)
+ * @return Percentage as float (0.0 - 1.0)
+ */
+float Percentage_toFloat(Percentage_t percentage);
+
+/**
+ * @brief Convert percentage to integer (0-100)
+ * @param[in] percentage Percentage in 0.01% units (0-10000)
+ * @return Percentage as integer (0-100)
+ */
+uint8_t Percentage_toUint8(Percentage_t percentage);
+
 #ifdef __cplusplus
 }
 #endif
