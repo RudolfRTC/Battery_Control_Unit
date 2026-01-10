@@ -303,6 +303,40 @@ float Percentage_toFloat(Percentage_t percentage);
  */
 uint8_t Percentage_toUint8(Percentage_t percentage);
 
+/*============================================================================*/
+/* INLINE CONVERSION FUNCTIONS (for performance optimization)                */
+/*============================================================================*/
+
+/**
+ * @brief Convert voltage from millivolts to volts (inline for performance)
+ * @param[in] voltage_mV Voltage in millivolts
+ * @return Voltage in volts
+ */
+static inline float Voltage_mVtoV_Fast(Voltage_mV_t voltage_mV)
+{
+    return ((float)voltage_mV * 0.001f);
+}
+
+/**
+ * @brief Convert current from milliamperes to amperes (inline for performance)
+ * @param[in] current_mA Current in milliamperes
+ * @return Current in amperes
+ */
+static inline float Current_mAtoA_Fast(Current_mA_t current_mA)
+{
+    return ((float)current_mA * 0.001f);
+}
+
+/**
+ * @brief Convert temperature to Celsius (inline for performance)
+ * @param[in] temp Temperature in 0.01°C units
+ * @return Temperature in °C
+ */
+static inline float Temperature_toCelsius_Fast(Temperature_t temp)
+{
+    return ((float)temp * 0.01f);
+}
+
 #ifdef __cplusplus
 }
 #endif

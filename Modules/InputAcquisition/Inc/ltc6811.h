@@ -64,6 +64,10 @@ extern "C" {
 #define LTC6811_CELL_VOLTAGE_MIN_MV    (0U)
 #define LTC6811_CELL_VOLTAGE_MAX_MV    (5000U)
 
+/** @brief PEC15 (Packet Error Code) constants */
+#define LTC6811_PEC15_SEED             (16U)    /**< Initial PEC15 value */
+#define LTC6811_PEC15_MULTIPLIER       (2U)     /**< Final PEC15 multiplier */
+
 /*============================================================================*/
 /* TYPE DEFINITIONS                                                           */
 /*============================================================================*/

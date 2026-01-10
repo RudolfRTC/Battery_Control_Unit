@@ -944,10 +944,11 @@ Status_t LTC6811_MuteDischarge(bool mute)
 
 /**
  * @brief Calculate PEC15 (Packet Error Code)
+ * @note Algorithm per LTC6811 datasheet section 4.2.2
  */
 static uint16_t ltc6811_calculate_pec15(const uint8_t *pData, uint8_t length)
 {
-    uint16_t pec = 16U;  /* PEC seed */
+    uint16_t pec = LTC6811_PEC15_SEED;  /* PEC seed */
     uint8_t addr;
     uint8_t i;
 
@@ -957,7 +958,7 @@ static uint16_t ltc6811_calculate_pec15(const uint8_t *pData, uint8_t length)
         pec = (uint16_t)((pec << 8) ^ pec15Table[addr]);
     }
 
-    return (pec * 2U);  /* Multiply by 2 for final PEC */
+    return (pec * LTC6811_PEC15_MULTIPLIER);  /* Multiply by 2 for final PEC */
 }
 
 /**

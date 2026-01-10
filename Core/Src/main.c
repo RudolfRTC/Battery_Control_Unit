@@ -117,6 +117,10 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  /* Configure SysTick for 1ms tick (deterministic scheduling) */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000U);
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
   /* Initialize BCU application */
   Status_t status = App_Init();
 
@@ -126,13 +130,27 @@ int main(void)
     ErrorHandler_SafeState();
   }
 
+  /* Initialize scheduler */
+  status = Scheduler_Init();
+  if (status != STATUS_OK)
+  {
+    ErrorHandler_SafeState();
+  }
+
+  /* Register application jobs */
+  status = App_RegisterSchedulerJobs();
+  if (status != STATUS_OK)
+  {
+    ErrorHandler_SafeState();
+  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  /* Start main application loop (never returns) */
-  App_MainLoop();
+  /* Run deterministic scheduler (never returns) */
+  Scheduler_Run();
 
   /* Should never reach here */
   while (1)
@@ -371,8 +389,8 @@ static void MX_SPI4_Init(void)
   hspi4.Init.Mode = SPI_MODE_MASTER;
   hspi4.Init.Direction = SPI_DIRECTION_2LINES;
   hspi4.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi4.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi4.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi4.Init.NSS = SPI_NSS_HARD_OUTPUT;
   hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;

@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "timestamp.h"
 #include "app_errors.h"
+#include "bcu_scheduler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -199,6 +200,9 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* Increment scheduler tick (1ms) */
+  g_tick_ms++;
 
   /* Call timestamp module handler */
   Timestamp_SysTick_Handler();

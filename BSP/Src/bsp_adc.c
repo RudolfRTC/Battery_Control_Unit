@@ -39,11 +39,11 @@ static ADC_HandleTypeDef hadc1;
 /** @brief DMA handle */
 static DMA_HandleTypeDef hdma_adc1;
 
-/** @brief DMA buffer for ADC results */
-static uint16_t adc_dma_buffer[ADC_DMA_BUFFER_SIZE];
+/** @brief DMA buffer for ADC results (volatile - accessed by DMA ISR) */
+static volatile uint16_t adc_dma_buffer[ADC_DMA_BUFFER_SIZE] __attribute__((aligned(32)));
 
-/** @brief Filtered ADC values (after oversampling) */
-static uint16_t adc_values[ADC_NUM_CHANNELS];
+/** @brief Filtered ADC values (after oversampling, volatile - accessed by ISR) */
+static volatile uint16_t adc_values[ADC_NUM_CHANNELS];
 
 /** @brief Calibration data for each channel */
 static ADC_Calibration_t adc_calibration[ADC_NUM_CHANNELS];
@@ -447,7 +447,18 @@ static void adc_process_dma_buffer(void)
         for (sample = 0U; sample < BSP_ADC_OVERSAMPLE_RATIO; sample++)
         {
             uint16_t index = (sample * ADC_NUM_CHANNELS) + ch;
-            sum += (uint32_t)adc_dma_buffer[index];
+
+            /* Bounds check to prevent buffer overflow */
+            if (index < ADC_DMA_BUFFER_SIZE)
+            {
+                sum += (uint32_t)adc_dma_buffer[index];
+            }
+            else
+            {
+                /* Log error and skip invalid samples */
+                adc_stats.errorCount++;
+                break;
+            }
         }
 
         adc_values[ch] = (uint16_t)(sum / BSP_ADC_OVERSAMPLE_RATIO);

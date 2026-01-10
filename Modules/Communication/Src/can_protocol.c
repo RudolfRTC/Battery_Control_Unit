@@ -413,11 +413,20 @@ Status_t CANProto_SendIOStates(void)
         msg.data[7] = 0U;
 
         /* Read first 20 output states (20 channels) */
-        /* Simplified: Pack as bitmap (1 bit per channel) */
+        /* Pack as bitmap (1 bit per channel) in first 3 bytes */
         for (uint8_t i = 0U; i < 20U; i++)
         {
-            /* TODO: Read actual BTT6200 channel state */
-            /* For now, placeholder */
+            BTT6200_ChannelState_t channelState;
+            if (BTT6200_GetChannelState(i, &channelState) == STATUS_OK)
+            {
+                /* Set bit if channel is ON or PWM (active states) */
+                if ((channelState == BTT6200_STATE_ON) || (channelState == BTT6200_STATE_PWM))
+                {
+                    uint8_t byteIndex = i / 8U;
+                    uint8_t bitIndex = i % 8U;
+                    msg.data[byteIndex] |= (1U << bitIndex);
+                }
+            }
         }
 
         /* Transmit */

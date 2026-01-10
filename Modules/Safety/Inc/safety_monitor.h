@@ -30,6 +30,11 @@ extern "C" {
 /* CONSTANTS                                                                  */
 /*============================================================================*/
 
+/** @brief STM32F413 RAM memory layout */
+#define MCU_RAM_START     (0x20000000U)  /**< RAM start address */
+#define MCU_RAM_END       (0x20050000U)  /**< RAM end address (320KB) */
+#define MCU_RAM_SIZE      (0x00050000U)  /**< Total RAM size (320KB) */
+
 /** @brief Maximum violation count before fault */
 #define SAFETY_MAX_VIOLATIONS     (10U)
 

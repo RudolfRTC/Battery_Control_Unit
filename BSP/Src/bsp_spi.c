@@ -27,11 +27,15 @@
 #define SPI_NUM_INSTANCES (1U)
 
 /*============================================================================*/
-/* PRIVATE VARIABLES                                                          */
+/* EXTERNAL VARIABLES                                                         */
 /*============================================================================*/
 
-/** @brief SPI4 handle for ISO-SPI */
-static SPI_HandleTypeDef hspi4;
+/** @brief SPI4 handle from main.c (STM32CubeMX generated) */
+extern SPI_HandleTypeDef hspi4;
+
+/*============================================================================*/
+/* PRIVATE VARIABLES                                                          */
+/*============================================================================*/
 
 /** @brief SPI statistics */
 static SPI_Statistics_t spi_stats[SPI_NUM_INSTANCES];
@@ -66,10 +70,6 @@ Status_t BSP_SPI_Init(uint8_t instance, const SPI_Config_t *pConfig)
     {
         status = STATUS_ERROR_PARAM;
     }
-    else if (spi_initialized[0])
-    {
-        status = STATUS_ERROR_ALREADY_INIT;
-    }
     else
     {
         /* Get SPI handle */
@@ -77,6 +77,13 @@ Status_t BSP_SPI_Init(uint8_t instance, const SPI_Config_t *pConfig)
 
         if (status == STATUS_OK)
         {
+            /* If already initialized, deinitialize first */
+            if (spi_initialized[0])
+            {
+                (void)HAL_SPI_DeInit(pHandle);
+                spi_initialized[0] = false;
+            }
+
             /* Enable SPI4 clock */
             __HAL_RCC_SPI4_CLK_ENABLE();
 

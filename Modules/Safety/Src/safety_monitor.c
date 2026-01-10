@@ -18,6 +18,9 @@
 #include "safety_monitor.h"
 #include "watchdog.h"
 #include "app_errors.h"
+#include "pm_monitor.h"
+#include "temp_sensor.h"
+#include "bsp_can.h"
 #include <string.h>
 
 /*============================================================================*/
@@ -422,11 +425,11 @@ static bool safety_check_stack(void)
         extern uint32_t _estack;  /* From linker script */
         volatile uint32_t *pStack = &_estack;
 
-        /* Check if stack pointer is within valid range */
+        /* Check if stack pointer is within valid RAM range */
         uint32_t currentSP;
         __asm volatile ("MRS %0, MSP" : "=r" (currentSP));
 
-        if ((currentSP < 0x20000000U) || (currentSP > 0x20050000U))
+        if ((currentSP < MCU_RAM_START) || (currentSP > MCU_RAM_END))
         {
             passed = false;
         }
@@ -473,9 +476,16 @@ static bool safety_check_power(void)
     if (safety_config.enablePowerCheck)
     {
         /* Check if power monitoring module reports good status */
-        /* TODO: Integrate with PM_Monitor module */
-        /* For now, assume power is good */
-        passed = true;
+        bool powerGood = false;
+        if (PM_Monitor_IsSystemPowerGood(&powerGood) == STATUS_OK)
+        {
+            passed = powerGood;
+        }
+        else
+        {
+            /* If we cannot read power status, assume failure */
+            passed = false;
+        }
     }
 
     return passed;
@@ -491,9 +501,21 @@ static bool safety_check_temperature(void)
     if (safety_config.enableTempCheck)
     {
         /* Check if temperature is within safe limits */
-        /* TODO: Integrate with TempSensor module */
-        /* For now, assume temperature is OK */
-        passed = true;
+        int32_t temp_mC = 0;
+        if (TempSensor_ReadTemperature(&temp_mC) == STATUS_OK)
+        {
+            /* Check if temperature is within safe operating range */
+            /* Typical range: -40°C to +125°C */
+            if ((temp_mC < -40000) || (temp_mC > 125000))
+            {
+                passed = false;
+            }
+        }
+        else
+        {
+            /* If we cannot read temperature, assume failure */
+            passed = false;
+        }
     }
 
     return passed;
@@ -509,9 +531,25 @@ static bool safety_check_communication(void)
     if (safety_config.enableCommCheck)
     {
         /* Check CAN bus health */
-        /* TODO: Integrate with BSP_CAN module */
-        /* For now, assume communication is OK */
-        passed = true;
+        CAN_Statistics_t stats;
+        if (BSP_CAN_GetStatistics(BSP_CAN_INSTANCE_1, &stats) == STATUS_OK)
+        {
+            /* Check if error rate is acceptable (< 1% of total messages) */
+            uint32_t totalMessages = stats.txCount + stats.rxCount;
+            if (totalMessages > 0U)
+            {
+                uint32_t errorRate = (stats.errorCount * 100U) / totalMessages;
+                if (errorRate > 1U)
+                {
+                    passed = false;
+                }
+            }
+        }
+        else
+        {
+            /* If we cannot read CAN statistics, assume failure */
+            passed = false;
+        }
     }
 
     return passed;
