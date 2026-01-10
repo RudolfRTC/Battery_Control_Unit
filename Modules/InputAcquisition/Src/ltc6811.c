@@ -852,6 +852,92 @@ Status_t LTC6811_UpdateAllMeasurements(uint8_t deviceIndex)
     return status;
 }
 
+/**
+ * @brief Run self-test on LTC6811
+ */
+Status_t LTC6811_RunSelfTest(LTC6811_SelfTestMode_t testMode)
+{
+    Status_t status = STATUS_OK;
+    uint16_t cmd;
+
+    if (!ltc6811_initialized)
+    {
+        status = STATUS_ERROR_NOT_INIT;
+    }
+    else
+    {
+        /* Build DIAGN command with test mode */
+        cmd = LTC6811_CMD_DIAGN | ((uint16_t)testMode << 0);
+
+        /* Send diagnostic command */
+        status = ltc6811_send_command(cmd);
+    }
+
+    return status;
+}
+
+/**
+ * @brief Read ADC overlap flag (diagnostics)
+ */
+Status_t LTC6811_ReadADCOverlap(uint8_t deviceIndex, bool *pOverlap)
+{
+    Status_t status = STATUS_OK;
+    LTC6811_Status_t device_status;
+
+    /* Parameter validation */
+    if (pOverlap == NULL)
+    {
+        status = STATUS_ERROR_PARAM;
+    }
+    else if (deviceIndex >= num_devices)
+    {
+        status = STATUS_ERROR_PARAM;
+    }
+    else if (!ltc6811_initialized)
+    {
+        status = STATUS_ERROR_NOT_INIT;
+    }
+    else
+    {
+        /* Read status registers */
+        status = LTC6811_ReadStatus(deviceIndex, &device_status);
+
+        if (status == STATUS_OK)
+        {
+            /* ADC overlap is indicated by mux fail flag */
+            *pOverlap = device_status.muxFail;
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Mute/unmute discharge
+ */
+Status_t LTC6811_MuteDischarge(bool mute)
+{
+    Status_t status = STATUS_OK;
+
+    if (!ltc6811_initialized)
+    {
+        status = STATUS_ERROR_NOT_INIT;
+    }
+    else
+    {
+        if (mute)
+        {
+            status = ltc6811_send_command(LTC6811_CMD_MUTE);
+        }
+        else
+        {
+            status = ltc6811_send_command(LTC6811_CMD_UNMUTE);
+        }
+    }
+
+    return status;
+}
+
 /*============================================================================*/
 /* PRIVATE FUNCTIONS                                                          */
 /*============================================================================*/
@@ -997,8 +1083,11 @@ static void ltc6811_delay_us(uint32_t us)
  */
 static uint16_t ltc6811_code_to_voltage_mv(uint16_t code)
 {
-    /* LTC6811 resolution: 100uV per LSB */
-    /* Voltage = code * 0.0001 V = code * 0.1 mV */
+    /* LTC6811 resolution: 100µV per LSB
+     * ADC code is in units of 100µV (0.1mV)
+     * To convert to mV: voltage_mV = code * 0.1mV = code / 10
+     * Example: code=10 -> 10 * 100µV = 1000µV = 1.0mV -> 10/10 = 1mV
+     */
     return (uint16_t)((uint32_t)code / 10U);
 }
 

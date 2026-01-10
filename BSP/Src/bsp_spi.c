@@ -137,9 +137,18 @@ Status_t BSP_SPI_Init(uint8_t instance, const SPI_Config_t *pConfig)
                 /* Calculate prescaler based on clock speed */
                 /* APB2 = 100 MHz, SPI4 is on APB2 */
                 uint32_t apb2_freq = HAL_RCC_GetPCLK2Freq();
-                uint32_t prescaler_value = apb2_freq / pConfig->clockSpeed;
 
-                if (prescaler_value <= 2U)
+                /* Validate clock frequency and speed */
+                if ((apb2_freq == 0U) || (pConfig->clockSpeed == 0U))
+                {
+                    status = STATUS_ERROR_HW_FAULT;
+                }
+
+                if (status == STATUS_OK)
+                {
+                    uint32_t prescaler_value = apb2_freq / pConfig->clockSpeed;
+
+                    if (prescaler_value <= 2U)
                 {
                     pHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
                 }
@@ -172,22 +181,23 @@ Status_t BSP_SPI_Init(uint8_t instance, const SPI_Config_t *pConfig)
                     pHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
                 }
 
-                pHandle->Init.TIMode = SPI_TIMODE_DISABLE;
-                pHandle->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+                    pHandle->Init.TIMode = SPI_TIMODE_DISABLE;
+                    pHandle->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
 
-                /* Initialize SPI */
-                if (HAL_SPI_Init(pHandle) != HAL_OK)
-                {
-                    status = STATUS_ERROR_HW_FAULT;
-                }
-                else
-                {
-                    /* Reset statistics */
-                    (void)memset(&spi_stats[0], 0, sizeof(SPI_Statistics_t));
-                    spi_initialized[0] = true;
+                    /* Initialize SPI */
+                    if (HAL_SPI_Init(pHandle) != HAL_OK)
+                    {
+                        status = STATUS_ERROR_HW_FAULT;
+                    }
+                    else
+                    {
+                        /* Reset statistics */
+                        (void)memset(&spi_stats[0], 0, sizeof(SPI_Statistics_t));
+                        spi_initialized[0] = true;
 
-                    /* Deselect chip select initially */
-                    (void)BSP_SPI_ChipSelect(instance, false);
+                        /* Deselect chip select initially */
+                        (void)BSP_SPI_ChipSelect(instance, false);
+                    }
                 }
             }
         }

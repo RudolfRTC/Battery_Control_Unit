@@ -33,9 +33,6 @@ extern "C" {
 /** @brief Number of digital inputs */
 #define DI_MAX_INPUTS        (20U)
 
-/** @brief Current type (milliamperes) */
-typedef int32_t Current_mA_t;
-
 /*============================================================================*/
 /* TYPE DEFINITIONS                                                           */
 /*============================================================================*/
