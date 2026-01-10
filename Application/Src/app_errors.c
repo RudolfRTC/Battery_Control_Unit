@@ -19,6 +19,7 @@
 #include "fram_driver.h"
 #include "timestamp.h"
 #include "bsp_gpio.h"
+#include "btt6200.h"
 #include <string.h>
 
 /*============================================================================*/
@@ -393,7 +394,7 @@ void ErrorHandler_SafeState(void)
     __disable_irq();
 
     /* Turn off all outputs */
-    /* TODO: BTT6200_SetSafeState(); */
+    (void)BTT6200_SetSafeState();
 
     /* Turn on error LED */
     (void)BSP_GPIO_WritePin(GPIOH, GPIO_PIN_10, GPIO_STATE_HIGH);  /* Error LED */

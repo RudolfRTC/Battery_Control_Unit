@@ -367,8 +367,17 @@ static Status_t datalog_build_entry(DataLog_Entry_t *pEntry)
         (void)memset(pEntry->output_states, 0, sizeof(pEntry->output_states));
         for (uint8_t i = 0U; i < 20U; i++)
         {
-            /* TODO: Read actual BTT6200 channel state */
-            /* For now, placeholder */
+            BTT6200_ChannelState_t channelState;
+            if (BTT6200_GetChannelState(i, &channelState) == STATUS_OK)
+            {
+                /* Set bit if channel is ON or PWM (active states) */
+                if ((channelState == BTT6200_STATE_ON) || (channelState == BTT6200_STATE_PWM))
+                {
+                    uint8_t byteIndex = i / 8U;
+                    uint8_t bitIndex = i % 8U;
+                    pEntry->output_states[byteIndex] |= (1U << bitIndex);
+                }
+            }
         }
 
         /* Input states (20 inputs, packed as bitmap) */

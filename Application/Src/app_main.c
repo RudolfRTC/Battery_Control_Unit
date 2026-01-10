@@ -29,7 +29,9 @@
 #include "btt6200.h"
 #include "pm_monitor.h"
 #include "temp_sensor.h"
+#include "ltc6811.h"
 #include "fram_driver.h"
+#include "data_logger.h"
 #include "can_protocol.h"
 #include "timestamp.h"
 #include <string.h>
@@ -256,8 +258,13 @@ void App_SlowTasks(void)
     /* Update timing for safety monitor */
     (void)SafetyMonitor_UpdateTiming(app_status.cycleTime_us);
 
-    /* Data logging */
-    /* TODO: Periodic data logging to FRAM */
+    /* Data logging - log every 10 seconds (10000ms / 100ms = 100 cycles) */
+    static uint32_t log_counter = 0U;
+    log_counter++;
+    if ((log_counter % 100U) == 0U)
+    {
+        (void)DataLogger_LogEntry();
+    }
 
     /* LED indicators */
     static uint32_t led_toggle_count = 0U;
@@ -379,7 +386,7 @@ Status_t App_Shutdown(void)
 void App_EnterSafeState(void)
 {
     /* Disable all outputs */
-    /* TODO: BTT6200_SetSafeState(); */
+    (void)BTT6200_SetSafeState();
 
     /* Disable LEM sensors */
     (void)LEM_EnableSupply(false);
@@ -541,6 +548,12 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
+        /* Initialize LTC6811 battery monitor (1 device with 12 cells) */
+        status = LTC6811_Init(1U);
+    }
+
+    if (status == STATUS_OK)
+    {
         /* Initialize CAN bus */
         CAN_Config_t canConfig = {
             .baudrate = 500000U,
@@ -602,14 +615,24 @@ static void app_state_machine(void)
             break;
 
         case APP_STATE_STARTUP:
+        {
             /* Startup sequence */
-            /* TODO: Power sequencing, self-tests */
-            (void)App_RequestStateChange(APP_STATE_POWER_ON);
+            /* Verify power is stable */
+            bool powerGood = false;
+            if (PM_Monitor_IsSystemPowerGood(&powerGood) == STATUS_OK)
+            {
+                if (powerGood)
+                {
+                    (void)App_RequestStateChange(APP_STATE_POWER_ON);
+                }
+            }
             break;
+        }
 
         case APP_STATE_POWER_ON:
             /* Power on systems */
-            /* TODO: Enable power rails, outputs */
+            /* Enable BTT6200 outputs (all off initially) */
+            (void)BTT6200_EnableOutputs(true);
             (void)App_RequestStateChange(APP_STATE_RUNNING);
             break;
 
@@ -628,7 +651,11 @@ static void app_state_machine(void)
 
         case APP_STATE_SHUTDOWN:
             /* Shutdown sequence */
-            /* TODO: Disable outputs, save data */
+            /* Save any pending data to FRAM */
+            (void)DataLogger_LogEntry();
+            /* Disable all outputs safely */
+            (void)BTT6200_SetSafeState();
+            (void)BTT6200_EnableOutputs(false);
             break;
 
         case APP_STATE_ERROR:
