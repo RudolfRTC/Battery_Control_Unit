@@ -125,11 +125,18 @@ Status_t App_Shutdown(void);
 void App_EnterSafeState(void);
 
 /**
- * @brief Get application version
+ * @brief Get firmware version
  * @param[out] pVersion Pointer to version structure
  * @return STATUS_OK on success
  */
 Status_t App_GetVersion(Version_t *pVersion);
+
+/**
+ * @brief Register scheduler jobs
+ * @return STATUS_OK on success
+ * @note Call this after App_Init() and before Scheduler_Run()
+ */
+Status_t App_RegisterSchedulerJobs(void);
 
 #ifdef __cplusplus
 }

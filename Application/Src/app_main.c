@@ -30,9 +30,12 @@
 #include "pm_monitor.h"
 #include "temp_sensor.h"
 #include "ltc6811.h"
+#include "ltc_scanner.h"
 #include "fram_driver.h"
 #include "data_logger.h"
 #include "can_protocol.h"
+#include "bcu_scheduler.h"
+#include "bcu_timing_config.h"
 #include "timestamp.h"
 #include <string.h>
 
@@ -64,6 +67,14 @@ static Status_t app_init_modules(void);
 static Status_t app_register_callbacks(void);
 static void app_update_status(void);
 static void app_state_machine(void);
+
+/* Scheduler job functions */
+static void Job_Critical_1ms(uint32_t now_ms);
+static void Job_Fast_2ms(uint32_t now_ms);
+static void Job_Medium_10ms(uint32_t now_ms);
+static void Job_Slow_50ms(uint32_t now_ms);
+static void Job_VerySlow_100ms(uint32_t now_ms);
+static void Job_CANRx_EveryLoop(uint32_t now_ms);
 
 /* Callback handlers */
 static void app_lem_overcurrent_handler(uint8_t sensorId, Current_mA_t current);
@@ -595,8 +606,15 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
-        /* Initialize LTC6811 battery monitor (1 device with 12 cells) */
-        status = LTC6811_Init(1U);
+        /* Initialize LTC6811 scanner (48 modules via LTC6820) */
+        LTCScanner_Config_t ltc_config = {
+            .num_devices = 48U,
+            .current_threshold_A = CURRENT_ACTIVE_THRESHOLD_A,
+            .precharge_voltage_V = PRECHARGE_VOLTAGE_THRESHOLD_V,
+            .transient_hold_ms = TRANSIENT_HOLD_MS,
+            .enable_balancing = false
+        };
+        status = LTCScanner_Init(&ltc_config);
     }
 
     if (status == STATUS_OK)
@@ -872,3 +890,207 @@ static void app_di_state_change_handler(uint8_t inputId, bool state)
 /*============================================================================*/
 /* END OF FILE                                                                */
 /*============================================================================*/
+
+/*============================================================================*/
+/* SCHEDULER JOB FUNCTIONS                                                    */
+/*============================================================================*/
+
+/**
+ * @brief Critical 1ms job - Safety and watchdog
+ */
+static void Job_Critical_1ms(uint32_t now_ms)
+{
+    uint32_t start_us = Scheduler_WCET_Start("Critical_1ms");
+
+    /* Safety monitor - highest priority */
+    Status_t status = SafetyMonitor_Execute();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_SAFETY_MONITOR_FAIL, 0U, __LINE__, 0U);
+    }
+
+    /* Refresh watchdogs */
+    status = Watchdog_RefreshAll();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_SAFETY_WATCHDOG, 2U, __LINE__, 0U);
+    }
+
+    /* LTC scanner state machine step (non-blocking) */
+    status = LTCScanner_Task_Step(now_ms);
+    if (status != STATUS_OK)
+    {
+        /* LTC errors handled internally */
+    }
+
+    (void)Scheduler_WCET_Stop("Critical_1ms", start_us, WCET_CRITICAL_MAX_US);
+}
+
+/**
+ * @brief Fast 2ms job - LEM sensors
+ */
+static void Job_Fast_2ms(uint32_t now_ms)
+{
+    (void)now_ms;
+
+    uint32_t start_us = Scheduler_WCET_Start("Fast_2ms");
+
+    /* Read LEM sensors (1kHz sampling via 2ms period) */
+    Status_t status = LEM_Update();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_LEM_COMMUNICATION, 0U, __LINE__, 0U);
+    }
+
+    /* Update LTC scanner with pack current (for adaptive mode) */
+    Current_mA_t pack_current_mA = 0;
+    if (LEM_ReadCurrent(0U, &pack_current_mA) == STATUS_OK)
+    {
+        float pack_current_A = (float)pack_current_mA / 1000.0f;
+        (void)LTCScanner_UpdatePackCurrent(pack_current_A);
+    }
+
+    (void)Scheduler_WCET_Stop("Fast_2ms", start_us, 0U);
+}
+
+/**
+ * @brief Medium 10ms job - Digital inputs, power monitor, temp
+ */
+static void Job_Medium_10ms(uint32_t now_ms)
+{
+    (void)now_ms;
+
+    uint32_t start_us = Scheduler_WCET_Start("Medium_10ms");
+
+    /* Digital inputs with debouncing */
+    Status_t status = DI_Update();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_DI_UPDATE_FAIL, 0U, __LINE__, 0U);
+    }
+
+    /* BTT6200 output diagnostics */
+    status = BTT6200_Update();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_BTT6200_FAULT, 0U, __LINE__, 0U);
+    }
+
+    /* Power monitoring */
+    status = PM_Monitor_Update();
+    if (status != STATUS_OK)
+    {
+        ErrorHandler_LogError(ERROR_POWER_MONITOR_FAIL, 0U, __LINE__, 0U);
+    }
+
+    /* Temperature sensor */
+    int32_t temp_mC;
+    (void)TempSensor_ReadTemperature(&temp_mC);
+
+    /* CAN TX periodic (status messages) */
+    (void)CANProto_TransmitPeriodic();
+
+    (void)Scheduler_WCET_Stop("Medium_10ms", start_us, 0U);
+}
+
+/**
+ * @brief Slow 50ms job - CAN cell voltages
+ */
+static void Job_Slow_50ms(uint32_t now_ms)
+{
+    (void)now_ms;
+
+    uint32_t start_us = Scheduler_WCET_Start("Slow_50ms");
+
+    /* Transmit CAN cell voltage messages */
+    /* CANProto would have specific function for this */
+    
+    /* Update status */
+    app_update_status();
+
+    (void)Scheduler_WCET_Stop("Slow_50ms", start_us, 0U);
+}
+
+/**
+ * @brief Very slow 100ms job - Logging and diagnostics
+ */
+static void Job_VerySlow_100ms(uint32_t now_ms)
+{
+    static uint32_t log_counter = 0U;
+
+    uint32_t start_us = Scheduler_WCET_Start("VerySlow_100ms");
+
+    /* Periodic data logging to FRAM (every 10 seconds = 100 × 100ms) */
+    log_counter++;
+    if ((log_counter % 100U) == 0U)
+    {
+        (void)DataLogger_LogEntry();
+    }
+
+    /* Diagnostics */
+    (void)ErrorHandler_Update();  /* Age DTCs */
+
+    /* Update timing for safety monitor */
+    (void)SafetyMonitor_UpdateTiming(app_status.cycleTime_us);
+
+    /* State machine */
+    app_state_machine();
+
+    /* LED indicators */
+    if ((log_counter % 5U) == 0U)  /* Toggle every 500ms */
+    {
+        (void)BSP_GPIO_TogglePin(GPIOH, GPIO_PIN_9);  /* Status LED */
+    }
+
+    (void)Scheduler_WCET_Stop("VerySlow_100ms", start_us, 0U);
+}
+
+/**
+ * @brief CAN RX processing - every loop (non-blocking)
+ */
+static void Job_CANRx_EveryLoop(uint32_t now_ms)
+{
+    (void)now_ms;
+
+    /* Process incoming CAN messages (non-blocking) */
+    (void)CANProto_ProcessRxMessages();
+}
+
+/**
+ * @brief Register all scheduler jobs
+ */
+Status_t App_RegisterSchedulerJobs(void)
+{
+    Status_t status;
+
+    /* Register critical 1ms job */
+    status = Scheduler_RegisterJob("Critical_1ms", Job_Critical_1ms,
+                                   SCHED_PERIOD_CRITICAL_MS, SCHED_PRIORITY_CRITICAL);
+    if (status != STATUS_OK) { return status; }
+
+    /* Register fast 2ms job */
+    status = Scheduler_RegisterJob("Fast_2ms", Job_Fast_2ms,
+                                   SCHED_PERIOD_FAST_MS, SCHED_PRIORITY_FAST);
+    if (status != STATUS_OK) { return status; }
+
+    /* Register medium 10ms job */
+    status = Scheduler_RegisterJob("Medium_10ms", Job_Medium_10ms,
+                                   SCHED_PERIOD_MEDIUM_MS, SCHED_PRIORITY_MEDIUM);
+    if (status != STATUS_OK) { return status; }
+
+    /* Register slow 50ms job */
+    status = Scheduler_RegisterJob("Slow_50ms", Job_Slow_50ms,
+                                   SCHED_PERIOD_SLOW_MS, SCHED_PRIORITY_SLOW);
+    if (status != STATUS_OK) { return status; }
+
+    /* Register very slow 100ms job */
+    status = Scheduler_RegisterJob("VerySlow_100ms", Job_VerySlow_100ms,
+                                   SCHED_PERIOD_VERY_SLOW_MS, SCHED_PRIORITY_VERY_SLOW);
+    if (status != STATUS_OK) { return status; }
+
+    /* Register CAN RX processing (every 1ms) */
+    status = Scheduler_RegisterJob("CANRx", Job_CANRx_EveryLoop,
+                                   CAN_RX_PERIOD_MS, SCHED_PRIORITY_CRITICAL);
+
+    return status;
+}
