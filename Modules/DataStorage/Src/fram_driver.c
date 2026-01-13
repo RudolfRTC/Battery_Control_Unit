@@ -336,7 +336,7 @@ Status_t FRAM_WriteFaultLog(uint16_t logIndex, const FRAM_FaultLogEntry_t *pEntr
 {
     Status_t status = STATUS_ERROR_PARAM;
 
-    if (pEntry != NULL)
+    if ((pEntry != NULL) && fram_initialized)
     {
         uint16_t maxEntries = FRAM_FAULT_LOG_SIZE / sizeof(FRAM_FaultLogEntry_t);
 
@@ -345,7 +345,24 @@ Status_t FRAM_WriteFaultLog(uint16_t logIndex, const FRAM_FaultLogEntry_t *pEntr
             uint16_t address = FRAM_FAULT_LOG_OFFSET +
                               (logIndex * (uint16_t)sizeof(FRAM_FaultLogEntry_t));
 
-            status = FRAM_Write(address, (const uint8_t *)pEntry, sizeof(FRAM_FaultLogEntry_t));
+            if (fram_write_protected)
+            {
+                status = STATUS_ERROR_WRITE_PROTECTED;
+            }
+            else
+            {
+                status = fram_write_bytes(address, (const uint8_t *)pEntry, sizeof(FRAM_FaultLogEntry_t));
+
+                if (status == STATUS_OK)
+                {
+                    fram_stats.writeCount++;
+                    fram_stats.bytesWritten += sizeof(FRAM_FaultLogEntry_t);
+                }
+            }
+        }
+        else
+        {
+            status = STATUS_ERROR_RANGE;
         }
     }
 
@@ -359,7 +376,7 @@ Status_t FRAM_ReadFaultLog(uint16_t logIndex, FRAM_FaultLogEntry_t *pEntry)
 {
     Status_t status = STATUS_ERROR_PARAM;
 
-    if (pEntry != NULL)
+    if ((pEntry != NULL) && fram_initialized)
     {
         uint16_t maxEntries = FRAM_FAULT_LOG_SIZE / sizeof(FRAM_FaultLogEntry_t);
 
@@ -368,7 +385,17 @@ Status_t FRAM_ReadFaultLog(uint16_t logIndex, FRAM_FaultLogEntry_t *pEntry)
             uint16_t address = FRAM_FAULT_LOG_OFFSET +
                               (logIndex * (uint16_t)sizeof(FRAM_FaultLogEntry_t));
 
-            status = FRAM_Read(address, (uint8_t *)pEntry, sizeof(FRAM_FaultLogEntry_t));
+            status = fram_read_bytes(address, (uint8_t *)pEntry, sizeof(FRAM_FaultLogEntry_t));
+
+            if (status == STATUS_OK)
+            {
+                fram_stats.readCount++;
+                fram_stats.bytesRead += sizeof(FRAM_FaultLogEntry_t);
+            }
+        }
+        else
+        {
+            status = STATUS_ERROR_RANGE;
         }
     }
 

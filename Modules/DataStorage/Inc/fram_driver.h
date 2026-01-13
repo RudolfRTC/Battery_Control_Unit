@@ -25,6 +25,12 @@ extern "C" {
 #include "app_types.h"
 #include "app_config.h"
 
+/* Forward declaration to avoid circular dependency */
+#ifndef ERROR_CODE_T_DEFINED
+typedef uint16_t ErrorCode_t;
+#define ERROR_CODE_T_DEFINED
+#endif
+
 /*============================================================================*/
 /* CONSTANTS                                                                  */
 /*============================================================================*/
@@ -68,9 +74,25 @@ typedef enum {
 typedef struct {
     uint32_t writeCount;      /**< Total write operations */
     uint32_t readCount;       /**< Total read operations */
+    uint32_t bytesWritten;    /**< Total bytes written */
+    uint32_t bytesRead;       /**< Total bytes read */
     uint32_t crcErrorCount;   /**< CRC check failures */
     uint32_t i2cErrorCount;   /**< I2C errors */
+    uint32_t writeErrors;     /**< Write error count */
+    uint32_t readErrors;      /**< Read error count */
 } FRAM_Statistics_t;
+
+/**
+ * @brief Fault log entry structure for FRAM storage
+ */
+typedef struct {
+    ErrorCode_t errorCode;    /**< Error code */
+    uint32_t timestamp_ms;    /**< Timestamp in milliseconds */
+    uint32_t param1;          /**< Error parameter 1 */
+    uint32_t param2;          /**< Error parameter 2 */
+    uint32_t param3;          /**< Error parameter 3 */
+    uint16_t crc;             /**< CRC for data integrity */
+} FRAM_FaultLogEntry_t;
 
 /*============================================================================*/
 /* FUNCTION PROTOTYPES                                                        */
@@ -175,6 +197,22 @@ Status_t FRAM_ResetStatistics(void);
  * @return STATUS_OK if test passed, error code otherwise
  */
 Status_t FRAM_SelfTest(void);
+
+/**
+ * @brief Write fault log entry to FRAM
+ * @param[in] index    Fault log entry index (0 to max entries)
+ * @param[in] pEntry   Pointer to fault log entry
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t FRAM_WriteFaultLog(uint16_t index, const FRAM_FaultLogEntry_t *pEntry);
+
+/**
+ * @brief Read fault log entry from FRAM
+ * @param[in]  index    Fault log entry index (0 to max entries)
+ * @param[out] pEntry   Pointer to store fault log entry
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t FRAM_ReadFaultLog(uint16_t index, FRAM_FaultLogEntry_t *pEntry);
 
 #ifdef __cplusplus
 }

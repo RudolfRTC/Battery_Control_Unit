@@ -126,7 +126,43 @@ Status_t ErrorHandler_Init(void)
         (void)memset(&error_state, 0, sizeof(error_state));
 
         /* Load DTC history from FRAM */
-        /* TODO: Implement DTC history loading */
+        uint32_t maxEntries = FRAM_ADDR_FAULT_LOG_SIZE / sizeof(FRAM_FaultLogEntry_t);
+        uint32_t currentTime = HAL_GetTick();
+
+        for (uint16_t i = 0U; (i < maxEntries) && (i < FAULT_LOG_MAX_ENTRIES); i++)
+        {
+            FRAM_FaultLogEntry_t faultLog;
+            Status_t framStatus = FRAM_ReadFaultLog(i, &faultLog);
+
+            if ((framStatus == STATUS_OK) && (faultLog.errorCode != ERROR_NONE))
+            {
+                /* Check if fault is still relevant (within aging threshold) */
+                uint32_t age_ms = currentTime - faultLog.timestamp_ms;
+
+                if (age_ms < DTC_AGING_THRESHOLD_MS)
+                {
+                    /* Add to active DTCs if there's space */
+                    if (error_state.activeDTCCount < MAX_ACTIVE_DTCS)
+                    {
+                        DTC_Entry_t *pDTC = allocate_dtc();
+
+                        if (pDTC != NULL)
+                        {
+                            pDTC->code = faultLog.errorCode;
+                            pDTC->timestamp_ms = faultLog.timestamp_ms;
+                            pDTC->occurrenceCount = 1U;
+                            pDTC->param1 = faultLog.param1;
+                            pDTC->param2 = faultLog.param2;
+                            pDTC->param3 = faultLog.param3;
+                            pDTC->status = DTC_STATUS_PENDING;
+                            pDTC->confirmed = false;
+
+                            error_state.activeDTCCount++;
+                        }
+                    }
+                }
+            }
+        }
 
         error_handler_initialized = true;
     }

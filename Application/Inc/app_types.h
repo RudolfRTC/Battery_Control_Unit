@@ -86,7 +86,11 @@ typedef enum {
     STATUS_ERROR_NO_MEMORY   = 0x0CU,  /**< Memory allocation failed */
     STATUS_ERROR_RANGE       = 0x0DU,  /**< Value out of range */
     STATUS_ERROR_INVALID_STATE = 0x0EU, /**< Invalid state transition */
-    STATUS_ERROR_SAFETY      = 0x0FU   /**< Safety violation detected */
+    STATUS_ERROR_SAFETY      = 0x0FU,  /**< Safety violation detected */
+    STATUS_ERROR_WRITE_PROTECTED = 0x10U, /**< Write protection active */
+    STATUS_ERROR_INVALID_DATA = 0x11U, /**< Invalid data detected */
+    STATUS_ERROR_NO_DATA     = 0x12U,  /**< No data available */
+    STATUS_ERROR_NOT_FOUND   = 0x13U   /**< Resource not found */
 } Status_t;
 
 /**
