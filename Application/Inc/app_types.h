@@ -138,11 +138,6 @@ typedef struct {
 typedef void (*Callback_t)(void);
 
 /**
- * @brief Error callback function pointer with error code
- */
-typedef void (*ErrorCallback_t)(Status_t errorCode);
-
-/**
  * @brief Range validation structure
  */
 typedef struct {

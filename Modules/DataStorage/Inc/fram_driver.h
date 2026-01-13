@@ -24,12 +24,7 @@ extern "C" {
 /*============================================================================*/
 #include "app_types.h"
 #include "app_config.h"
-
-/* Forward declaration to avoid circular dependency */
-#ifndef ERROR_CODE_T_DEFINED
-typedef uint16_t ErrorCode_t;
-#define ERROR_CODE_T_DEFINED
-#endif
+#include "app_errors.h"
 
 /*============================================================================*/
 /* CONSTANTS                                                                  */
