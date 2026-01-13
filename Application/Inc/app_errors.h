@@ -52,6 +52,8 @@ typedef enum {
     ERROR_POWER_3V3_DIGITAL_FAULT   = 0x0106U,  /**< 3.3V digital fault */
     ERROR_POWER_3V3_ANALOG_FAULT    = 0x0107U,  /**< 3.3V analog fault */
     ERROR_POWER_LM74900_FAULT       = 0x0108U,  /**< LM74900 fault signal */
+    ERROR_POWER_MONITOR_FAIL        = 0x0109U,  /**< Power monitoring failed */
+    ERROR_POWER_FAULT               = 0x010AU,  /**< Generic power fault */
 
     /* CAN Communication errors (0x02xx) */
     ERROR_CAN_BUS_OFF               = 0x0201U,  /**< CAN bus-off */
@@ -68,6 +70,7 @@ typedef enum {
     ERROR_DIN_ACS772_FAULT          = 0x0303U,  /**< ACS772 sensor fault */
     ERROR_DIN_OVERCURRENT           = 0x0304U,  /**< Input overcurrent */
     ERROR_DIN_CALIBRATION           = 0x0305U,  /**< Calibration error */
+    ERROR_DI_UPDATE_FAIL            = 0x0306U,  /**< Digital input update failed */
 
     /* Analog Input errors (0x04xx) */
     ERROR_AIN_OUT_OF_RANGE          = 0x0401U,  /**< Analog value out of range */
@@ -77,6 +80,7 @@ typedef enum {
     ERROR_AIN_REF_VOLTAGE           = 0x0405U,  /**< Reference voltage fault */
     ERROR_AIN_CALIBRATION           = 0x0406U,  /**< Calibration error */
     ERROR_AIN_ADC_TIMEOUT           = 0x0407U,  /**< ADC conversion timeout */
+    ERROR_LEM_COMMUNICATION         = 0x0408U,  /**< LEM communication error */
 
     /* Output Control errors (0x05xx) */
     ERROR_OUT_OPEN_LOAD             = 0x0501U,  /**< Open load detected */
@@ -84,6 +88,7 @@ typedef enum {
     ERROR_OUT_OVERCURRENT           = 0x0503U,  /**< Output overcurrent */
     ERROR_OUT_OVERTEMPERATURE       = 0x0504U,  /**< Output overtemperature */
     ERROR_OUT_BTT6200_FAULT         = 0x0505U,  /**< BTT6200 fault */
+    ERROR_BTT6200_FAULT             = 0x0505U,  /**< BTT6200 fault (alias) */
     ERROR_OUT_INVALID_CHANNEL       = 0x0506U,  /**< Invalid channel number */
     ERROR_OUT_CONTROL_TIMEOUT       = 0x0507U,  /**< Control timeout */
 
@@ -101,6 +106,9 @@ typedef enum {
     ERROR_DIAG_TEMP_CRITICAL        = 0x0703U,  /**< Temperature critical */
     ERROR_DIAG_DTC_FULL             = 0x0704U,  /**< DTC storage full */
     ERROR_DIAG_LOG_FULL             = 0x0705U,  /**< Event log full */
+    ERROR_SENSOR_FAULT              = 0x0706U,  /**< Generic sensor fault */
+    ERROR_ACTUATOR_FAULT            = 0x0707U,  /**< Generic actuator fault */
+    ERROR_TEMPERATURE_FAULT         = 0x0708U,  /**< Generic temperature fault */
 
     /* Safety errors (0x08xx) - Critical! */
     ERROR_SAFETY_WATCHDOG           = 0x0801U,  /**< Watchdog timeout */
@@ -110,6 +118,8 @@ typedef enum {
     ERROR_SAFETY_REDUNDANCY         = 0x0805U,  /**< Redundancy check failed */
     ERROR_SAFETY_MEMORY_CORRUPTION  = 0x0806U,  /**< Memory corruption */
     ERROR_SAFETY_CRITICAL_FAULT     = 0x0807U,  /**< Critical safety fault */
+    ERROR_SAFETY_MONITOR_FAIL       = 0x0808U,  /**< Safety monitor failure */
+    ERROR_SAFETY_MONITOR_FAULT      = 0x0809U,  /**< Safety monitor fault */
 
     /* BSP/Hardware errors (0x09xx) */
     ERROR_BSP_GPIO_CONFIG           = 0x0901U,  /**< GPIO configuration error */
@@ -138,6 +148,51 @@ typedef enum {
     SEVERITY_ERROR    = 0x02U,  /**< Error - recoverable */
     SEVERITY_CRITICAL = 0x03U   /**< Critical - requires safe state */
 } ErrorSeverity_t;
+
+/**
+ * @brief DTC (Diagnostic Trouble Code) status
+ */
+typedef enum {
+    DTC_STATUS_CLEARED   = 0x00U,  /**< DTC cleared */
+    DTC_STATUS_PENDING   = 0x01U,  /**< DTC pending confirmation */
+    DTC_STATUS_CONFIRMED = 0x02U,  /**< DTC confirmed */
+    DTC_STATUS_ACTIVE    = 0x03U   /**< DTC active */
+} DTC_Status_t;
+
+/**
+ * @brief DTC information structure
+ */
+typedef struct {
+    ErrorCode_t code;             /**< Error code */
+    uint32_t timestamp_ms;        /**< Timestamp in milliseconds */
+    uint32_t occurrenceCount;     /**< Number of occurrences */
+    uint32_t param1;              /**< Error parameter 1 */
+    uint32_t param2;              /**< Error parameter 2 */
+    uint32_t param3;              /**< Error parameter 3 */
+    DTC_Status_t status;          /**< DTC status */
+    bool confirmed;               /**< Confirmation flag */
+} DTC_Info_t;
+
+/**
+ * @brief Error handler statistics
+ */
+typedef struct {
+    uint32_t totalErrorCount;     /**< Total error count */
+    uint32_t criticalErrorCount;  /**< Critical error count */
+    uint32_t warningCount;        /**< Warning count */
+    uint32_t activeDTCCount;      /**< Active DTC count */
+    uint32_t lastErrorTime_ms;    /**< Last error timestamp */
+    bool safeStateActive;         /**< Safe state flag */
+} ErrorStatistics_t;
+
+/**
+ * @brief Error callback function type
+ * @param errorCode Error code that occurred
+ * @param param1 Error parameter 1
+ * @param param2 Error parameter 2
+ * @param param3 Error parameter 3
+ */
+typedef void (*ErrorCallback_t)(ErrorCode_t errorCode, uint32_t param1, uint32_t param2, uint32_t param3);
 
 /**
  * @brief Error record structure for logging
@@ -238,14 +293,82 @@ const char* ErrorHandler_GetErrorString(ErrorCode_t errorCode);
 const char* ErrorHandler_GetStatusString(Status_t status);
 
 /**
- * @brief Log error with timestamp and context
- * @param[in] errorCode Error code to log
- * @param[in] moduleId Module identifier
- * @param[in] lineNumber Source line number
- * @param[in] data Additional error data
+ * @brief Initialize error handler
+ * @return STATUS_OK on success, error code otherwise
  */
-void ErrorHandler_LogError(ErrorCode_t errorCode, uint16_t moduleId,
-                           uint16_t lineNumber, uint32_t data);
+Status_t ErrorHandler_Init(void);
+
+/**
+ * @brief Log error with parameters
+ * @param[in] code Error code to log
+ * @param[in] param1 Error parameter 1
+ * @param[in] param2 Error parameter 2
+ * @param[in] param3 Error parameter 3
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_LogError(ErrorCode_t code, uint32_t param1, uint32_t param2, uint32_t param3);
+
+/**
+ * @brief Get DTC information
+ * @param[in]  code  Error code to query
+ * @param[out] pInfo Pointer to DTC information structure
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_GetDTC(ErrorCode_t code, DTC_Info_t *pInfo);
+
+/**
+ * @brief Clear specific DTC
+ * @param[in] code Error code to clear
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_ClearDTC(ErrorCode_t code);
+
+/**
+ * @brief Clear all DTCs
+ * @return STATUS_OK on success
+ */
+Status_t ErrorHandler_ClearAllDTCs(void);
+
+/**
+ * @brief Get active DTC count
+ * @param[out] pCount Pointer to store active DTC count
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_GetActiveDTCCount(uint32_t *pCount);
+
+/**
+ * @brief Check if DTC is active
+ * @param[in] code Error code to check
+ * @return true if DTC is active, false otherwise
+ */
+bool ErrorHandler_IsDTCActive(ErrorCode_t code);
+
+/**
+ * @brief Update error handler (periodic aging)
+ * @return STATUS_OK on success
+ */
+Status_t ErrorHandler_Update(void);
+
+/**
+ * @brief Register error callback
+ * @param[in] callback Callback function pointer
+ * @return STATUS_OK on success
+ */
+Status_t ErrorHandler_RegisterCallback(ErrorCallback_t callback);
+
+/**
+ * @brief Get error statistics
+ * @param[out] pStats Pointer to statistics structure
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_GetStatistics(ErrorStatistics_t *pStats);
+
+/**
+ * @brief Get error name string
+ * @param[in] code Error code
+ * @return Pointer to constant error name string
+ */
+const char* ErrorHandler_GetErrorName(ErrorCode_t code);
 
 /**
  * @brief Assert handler for debug builds

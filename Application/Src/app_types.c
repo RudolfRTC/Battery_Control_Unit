@@ -38,7 +38,11 @@ static const char* const status_strings[] = {
     "NO_MEMORY",           /* STATUS_ERROR_NO_MEMORY */
     "OUT_OF_RANGE",        /* STATUS_ERROR_RANGE */
     "INVALID_STATE",       /* STATUS_ERROR_INVALID_STATE */
-    "SAFETY_VIOLATION"     /* STATUS_ERROR_SAFETY */
+    "SAFETY_VIOLATION",    /* STATUS_ERROR_SAFETY */
+    "WRITE_PROTECTED",     /* STATUS_ERROR_WRITE_PROTECTED */
+    "INVALID_DATA",        /* STATUS_ERROR_INVALID_DATA */
+    "NO_DATA",             /* STATUS_ERROR_NO_DATA */
+    "NOT_FOUND"            /* STATUS_ERROR_NOT_FOUND */
 };
 
 #define STATUS_STRING_COUNT  (sizeof(status_strings) / sizeof(status_strings[0]))

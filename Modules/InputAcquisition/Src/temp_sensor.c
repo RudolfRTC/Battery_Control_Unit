@@ -372,31 +372,31 @@ static void temp_check_limits(void)
     /* Check low limit */
     if (temp_data.currentTemp_mC < temp_config.lowLimit_mC)
     {
-        if (!temp_data.undertemperature)
+        if (!temp_data.underTemp)
         {
-            temp_data.undertemperature = true;
+            temp_data.underTemp = true;
             alarmTriggered = true;
             alarmType = TEMP_ALARM_LOW;
         }
     }
     else if (temp_data.currentTemp_mC > (temp_config.lowLimit_mC + temp_config.hysteresis_mC))
     {
-        temp_data.undertemperature = false;
+        temp_data.underTemp = false;
     }
 
     /* Check high limit */
     if (temp_data.currentTemp_mC > temp_config.highLimit_mC)
     {
-        if (!temp_data.overtemperature)
+        if (!temp_data.overTemp)
         {
-            temp_data.overtemperature = true;
+            temp_data.overTemp = true;
             alarmTriggered = true;
             alarmType = TEMP_ALARM_HIGH;
         }
     }
     else if (temp_data.currentTemp_mC < (temp_config.highLimit_mC - temp_config.hysteresis_mC))
     {
-        temp_data.overtemperature = false;
+        temp_data.overTemp = false;
     }
 
     /* Call alarm callback */

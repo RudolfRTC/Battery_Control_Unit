@@ -43,6 +43,16 @@ extern "C" {
 /*============================================================================*/
 
 /**
+ * @brief Temperature alarm type enumeration
+ */
+typedef enum {
+    TEMP_ALARM_NONE  = 0x00U,  /**< No alarm */
+    TEMP_ALARM_LOW   = 0x01U,  /**< Under-temperature alarm */
+    TEMP_ALARM_HIGH  = 0x02U,  /**< Over-temperature alarm */
+    TEMP_ALARM_ERROR = 0x03U   /**< Sensor error alarm */
+} TempSensor_AlarmType_t;
+
+/**
  * @brief Temperature sensor configuration
  */
 typedef struct {
@@ -70,10 +80,10 @@ typedef struct {
 
 /**
  * @brief Temperature alarm callback function type
+ * @param[in] alarmType    Type of temperature alarm
  * @param[in] temperature_mC Current temperature in milliCelsius
- * @param[in] isOverTemp     True if over-temperature, false if under-temperature
  */
-typedef void (*TempSensor_AlarmCallback_t)(int32_t temperature_mC, bool isOverTemp);
+typedef void (*TempSensor_AlarmCallback_t)(TempSensor_AlarmType_t alarmType, int32_t temperature_mC);
 
 /*============================================================================*/
 /* FUNCTION PROTOTYPES                                                        */

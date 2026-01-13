@@ -96,6 +96,14 @@ Status_t DataLog_Init(void);
 Status_t DataLog_LogData(void);
 
 /**
+ * @brief Alias for DataLog_LogData() - Log current system data entry
+ * @return Status code
+ */
+static inline Status_t DataLogger_LogEntry(void) {
+    return DataLog_LogData();
+}
+
+/**
  * @brief Read log entry by index
  * @param[in] index Log entry index
  * @param[out] pEntry Pointer to entry structure
