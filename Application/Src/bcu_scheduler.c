@@ -98,10 +98,15 @@ Status_t Scheduler_RegisterJob(const char *name, JobFunc_t func,
 
     if ((name != NULL) && (func != NULL) && (period_ms > 0U) && (job_count < SCHED_MAX_JOBS))
     {
+        /* Atomic read of g_tick_ms to prevent race with SysTick ISR */
+        __disable_irq();
+        uint32_t tick_snapshot = g_tick_ms;
+        __enable_irq();
+
         jobs[job_count].name = name;
         jobs[job_count].func = func;
         jobs[job_count].period_ms = period_ms;
-        jobs[job_count].next_deadline_ms = g_tick_ms + period_ms;
+        jobs[job_count].next_deadline_ms = tick_snapshot + period_ms;
         jobs[job_count].priority = priority;
         jobs[job_count].enabled = true;
 
@@ -154,8 +159,10 @@ void Scheduler_Run(void)
         /* Measure loop start time */
         loop_start_us = Timestamp_GetMicros();
 
-        /* Get current tick */
+        /* Get current tick (atomic read to prevent race with SysTick ISR) */
+        __disable_irq();
         uint32_t now_ms = g_tick_ms;
+        __enable_irq();
 
         /* Execute all due jobs (priority order) */
         for (uint8_t priority = 0U; priority <= SCHED_PRIORITY_VERY_SLOW; priority++)
@@ -291,9 +298,13 @@ Status_t Scheduler_WCET_Stop(const char *task_name, uint32_t start_us, uint32_t 
             }
 
             /* Update average (running average) */
-            wcet_stats[i].avg_time_us =
-                (wcet_stats[i].avg_time_us * (wcet_stats[i].count - 1U) + elapsed_us) /
-                wcet_stats[i].count;
+            /* MISRA 21.4: Division by zero check (defensive programming) */
+            if (wcet_stats[i].count > 0U)
+            {
+                wcet_stats[i].avg_time_us =
+                    (wcet_stats[i].avg_time_us * (wcet_stats[i].count - 1U) + elapsed_us) /
+                    wcet_stats[i].count;
+            }
 
             /* Check budget overrun */
             if ((budget_us > 0U) && (elapsed_us > budget_us))

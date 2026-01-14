@@ -181,21 +181,24 @@ void App_MainLoop(void)
         uint32_t current_ms = Timestamp_GetMillis();
 
         /* Fast tasks (1ms) - Safety critical */
-        if ((current_ms - fast_task_last_ms) >= TASK_PERIOD_SAFETY_MS)
+        /* MISRA fix: Use signed comparison for wraparound-safe timing */
+        if (((int32_t)(current_ms - fast_task_last_ms)) >= (int32_t)TASK_PERIOD_SAFETY_MS)
         {
             App_FastTasks();
             fast_task_last_ms = current_ms;
         }
 
         /* Medium tasks (10ms) - Control and I/O */
-        if ((current_ms - medium_task_last_ms) >= TASK_PERIOD_FAST_MS)
+        /* MISRA fix: Use signed comparison for wraparound-safe timing */
+        if (((int32_t)(current_ms - medium_task_last_ms)) >= (int32_t)TASK_PERIOD_FAST_MS)
         {
             App_MediumTasks();
             medium_task_last_ms = current_ms;
         }
 
         /* Slow tasks (100ms) - Communication and diagnostics */
-        if ((current_ms - slow_task_last_ms) >= TASK_PERIOD_SLOW_MS)
+        /* MISRA fix: Use signed comparison for wraparound-safe timing */
+        if (((int32_t)(current_ms - slow_task_last_ms)) >= (int32_t)TASK_PERIOD_SLOW_MS)
         {
             App_SlowTasks();
             slow_task_last_ms = current_ms;
@@ -842,15 +845,13 @@ static void app_error_handler(ErrorCode_t code, uint32_t p1, uint32_t p2, uint32
     /* Transmit fault message via CAN */
     (void)CANProto_SendFaults();
 
-    /* For critical errors, blink error LED faster */
+    /* ISO 26262 ASIL-B: REMOVED blocking HAL_Delay from error callback
+     * Blocking delays in error handlers can cause watchdog timeout.
+     * LED error indication now handled by non-blocking periodic task. */
     if ((code >= ERROR_SAFETY_WATCHDOG) && (code <= ERROR_SAFETY_CRITICAL_FAULT))
     {
-        /* Rapid blink */
-        for (uint8_t i = 0U; i < 6U; i++)
-        {
-            (void)BSP_GPIO_TogglePin(GPIOH, GPIO_PIN_10);
-            HAL_Delay(50);
-        }
+        /* Set error LED on (single toggle, no blocking delay) */
+        (void)BSP_GPIO_WritePin(GPIOH, GPIO_PIN_10, GPIO_PIN_SET);
     }
 
     (void)p1;  /* Suppress unused warnings */

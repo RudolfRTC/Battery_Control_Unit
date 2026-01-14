@@ -316,9 +316,10 @@ Status_t LTCScanner_ForceScan(void)
 /**
  * @brief Update pack current
  */
-Status_t LTCScanner_UpdatePackCurrent(float pack_current_A)
+Status_t LTCScanner_UpdatePackCurrent(float current_A)
 {
-    pack_current_A = pack_current_A;
+    /* Update module-level variable (MISRA fix: parameter shadowing) */
+    pack_current_A = current_A;
     return STATUS_OK;
 }
 
@@ -405,7 +406,8 @@ static void ltc_sm_wait_conversion(uint32_t now_ms)
 static void ltc_sm_read_group(uint32_t now_ms)
 {
     Status_t status;
-    uint16_t voltages[LTC_SCANNER_MAX_DEVICES][3];  /* 3 cells per group */
+    /* Initialize at declaration per MISRA 9.1 */
+    uint16_t voltages[LTC_SCANNER_MAX_DEVICES][3] = {0};  /* 3 cells per group */
 
     /* Check timeout */
     if (now_ms >= state_timeout_ms)
@@ -413,9 +415,6 @@ static void ltc_sm_read_group(uint32_t now_ms)
         ltc_enter_error_state(LTC_EVENT_TIMEOUT);
         return;
     }
-
-    /* Read current group */
-    (void)memset(voltages, 0, sizeof(voltages));
 
     /* Determine which group to read based on state */
     uint8_t group_offset = 0U;
