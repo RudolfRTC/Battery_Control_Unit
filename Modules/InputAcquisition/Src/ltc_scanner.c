@@ -443,6 +443,13 @@ static void ltc_sm_read_group(uint32_t now_ms)
 
     if (status == STATUS_OK)
     {
+        /* ISO 26262 ASIL-B: Bounds check on num_devices */
+        if (scanner_config.num_devices > LTC_SCANNER_MAX_DEVICES)
+        {
+            ltc_enter_error_state(LTC_EVENT_CONFIG_ERROR);
+            return;
+        }
+
         /* Copy voltages to temporary buffer */
         for (uint8_t dev = 0U; dev < scanner_config.num_devices; dev++)
         {

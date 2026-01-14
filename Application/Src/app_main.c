@@ -96,9 +96,7 @@ Status_t App_Init(void)
 {
     Status_t status = STATUS_OK;
 
-    /* Initialize HAL */
-    HAL_Init();
-
+    /* MISRA fix: HAL_Init() already called in main(), removed duplicate call */
     /* Configure system clock to 100 MHz */
     SystemClock_Config();
 

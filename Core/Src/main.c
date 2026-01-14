@@ -119,7 +119,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /* Configure SysTick for 1ms tick (deterministic scheduling) */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000U);
+  /* MISRA 17.7: Check return value of critical function */
+  if (HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000U) != 0U)
+  {
+    ErrorHandler_SafeState();
+  }
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
   /* Initialize BCU application */
@@ -153,13 +157,9 @@ int main(void)
   /* Run deterministic scheduler (never returns) */
   Scheduler_Run();
 
-  /* Should never reach here */
-  while (1)
-  {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
+  /* USER CODE END WHILE */
+  /* USER CODE BEGIN 3 */
+  /* MISRA 2.1: Unreachable code removed - Scheduler_Run() never returns */
   /* USER CODE END 3 */
 }
 
