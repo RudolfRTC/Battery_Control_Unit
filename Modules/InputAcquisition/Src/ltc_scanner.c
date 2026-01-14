@@ -30,6 +30,7 @@
 #define LTC_EVENT_CRC_ERROR             (0x03U)
 #define LTC_EVENT_TIMEOUT               (0x04U)
 #define LTC_EVENT_MODE_CHANGE           (0x05U)
+#define LTC_EVENT_CONFIG_ERROR          (0x06U)  /**< Configuration error */
 
 /*============================================================================*/
 /* PRIVATE VARIABLES                                                          */

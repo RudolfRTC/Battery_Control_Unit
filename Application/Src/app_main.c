@@ -49,14 +49,14 @@ static volatile AppState_t app_state = APP_STATE_INIT;
 /** @brief Application status (volatile - accessed from multiple contexts) */
 static volatile AppStatus_t app_status = {0};
 
-/** @brief Fast task timestamp (1ms, volatile - timing critical) */
-static volatile uint32_t fast_task_last_ms = 0U;
+/** @brief Fast task timestamp (1ms) - MISRA: No volatile, not ISR-accessed */
+static uint32_t fast_task_last_ms = 0U;
 
-/** @brief Medium task timestamp (10ms, volatile - timing critical) */
-static volatile uint32_t medium_task_last_ms = 0U;
+/** @brief Medium task timestamp (10ms) - MISRA: No volatile, not ISR-accessed */
+static uint32_t medium_task_last_ms = 0U;
 
-/** @brief Slow task timestamp (100ms, volatile - timing critical) */
-static volatile uint32_t slow_task_last_ms = 0U;
+/** @brief Slow task timestamp (100ms) - MISRA: No volatile, not ISR-accessed */
+static uint32_t slow_task_last_ms = 0U;
 
 /*============================================================================*/
 /* PRIVATE FUNCTION PROTOTYPES                                                */
@@ -173,6 +173,7 @@ void App_MainLoop(void)
     while (1)
     {
         /* Measure loop execution time */
+        /* MISRA 10.1: Explicit cast - intentional 32-bit truncation for timing */
         loop_start_us = (uint32_t)Timestamp_GetMicros();
 
         /* Get current timestamp */

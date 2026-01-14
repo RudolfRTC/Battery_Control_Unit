@@ -278,7 +278,8 @@ uint32_t Scheduler_WCET_Start(const char *task_name)
 Status_t Scheduler_WCET_Stop(const char *task_name, uint32_t start_us, uint32_t budget_us)
 {
     Status_t status = STATUS_OK;
-    uint32_t end_us = Timestamp_GetMicros();
+    /* MISRA 10.1: Explicit cast - intentional truncation for 32-bit timing */
+    uint32_t end_us = (uint32_t)Timestamp_GetMicros();
     uint32_t elapsed_us = end_us - start_us;
 
     /* Find or create WCET stats entry */

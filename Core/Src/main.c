@@ -630,10 +630,11 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
+  /* MISRA/ISO 26262: No __disable_irq() - allow watchdog to reset system */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
   while (1)
   {
+    /* Wait for watchdog reset - interrupts enabled for watchdog ISR */
   }
   /* USER CODE END Error_Handler_Debug */
 }
