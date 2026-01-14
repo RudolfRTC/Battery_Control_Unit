@@ -24,6 +24,7 @@
 #include "app_main.h"
 #include "app_config.h"
 #include "app_errors.h"
+#include "bcu_scheduler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
