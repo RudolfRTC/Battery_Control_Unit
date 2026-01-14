@@ -72,7 +72,7 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core" />
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers" />
-					<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities" /></sourceEntries>
+					<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/Communication" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/DataStorage" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/InputAcquisition" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/OutputControl" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/PowerManagement" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/Safety" /></sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings" />
@@ -144,7 +144,7 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core" />
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers" />
-					<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities" /></sourceEntries>
+					<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Application" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/Communication" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/DataStorage" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/InputAcquisition" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/OutputControl" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/PowerManagement" /><entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Modules/Safety" /></sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings" />
