@@ -52,6 +52,8 @@ typedef enum {
     ERROR_POWER_3V3_DIGITAL_FAULT   = 0x0106U,  /**< 3.3V digital fault */
     ERROR_POWER_3V3_ANALOG_FAULT    = 0x0107U,  /**< 3.3V analog fault */
     ERROR_POWER_LM74900_FAULT       = 0x0108U,  /**< LM74900 fault signal */
+    ERROR_POWER_FAULT               = 0x0109U,  /**< General power fault */
+    ERROR_POWER_MONITOR_FAIL        = 0x010AU,  /**< Power monitor failure */
 
     /* CAN Communication errors (0x02xx) */
     ERROR_CAN_BUS_OFF               = 0x0201U,  /**< CAN bus-off */
@@ -68,6 +70,7 @@ typedef enum {
     ERROR_DIN_ACS772_FAULT          = 0x0303U,  /**< ACS772 sensor fault */
     ERROR_DIN_OVERCURRENT           = 0x0304U,  /**< Input overcurrent */
     ERROR_DIN_CALIBRATION           = 0x0305U,  /**< Calibration error */
+    ERROR_DI_UPDATE_FAIL            = 0x0306U,  /**< Digital input update failed */
 
     /* Analog Input errors (0x04xx) */
     ERROR_AIN_OUT_OF_RANGE          = 0x0401U,  /**< Analog value out of range */
@@ -77,6 +80,7 @@ typedef enum {
     ERROR_AIN_REF_VOLTAGE           = 0x0405U,  /**< Reference voltage fault */
     ERROR_AIN_CALIBRATION           = 0x0406U,  /**< Calibration error */
     ERROR_AIN_ADC_TIMEOUT           = 0x0407U,  /**< ADC conversion timeout */
+    ERROR_LEM_COMMUNICATION         = 0x0408U,  /**< LEM communication error */
 
     /* Output Control errors (0x05xx) */
     ERROR_OUT_OPEN_LOAD             = 0x0501U,  /**< Open load detected */
@@ -84,8 +88,10 @@ typedef enum {
     ERROR_OUT_OVERCURRENT           = 0x0503U,  /**< Output overcurrent */
     ERROR_OUT_OVERTEMPERATURE       = 0x0504U,  /**< Output overtemperature */
     ERROR_OUT_BTT6200_FAULT         = 0x0505U,  /**< BTT6200 fault */
+    ERROR_BTT6200_FAULT             = 0x0505U,  /**< BTT6200 fault (alias) */
     ERROR_OUT_INVALID_CHANNEL       = 0x0506U,  /**< Invalid channel number */
     ERROR_OUT_CONTROL_TIMEOUT       = 0x0507U,  /**< Control timeout */
+    ERROR_ACTUATOR_FAULT            = 0x0508U,  /**< General actuator fault */
 
     /* Data Storage errors (0x06xx) */
     ERROR_FRAM_I2C_FAULT            = 0x0601U,  /**< FRAM I2C communication */
@@ -99,8 +105,10 @@ typedef enum {
     ERROR_DIAG_TEMP_SENSOR          = 0x0701U,  /**< Temperature sensor fault */
     ERROR_DIAG_TEMP_WARNING         = 0x0702U,  /**< Temperature warning */
     ERROR_DIAG_TEMP_CRITICAL        = 0x0703U,  /**< Temperature critical */
-    ERROR_DIAG_DTC_FULL             = 0x0704U,  /**< DTC storage full */
-    ERROR_DIAG_LOG_FULL             = 0x0705U,  /**< Event log full */
+    ERROR_TEMPERATURE_FAULT         = 0x0704U,  /**< General temperature fault */
+    ERROR_DIAG_DTC_FULL             = 0x0705U,  /**< DTC storage full */
+    ERROR_DIAG_LOG_FULL             = 0x0706U,  /**< Event log full */
+    ERROR_SENSOR_FAULT              = 0x0707U,  /**< General sensor fault */
 
     /* Safety errors (0x08xx) - Critical! */
     ERROR_SAFETY_WATCHDOG           = 0x0801U,  /**< Watchdog timeout */
@@ -110,6 +118,8 @@ typedef enum {
     ERROR_SAFETY_REDUNDANCY         = 0x0805U,  /**< Redundancy check failed */
     ERROR_SAFETY_MEMORY_CORRUPTION  = 0x0806U,  /**< Memory corruption */
     ERROR_SAFETY_CRITICAL_FAULT     = 0x0807U,  /**< Critical safety fault */
+    ERROR_SAFETY_MONITOR_FAIL       = 0x0808U,  /**< Safety monitor failure */
+    ERROR_SAFETY_MONITOR_FAULT      = 0x0809U,  /**< Safety monitor fault */
 
     /* BSP/Hardware errors (0x09xx) */
     ERROR_BSP_GPIO_CONFIG           = 0x0901U,  /**< GPIO configuration error */
