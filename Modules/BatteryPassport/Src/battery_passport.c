@@ -19,6 +19,7 @@
 #include "app_config.h"
 #include <string.h>
 #include <stddef.h>
+#include <limits.h>
 
 /*============================================================================*/
 /* PRIVATE CONSTANTS                                                          */
@@ -152,7 +153,7 @@ Status_t BatteryPassport_Init(void)
         {
             g_passport_state = PASSPORT_STATE_READY;
             g_passport_initialized = true;
-            g_last_commit_time_ms = Timestamp_GetMs();
+            g_last_commit_time_ms = Timestamp_GetMillis();
             g_last_update_time_ms = g_last_commit_time_ms;
             g_last_throughput_time_ms = g_last_commit_time_ms;
         }
@@ -198,7 +199,7 @@ Status_t BatteryPassport_UpdateMeasurements(
 )
 {
     Status_t status = STATUS_OK;
-    uint32_t now_ms = Timestamp_GetMs();
+    uint32_t now_ms = Timestamp_GetMillis();
 
     if (g_passport_state != PASSPORT_STATE_READY)
     {
@@ -248,7 +249,7 @@ Status_t BatteryPassport_UpdateMeasurements(
 Status_t BatteryPassport_CommitIfNeeded(void)
 {
     Status_t status = STATUS_OK;
-    uint32_t now_ms = Timestamp_GetMs();
+    uint32_t now_ms = Timestamp_GetMillis();
     uint32_t elapsed_ms;
     bool should_commit = false;
 
@@ -307,7 +308,7 @@ Status_t BatteryPassport_CommitIfNeeded(void)
 Status_t BatteryPassport_ForceCommit(void)
 {
     Status_t status = STATUS_OK;
-    uint32_t now_ms = Timestamp_GetMs();
+    uint32_t now_ms = Timestamp_GetMillis();
 
     if (g_passport_state != PASSPORT_STATE_READY)
     {
