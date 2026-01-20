@@ -20,6 +20,7 @@
 #include "timestamp.h"
 #include "bsp_gpio.h"
 #include "btt6200.h"
+#include "watchdog.h"
 #include <string.h>
 
 /*============================================================================*/

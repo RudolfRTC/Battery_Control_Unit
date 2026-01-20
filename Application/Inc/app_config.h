@@ -95,6 +95,8 @@ extern "C" {
 /*============================================================================*/
 /** @brief CAN bus configuration */
 #define CAN_BITRATE_KBPS              (500U)      /**< 500 kbit/s */
+#define CAN1_BAUDRATE                 (500000UL)  /**< CAN1: 500 kbit/s in Hz */
+#define CAN2_BAUDRATE                 (500000UL)  /**< CAN2: 500 kbit/s in Hz */
 #define CAN_TX_MAILBOX_COUNT          (3U)        /**< 3 TX mailboxes */
 #define CAN_RX_FIFO_SIZE              (3U)        /**< 3 RX FIFO depth */
 #define CAN_FILTER_COUNT              (14U)       /**< 14 filter banks */

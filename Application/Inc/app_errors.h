@@ -140,6 +140,47 @@ typedef enum {
 } ErrorSeverity_t;
 
 /**
+ * @brief DTC (Diagnostic Trouble Code) status
+ */
+typedef enum {
+    DTC_STATUS_PENDING   = 0x00U,  /**< DTC pending confirmation */
+    DTC_STATUS_CONFIRMED = 0x01U,  /**< DTC confirmed */
+    DTC_STATUS_CLEARED   = 0x02U   /**< DTC cleared */
+} DTC_Status_t;
+
+/**
+ * @brief DTC information structure (public API)
+ */
+typedef struct {
+    ErrorCode_t code;              /**< Error code */
+    uint32_t timestamp_ms;         /**< Timestamp in milliseconds */
+    uint32_t occurrenceCount;      /**< Number of occurrences */
+    uint32_t param1;               /**< First error parameter */
+    uint32_t param2;               /**< Second error parameter */
+    uint32_t param3;               /**< Third error parameter */
+    DTC_Status_t status;           /**< DTC status */
+    bool confirmed;                /**< Confirmation flag */
+} DTC_Info_t;
+
+/**
+ * @brief Error statistics structure
+ */
+typedef struct {
+    uint32_t totalErrorCount;      /**< Total error count */
+    uint32_t criticalErrorCount;   /**< Critical error count */
+    uint32_t warningCount;         /**< Warning count */
+    uint32_t activeDTCCount;       /**< Active DTC count */
+    uint32_t lastErrorTime_ms;     /**< Last error timestamp */
+    bool safeStateActive;          /**< Safe state active flag */
+} ErrorStatistics_t;
+
+/**
+ * @brief Error callback function pointer
+ */
+typedef void (*ErrorCallback_t)(ErrorCode_t code, uint32_t param1,
+                                 uint32_t param2, uint32_t param3);
+
+/**
  * @brief Error record structure for logging
  */
 typedef struct {
@@ -239,13 +280,14 @@ const char* ErrorHandler_GetStatusString(Status_t status);
 
 /**
  * @brief Log error with timestamp and context
- * @param[in] errorCode Error code to log
- * @param[in] moduleId Module identifier
- * @param[in] lineNumber Source line number
- * @param[in] data Additional error data
+ * @param[in] code Error code to log
+ * @param[in] param1 First error parameter (e.g., module ID)
+ * @param[in] param2 Second error parameter (e.g., line number)
+ * @param[in] param3 Third error parameter (additional data)
+ * @return STATUS_OK on success, error code otherwise
  */
-void ErrorHandler_LogError(ErrorCode_t errorCode, uint16_t moduleId,
-                           uint16_t lineNumber, uint32_t data);
+Status_t ErrorHandler_LogError(ErrorCode_t code, uint32_t param1,
+                                uint32_t param2, uint32_t param3);
 
 /**
  * @brief Assert handler for debug builds
@@ -263,6 +305,54 @@ void ErrorHandler_HardFault(void);
  * @brief Enter safe state (critical errors)
  */
 void ErrorHandler_SafeState(void);
+
+/**
+ * @brief Initialize error handler
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_Init(void);
+
+/**
+ * @brief Get DTC information by error code
+ * @param[in] code Error code to query
+ * @param[out] pInfo Pointer to DTC info structure
+ * @return STATUS_OK on success, STATUS_ERROR_NOT_FOUND if not found
+ */
+Status_t ErrorHandler_GetDTC(ErrorCode_t code, DTC_Info_t *pInfo);
+
+/**
+ * @brief Clear DTC by error code
+ * @param[in] code Error code to clear
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_ClearDTC(ErrorCode_t code);
+
+/**
+ * @brief Clear all DTCs
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_ClearAllDTCs(void);
+
+/**
+ * @brief Get error statistics
+ * @param[out] pStats Pointer to statistics structure
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_GetStatistics(ErrorStatistics_t *pStats);
+
+/**
+ * @brief Register error callback
+ * @param[in] callback Callback function pointer
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t ErrorHandler_RegisterCallback(ErrorCallback_t callback);
+
+/**
+ * @brief Check if DTC is active
+ * @param[in] code Error code to check
+ * @return true if active, false otherwise
+ */
+bool ErrorHandler_IsDTCActive(ErrorCode_t code);
 
 #ifdef __cplusplus
 }
