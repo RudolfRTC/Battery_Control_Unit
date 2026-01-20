@@ -69,11 +69,20 @@ typedef struct {
 } TempSensor_Data_t;
 
 /**
- * @brief Temperature alarm callback function type
- * @param[in] temperature_mC Current temperature in milliCelsius
- * @param[in] isOverTemp     True if over-temperature, false if under-temperature
+ * @brief Temperature alarm types
  */
-typedef void (*TempSensor_AlarmCallback_t)(int32_t temperature_mC, bool isOverTemp);
+typedef enum {
+    TEMP_ALARM_LOW      = 0x00U,  /**< Under-temperature alarm */
+    TEMP_ALARM_HIGH     = 0x01U,  /**< Over-temperature alarm */
+    TEMP_ALARM_CRITICAL = 0x02U   /**< Critical temperature alarm */
+} TempSensor_AlarmType_t;
+
+/**
+ * @brief Temperature alarm callback function type
+ * @param[in] alarmType    Type of temperature alarm
+ * @param[in] temp_mC      Current temperature in milliCelsius
+ */
+typedef void (*TempSensor_AlarmCallback_t)(TempSensor_AlarmType_t alarmType, int32_t temp_mC);
 
 /*============================================================================*/
 /* FUNCTION PROTOTYPES                                                        */

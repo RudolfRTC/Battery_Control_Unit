@@ -66,6 +66,9 @@ extern "C" {
 /* TYPE DEFINITIONS                                                           */
 /*============================================================================*/
 
+/* Forward declaration for error handling */
+typedef uint16_t ErrorCode_t;
+
 /**
  * @brief Standard function return status codes
  * @note  All API functions must return this type
@@ -86,7 +89,9 @@ typedef enum {
     STATUS_ERROR_NO_MEMORY   = 0x0CU,  /**< Memory allocation failed */
     STATUS_ERROR_RANGE       = 0x0DU,  /**< Value out of range */
     STATUS_ERROR_INVALID_STATE = 0x0EU, /**< Invalid state transition */
-    STATUS_ERROR_SAFETY      = 0x0FU   /**< Safety violation detected */
+    STATUS_ERROR_SAFETY      = 0x0FU,  /**< Safety violation detected */
+    STATUS_ERROR_NOT_FOUND   = 0x10U,  /**< Resource not found */
+    STATUS_ERROR_INVALID_DATA = 0x11U  /**< Invalid or corrupted data */
 } Status_t;
 
 /**
@@ -134,9 +139,10 @@ typedef struct {
 typedef void (*Callback_t)(void);
 
 /**
- * @brief Error callback function pointer with error code
+ * @brief Error callback function pointer with error code and parameters
  */
-typedef void (*ErrorCallback_t)(Status_t errorCode);
+typedef void (*ErrorCallback_t)(ErrorCode_t code, uint32_t param1,
+                                 uint32_t param2, uint32_t param3);
 
 /**
  * @brief Range validation structure
