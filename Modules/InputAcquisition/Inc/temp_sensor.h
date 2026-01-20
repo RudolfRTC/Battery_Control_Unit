@@ -72,9 +72,10 @@ typedef struct {
  * @brief Temperature alarm types
  */
 typedef enum {
-    TEMP_ALARM_LOW      = 0x00U,  /**< Under-temperature alarm */
-    TEMP_ALARM_HIGH     = 0x01U,  /**< Over-temperature alarm */
-    TEMP_ALARM_CRITICAL = 0x02U   /**< Critical temperature alarm */
+    TEMP_ALARM_NONE     = 0x00U,  /**< No alarm */
+    TEMP_ALARM_LOW      = 0x01U,  /**< Under-temperature alarm */
+    TEMP_ALARM_HIGH     = 0x02U,  /**< Over-temperature alarm */
+    TEMP_ALARM_CRITICAL = 0x03U   /**< Critical temperature alarm */
 } TempSensor_AlarmType_t;
 
 /**
