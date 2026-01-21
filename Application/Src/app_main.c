@@ -37,6 +37,7 @@
 #include "bcu_scheduler.h"
 #include "bcu_timing_config.h"
 #include "timestamp.h"
+#include "rul.h"
 #include <string.h>
 
 /*============================================================================*/
@@ -57,6 +58,9 @@ static volatile uint32_t medium_task_last_ms = 0U;
 
 /** @brief Slow task timestamp (100ms, volatile - timing critical) */
 static volatile uint32_t slow_task_last_ms = 0U;
+
+/** @brief RUL module context */
+static RUL_Context_t rul_context = {0};
 
 /*============================================================================*/
 /* PRIVATE FUNCTION PROTOTYPES                                                */
@@ -643,6 +647,12 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
+        /* Initialize RUL (Remaining Useful Life) module */
+        status = RUL_Init(&rul_context);
+    }
+
+    if (status == STATUS_OK)
+    {
         /* Register all callbacks */
         status = app_register_callbacks();
     }
@@ -1035,6 +1045,39 @@ static void Job_VerySlow_100ms(uint32_t now_ms)
 
     /* State machine */
     app_state_machine();
+
+    /* Update RUL module with battery data (every 100ms) */
+    {
+        Current_mA_t pack_current_mA = 0;
+        Voltage_mV_t pack_voltage_mV = 0;
+        Temperature_t temperature = 0;
+        Percentage_t soc_percent = 5000U;  /* 50% default, would come from BMS */
+
+        /* Get pack current from LEM sensor */
+        if (LEM_ReadCurrent(0U, &pack_current_mA) == STATUS_OK)
+        {
+            /* Update RUL with current battery data */
+            (void)RUL_Update(&rul_context, pack_current_mA, pack_voltage_mV,
+                           temperature, soc_percent);
+        }
+
+        /* Update operating time */
+        (void)RUL_UpdateOperatingTime(&rul_context, 100U);  /* 100ms increment */
+
+        /* Predict RUL every 10 seconds */
+        if ((log_counter % 100U) == 0U)
+        {
+            RUL_Prediction_t prediction;
+            if (RUL_PredictLife(&rul_context, &prediction) == STATUS_OK)
+            {
+                /* Prediction available - could be sent via CAN or logged */
+                if (prediction.isValid)
+                {
+                    /* Log RUL prediction to FRAM or transmit via CAN */
+                }
+            }
+        }
+    }
 
     /* LED indicators */
     if ((log_counter % 5U) == 0U)  /* Toggle every 500ms */
