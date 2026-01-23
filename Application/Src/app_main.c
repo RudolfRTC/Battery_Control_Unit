@@ -553,14 +553,18 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
-        /* Initialize FRAM storage */
-        status = FRAM_Init();
-    }
-
-    if (status == STATUS_OK)
-    {
-        /* Initialize configuration management (loads from FRAM) */
-        status = ConfigMgmt_Init();
+        /* Initialize FRAM storage (optional - may not be populated) */
+        Status_t fram_status = FRAM_Init();
+        if (fram_status == STATUS_OK)
+        {
+            /* Initialize configuration management (loads from FRAM) */
+            (void)ConfigMgmt_Init();
+        }
+        else
+        {
+            /* Log warning but continue - FRAM may not be populated */
+            (void)ErrorHandler_LogError(ERROR_FRAM_I2C_FAULT, 0U, 0U, 0U);
+        }
     }
 
     if (status == STATUS_OK)
@@ -611,8 +615,13 @@ static Status_t app_init_modules(void)
 
     if (status == STATUS_OK)
     {
-        /* Initialize temperature sensor */
-        status = TempSensor_Init();
+        /* Initialize temperature sensor (optional - don't fail if not connected) */
+        Status_t temp_status = TempSensor_Init();
+        if (temp_status != STATUS_OK)
+        {
+            /* Log warning but continue - temp sensor may not be populated */
+            (void)ErrorHandler_LogError(ERROR_DIAG_TEMP_SENSOR, 0U, 0U, 0U);
+        }
     }
 
     /* LTC6811 scanner disabled for testing - causes DMA interrupt loop if not connected
