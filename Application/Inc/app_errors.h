@@ -110,6 +110,18 @@ typedef enum {
     ERROR_SAFETY_REDUNDANCY         = 0x0805U,  /**< Redundancy check failed */
     ERROR_SAFETY_MEMORY_CORRUPTION  = 0x0806U,  /**< Memory corruption */
     ERROR_SAFETY_CRITICAL_FAULT     = 0x0807U,  /**< Critical safety fault */
+    ERROR_SAFETY_MONITOR_FAIL       = 0x0808U,  /**< Safety monitor execution failed */
+    ERROR_SAFETY_MONITOR_FAULT      = 0x0809U,  /**< Safety monitor fault detected */
+
+    /* Module errors (0x0Bxx) */
+    ERROR_LEM_COMMUNICATION         = 0x0B01U,  /**< LEM sensor communication error */
+    ERROR_DI_UPDATE_FAIL            = 0x0B02U,  /**< Digital input update failed */
+    ERROR_BTT6200_FAULT             = 0x0B03U,  /**< BTT6200 driver fault */
+    ERROR_POWER_MONITOR_FAIL        = 0x0B04U,  /**< Power monitoring failed */
+    ERROR_TEMPERATURE_FAULT         = 0x0B05U,  /**< Temperature fault */
+    ERROR_POWER_FAULT               = 0x0B06U,  /**< Power fault */
+    ERROR_SENSOR_FAULT              = 0x0B07U,  /**< Sensor fault */
+    ERROR_ACTUATOR_FAULT            = 0x0B08U,  /**< Actuator fault */
 
     /* BSP/Hardware errors (0x09xx) */
     ERROR_BSP_GPIO_CONFIG           = 0x0901U,  /**< GPIO configuration error */
@@ -150,6 +162,50 @@ typedef struct {
     uint16_t        line_number;  /**< Source line number */
     uint32_t        data;         /**< Additional error data */
 } ErrorRecord_t;
+
+/**
+ * @brief DTC (Diagnostic Trouble Code) status enumeration
+ */
+typedef enum {
+    DTC_STATUS_PENDING    = 0x00U,  /**< DTC pending confirmation */
+    DTC_STATUS_CONFIRMED  = 0x01U,  /**< DTC confirmed (occurred N times) */
+    DTC_STATUS_CLEARED    = 0x02U   /**< DTC cleared by user/diagnostics */
+} DTC_Status_t;
+
+/**
+ * @brief DTC information structure
+ */
+typedef struct {
+    ErrorCode_t code;              /**< DTC error code */
+    uint32_t    timestamp_ms;      /**< First occurrence timestamp */
+    uint32_t    occurrenceCount;  /**< Number of occurrences */
+    uint32_t    param1;           /**< Error parameter 1 */
+    uint32_t    param2;           /**< Error parameter 2 */
+    uint32_t    param3;           /**< Error parameter 3 */
+    DTC_Status_t status;          /**< Current DTC status */
+    bool        confirmed;        /**< DTC confirmed flag */
+} DTC_Info_t;
+
+/**
+ * @brief Error handler callback function pointer
+ * @param[in] errorCode Error code that triggered callback
+ * @param[in] param1 Error parameter 1
+ * @param[in] param2 Error parameter 2
+ * @param[in] param3 Error parameter 3
+ */
+typedef void (*ErrorHandlerCallback_t)(ErrorCode_t errorCode, uint32_t param1, uint32_t param2, uint32_t param3);
+
+/**
+ * @brief Error statistics structure
+ */
+typedef struct {
+    uint32_t totalErrorCount;      /**< Total errors logged */
+    uint32_t criticalErrorCount;   /**< Critical safety errors */
+    uint32_t warningCount;         /**< Non-critical warnings */
+    uint32_t activeDTCCount;       /**< Number of active DTCs */
+    uint32_t lastErrorTime_ms;     /**< Timestamp of last error */
+    bool     safeStateActive;       /**< Safe state flag */
+} ErrorStatistics_t;
 
 /*============================================================================*/
 /* ERROR HANDLING MACROS                                                      */
@@ -210,6 +266,12 @@ typedef struct {
 /*============================================================================*/
 
 /**
+ * @brief Initialize error handler
+ * @return STATUS_OK on success, STATUS_ERROR_ALREADY_INIT if already initialized
+ */
+Status_t ErrorHandler_Init(void);
+
+/**
  * @brief Get error severity for a given error code
  * @param[in] errorCode Error code to evaluate
  * @return Error severity level
@@ -240,12 +302,75 @@ const char* ErrorHandler_GetStatusString(Status_t status);
 /**
  * @brief Log error with timestamp and context
  * @param[in] errorCode Error code to log
- * @param[in] moduleId Module identifier
- * @param[in] lineNumber Source line number
- * @param[in] data Additional error data
+ * @param[in] param1 Error parameter 1 (context-specific)
+ * @param[in] param2 Error parameter 2 (context-specific)
+ * @param[in] param3 Error parameter 3 (context-specific)
+ * @return STATUS_OK on success, error code otherwise
  */
-void ErrorHandler_LogError(ErrorCode_t errorCode, uint16_t moduleId,
-                           uint16_t lineNumber, uint32_t data);
+Status_t ErrorHandler_LogError(ErrorCode_t errorCode, uint32_t param1,
+                               uint32_t param2, uint32_t param3);
+
+/**
+ * @brief Get DTC information
+ * @param[in]  code  DTC error code
+ * @param[out] pInfo Pointer to DTC information structure
+ * @return STATUS_OK on success, STATUS_ERROR_NOT_FOUND if DTC doesn't exist
+ */
+Status_t ErrorHandler_GetDTC(ErrorCode_t code, DTC_Info_t *pInfo);
+
+/**
+ * @brief Clear DTC
+ * @param[in] code DTC error code to clear
+ * @return STATUS_OK on success, STATUS_ERROR_NOT_FOUND if DTC doesn't exist
+ */
+Status_t ErrorHandler_ClearDTC(ErrorCode_t code);
+
+/**
+ * @brief Clear all DTCs
+ * @return STATUS_OK
+ */
+Status_t ErrorHandler_ClearAllDTCs(void);
+
+/**
+ * @brief Get active DTC count
+ * @param[out] pCount Pointer to store count
+ * @return STATUS_OK on success, STATUS_ERROR_PARAM if pCount is NULL
+ */
+Status_t ErrorHandler_GetActiveDTCCount(uint32_t *pCount);
+
+/**
+ * @brief Check if DTC is active
+ * @param[in] code DTC error code
+ * @return true if DTC is active, false otherwise
+ */
+bool ErrorHandler_IsDTCActive(ErrorCode_t code);
+
+/**
+ * @brief Update error handler (periodic aging of DTCs)
+ * @return STATUS_OK
+ */
+Status_t ErrorHandler_Update(void);
+
+/**
+ * @brief Register error callback
+ * @param[in] callback Callback function pointer
+ * @return STATUS_OK
+ */
+Status_t ErrorHandler_RegisterCallback(ErrorHandlerCallback_t callback);
+
+/**
+ * @brief Get error statistics
+ * @param[out] pStats Pointer to statistics structure
+ * @return STATUS_OK on success, STATUS_ERROR_PARAM if pStats is NULL
+ */
+Status_t ErrorHandler_GetStatistics(ErrorStatistics_t *pStats);
+
+/**
+ * @brief Get error name string
+ * @param[in] code Error code
+ * @return Error name string
+ */
+const char* ErrorHandler_GetErrorName(ErrorCode_t code);
 
 /**
  * @brief Assert handler for debug builds

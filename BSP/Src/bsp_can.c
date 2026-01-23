@@ -46,6 +46,7 @@ typedef struct {
     uint8_t txBuffer[CAN_TX_FIFO_SIZE * sizeof(CAN_Message_t)];
     CAN_Statistics_t stats;
     CAN_RxCallback_t rxCallback;
+    CAN_TxCallback_t txCallback;
     CAN_ErrorCallback_t errorCallback;
     bool initialized;
 } CAN_Instance_t;
@@ -67,8 +68,8 @@ static CAN_Instance_t can2_instance;
 static Status_t can_configure_bit_timing(CAN_HandleTypeDef *hcan, uint32_t baudrate);
 static Status_t can_configure_filters(CAN_HandleTypeDef *hcan, uint8_t instance);
 static CAN_Instance_t* can_get_instance(uint8_t instance);
-static void can_process_rx_message(CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *pRxHeader, uint8_t *pData);
-static void can_process_errors(CAN_Instance_t *pInst, uint32_t errorCode);
+static void can_process_rx_message(uint8_t instance, CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *pRxHeader, uint8_t *pData);
+static void can_process_errors(uint8_t instance, CAN_Instance_t *pInst, uint32_t errorCode);
 
 /*============================================================================*/
 /* PUBLIC FUNCTIONS                                                           */
@@ -115,17 +116,32 @@ Status_t BSP_CAN_Init(uint8_t instance, const CAN_Config_t *pConfig)
                 __HAL_RCC_CAN2_CLK_ENABLE();
             }
 
-            /* Configure basic parameters */
-            pInst->hcan.Init.Mode = (pConfig->loopback) ? CAN_MODE_LOOPBACK : CAN_MODE_NORMAL;
+            /* Configure basic parameters based on mode */
+            switch (pConfig->mode)
+            {
+                case BSP_CAN_MODE_LOOPBACK:
+                    pInst->hcan.Init.Mode = CAN_MODE_LOOPBACK;
+                    break;
+                case BSP_CAN_MODE_SILENT:
+                    pInst->hcan.Init.Mode = CAN_MODE_SILENT;
+                    break;
+                case BSP_CAN_MODE_SILENT_LOOPBACK:
+                    pInst->hcan.Init.Mode = CAN_MODE_SILENT_LOOPBACK;
+                    break;
+                case BSP_CAN_MODE_NORMAL:
+                default:
+                    pInst->hcan.Init.Mode = CAN_MODE_NORMAL;
+                    break;
+            }
             pInst->hcan.Init.TimeTriggeredMode = DISABLE;
-            pInst->hcan.Init.AutoBusOff = (pConfig->autoBusOff) ? ENABLE : DISABLE;
+            pInst->hcan.Init.AutoBusOff = ENABLE;  /* Enable automatic bus-off recovery */
             pInst->hcan.Init.AutoWakeUp = ENABLE;
             pInst->hcan.Init.AutoRetransmission = (pConfig->autoRetransmit) ? ENABLE : DISABLE;
-            pInst->hcan.Init.ReceiveFifoLocked = DISABLE;
-            pInst->hcan.Init.TransmitFifoPriority = DISABLE;
+            pInst->hcan.Init.ReceiveFifoLocked = (pConfig->rxFifo0Overrun) ? ENABLE : DISABLE;
+            pInst->hcan.Init.TransmitFifoPriority = (pConfig->txPriority > 0U) ? ENABLE : DISABLE;
 
             /* Configure bit timing */
-            status = can_configure_bit_timing(&pInst->hcan, pConfig->baudrate);
+            status = can_configure_bit_timing(&pInst->hcan, pConfig->bitrate);
 
             if (status == STATUS_OK)
             {
@@ -186,9 +202,11 @@ Status_t BSP_CAN_Init(uint8_t instance, const CAN_Config_t *pConfig)
 /**
  * @brief Transmit CAN message
  */
-Status_t BSP_CAN_Transmit(uint8_t instance, const CAN_Message_t *pMessage, uint32_t timeout_ms)
+Status_t BSP_CAN_Transmit(uint8_t instance, const CAN_Message_t *pMessage,
+                          uint32_t *pMailbox, uint32_t timeout_ms)
 {
     Status_t status = STATUS_ERROR_PARAM;
+    (void)timeout_ms;  /* Currently not used for blocking wait */
 
     if ((instance <= BSP_CAN_INSTANCE_2) && (pMessage != NULL))
     {
@@ -200,7 +218,7 @@ Status_t BSP_CAN_Transmit(uint8_t instance, const CAN_Message_t *pMessage, uint3
             uint32_t txMailbox;
 
             /* Build TX header */
-            if (pMessage->ide == CAN_IDE_EXTENDED)
+            if (pMessage->frameType == CAN_FRAME_EXTENDED)
             {
                 txHeader.ExtId = pMessage->id;
                 txHeader.IDE = CAN_ID_EXT;
@@ -211,8 +229,8 @@ Status_t BSP_CAN_Transmit(uint8_t instance, const CAN_Message_t *pMessage, uint3
                 txHeader.IDE = CAN_ID_STD;
             }
 
-            txHeader.RTR = (pMessage->rtr) ? CAN_RTR_REMOTE : CAN_RTR_DATA;
-            txHeader.DLC = pMessage->dlc;
+            txHeader.RTR = (pMessage->frameFormat == CAN_FRAME_REMOTE) ? CAN_RTR_REMOTE : CAN_RTR_DATA;
+            txHeader.DLC = pMessage->dataLength;
             txHeader.TransmitGlobalTime = DISABLE;
 
             /* Attempt to send */
@@ -224,25 +242,21 @@ Status_t BSP_CAN_Transmit(uint8_t instance, const CAN_Message_t *pMessage, uint3
             if (halStatus == HAL_OK)
             {
                 pInst->stats.txCount++;
+                if (pMailbox != NULL)
+                {
+                    *pMailbox = txMailbox;
+                }
                 status = STATUS_OK;
             }
             else if (halStatus == HAL_BUSY)
             {
-                /* Queue to TX FIFO if mailboxes full */
-                if (RingBuffer_Write(&pInst->txFifo, (const uint8_t *)pMessage,
-                                    sizeof(CAN_Message_t)) == STATUS_OK)
-                {
-                    status = STATUS_OK;
-                }
-                else
-                {
-                    pInst->stats.txDropped++;
-                    status = STATUS_ERROR_OVERFLOW;
-                }
+                /* Mailboxes full */
+                pInst->stats.txMailboxFullCount++;
+                status = STATUS_ERROR_BUSY;
             }
             else
             {
-                pInst->stats.txErrors++;
+                pInst->stats.txErrorCount++;
                 status = STATUS_ERROR;
             }
         }
@@ -252,11 +266,14 @@ Status_t BSP_CAN_Transmit(uint8_t instance, const CAN_Message_t *pMessage, uint3
 }
 
 /**
- * @brief Receive CAN message
+ * @brief Receive CAN message from FIFO
  */
-Status_t BSP_CAN_Receive(uint8_t instance, CAN_Message_t *pMessage, uint32_t timeout_ms)
+Status_t BSP_CAN_Receive(uint8_t instance, uint8_t fifo,
+                         CAN_Message_t *pMessage, uint32_t timeout_ms)
 {
     Status_t status = STATUS_ERROR_PARAM;
+    (void)fifo;       /* Currently using single RX FIFO buffer */
+    (void)timeout_ms; /* Currently not used for blocking wait */
 
     if ((instance <= BSP_CAN_INSTANCE_2) && (pMessage != NULL))
     {
@@ -265,38 +282,15 @@ Status_t BSP_CAN_Receive(uint8_t instance, CAN_Message_t *pMessage, uint32_t tim
         if ((pInst != NULL) && pInst->initialized)
         {
             /* Try to read from RX FIFO */
-            status = RingBuffer_Read(&pInst->rxFifo, (uint8_t *)pMessage, sizeof(CAN_Message_t));
-
-            if (status != STATUS_OK)
-            {
-                status = STATUS_ERROR_NO_DATA;
-            }
+            status = RingBuffer_Read(&pInst->rxFifo, (uint8_t *)pMessage,
+                                     sizeof(CAN_Message_t));
+            /* RingBuffer_Read returns STATUS_ERROR_UNDERFLOW if not enough data */
         }
     }
 
     return status;
 }
 
-/**
- * @brief Get number of messages available
- */
-Status_t BSP_CAN_Available(uint8_t instance, uint32_t *pCount)
-{
-    Status_t status = STATUS_ERROR_PARAM;
-
-    if ((instance <= BSP_CAN_INSTANCE_2) && (pCount != NULL))
-    {
-        CAN_Instance_t *pInst = can_get_instance(instance);
-
-        if ((pInst != NULL) && pInst->initialized)
-        {
-            *pCount = pInst->rxFifo.count / sizeof(CAN_Message_t);
-            status = STATUS_OK;
-        }
-    }
-
-    return status;
-}
 
 /**
  * @brief Register RX callback
@@ -400,23 +394,23 @@ Status_t BSP_CAN_GetBusState(uint8_t instance, CAN_BusState_t *pState)
 
             if (canError & HAL_CAN_ERROR_BOF)
             {
-                *pState = CAN_BUS_OFF;
+                *pState = CAN_STATE_BUS_OFF;
             }
             else if (canError & HAL_CAN_ERROR_EPV)
             {
-                *pState = CAN_ERROR_PASSIVE;
+                *pState = CAN_STATE_ERROR_PASSIVE;
             }
             else if (canError & HAL_CAN_ERROR_EWG)
             {
-                *pState = CAN_ERROR_WARNING;
+                *pState = CAN_STATE_ERROR_ACTIVE;
             }
             else if (canState == HAL_CAN_STATE_READY)
             {
-                *pState = CAN_BUS_ACTIVE;
+                *pState = CAN_STATE_READY;
             }
             else
             {
-                *pState = CAN_BUS_OFF;
+                *pState = CAN_STATE_UNINITIALIZED;
             }
 
             status = STATUS_OK;
@@ -444,6 +438,339 @@ Status_t BSP_CAN_DeInit(uint8_t instance)
             pInst->initialized = false;
             status = STATUS_OK;
         }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Start CAN bus communication
+ */
+Status_t BSP_CAN_Start(uint8_t instance)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            if (HAL_CAN_Start(&pInst->hcan) == HAL_OK)
+            {
+                status = STATUS_OK;
+            }
+            else
+            {
+                status = STATUS_ERROR;
+            }
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Stop CAN bus communication
+ */
+Status_t BSP_CAN_Stop(uint8_t instance)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            if (HAL_CAN_Stop(&pInst->hcan) == HAL_OK)
+            {
+                status = STATUS_OK;
+            }
+            else
+            {
+                status = STATUS_ERROR;
+            }
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Check if CAN message is available in FIFO
+ */
+bool BSP_CAN_IsMessageAvailable(uint8_t instance, uint8_t fifo, uint32_t *pCount)
+{
+    bool available = false;
+    (void)fifo;  /* Using internal ring buffer instead of hardware FIFO */
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            uint32_t count = RingBuffer_Available(&pInst->rxFifo) / sizeof(CAN_Message_t);
+
+            if (pCount != NULL)
+            {
+                *pCount = count;
+            }
+
+            available = (count > 0U);
+        }
+    }
+
+    return available;
+}
+
+/**
+ * @brief Configure CAN filter
+ */
+Status_t BSP_CAN_ConfigureFilter(uint8_t instance, const CAN_Filter_t *pFilter)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if ((instance <= BSP_CAN_INSTANCE_2) && (pFilter != NULL))
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            CAN_FilterTypeDef filterConfig;
+
+            filterConfig.FilterIdHigh = (uint16_t)((pFilter->id >> 13U) & 0xFFFFU);
+            filterConfig.FilterIdLow = (uint16_t)((pFilter->id << 3U) & 0xFFF8U);
+            filterConfig.FilterMaskIdHigh = (uint16_t)((pFilter->mask >> 13U) & 0xFFFFU);
+            filterConfig.FilterMaskIdLow = (uint16_t)((pFilter->mask << 3U) & 0xFFF8U);
+            filterConfig.FilterFIFOAssignment = (pFilter->fifo == 0U) ? CAN_FILTER_FIFO0 : CAN_FILTER_FIFO1;
+            filterConfig.FilterBank = pFilter->filterBank;
+            filterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+            filterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+            filterConfig.FilterActivation = pFilter->enabled ? CAN_FILTER_ENABLE : CAN_FILTER_DISABLE;
+            filterConfig.SlaveStartFilterBank = 14U;
+
+            if (HAL_CAN_ConfigFilter(&pInst->hcan, &filterConfig) == HAL_OK)
+            {
+                status = STATUS_OK;
+            }
+            else
+            {
+                status = STATUS_ERROR;
+            }
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Disable CAN filter
+ */
+Status_t BSP_CAN_DisableFilter(uint8_t instance, uint8_t filterBank)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            CAN_FilterTypeDef filterConfig;
+
+            filterConfig.FilterBank = filterBank;
+            filterConfig.FilterActivation = CAN_FILTER_DISABLE;
+            filterConfig.SlaveStartFilterBank = 14U;
+
+            if (HAL_CAN_ConfigFilter(&pInst->hcan, &filterConfig) == HAL_OK)
+            {
+                status = STATUS_OK;
+            }
+            else
+            {
+                status = STATUS_ERROR;
+            }
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Get CAN error counters
+ */
+Status_t BSP_CAN_GetErrorCounters(uint8_t instance, uint8_t *pTxErrors, uint8_t *pRxErrors)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            uint32_t esr = pInst->hcan.Instance->ESR;
+
+            if (pTxErrors != NULL)
+            {
+                *pTxErrors = (uint8_t)((esr >> 16U) & 0xFFU);  /* TEC field */
+            }
+
+            if (pRxErrors != NULL)
+            {
+                *pRxErrors = (uint8_t)((esr >> 24U) & 0xFFU);  /* REC field */
+            }
+
+            status = STATUS_OK;
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Abort pending CAN transmission
+ */
+Status_t BSP_CAN_AbortTransmission(uint8_t instance, uint32_t mailbox)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if ((instance <= BSP_CAN_INSTANCE_2) && (mailbox < BSP_CAN_TX_MAILBOXES))
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if ((pInst != NULL) && pInst->initialized)
+        {
+            if (HAL_CAN_AbortTxRequest(&pInst->hcan, (1UL << mailbox)) == HAL_OK)
+            {
+                status = STATUS_OK;
+            }
+            else
+            {
+                status = STATUS_ERROR;
+            }
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Register TX callback function
+ */
+Status_t BSP_CAN_RegisterTxCallback(uint8_t instance, CAN_TxCallback_t callback)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        CAN_Instance_t *pInst = can_get_instance(instance);
+
+        if (pInst != NULL)
+        {
+            pInst->txCallback = callback;
+            status = STATUS_OK;
+        }
+    }
+
+    return status;
+}
+
+/**
+ * @brief Enable/disable CAN transceiver standby mode
+ */
+Status_t BSP_CAN_SetStandbyMode(uint8_t instance, bool enable)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+    (void)enable;  /* Placeholder - implement based on TCAN3404 GPIO control */
+
+    if (instance <= BSP_CAN_INSTANCE_2)
+    {
+        /* TCAN3404 standby control would be implemented via GPIO */
+        /* For now, just return OK as placeholder */
+        status = STATUS_OK;
+    }
+
+    return status;
+}
+
+/**
+ * @brief Check CAN transceiver fault status
+ */
+Status_t BSP_CAN_GetTransceiverFault(uint8_t instance, bool *pFault)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if ((instance <= BSP_CAN_INSTANCE_2) && (pFault != NULL))
+    {
+        /* TCAN3404 fault detection would be implemented via GPIO */
+        /* For now, return no fault as placeholder */
+        *pFault = false;
+        status = STATUS_OK;
+    }
+
+    return status;
+}
+
+/**
+ * @brief Build standard CAN message (11-bit ID)
+ */
+Status_t BSP_CAN_BuildStandardMessage(CAN_Message_t *pMessage, uint16_t id,
+                                      const uint8_t *pData, uint8_t dataLength)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if ((pMessage != NULL) && (dataLength <= BSP_CAN_MAX_DATA_LEN))
+    {
+        pMessage->id = (uint32_t)id & 0x7FFU;  /* 11-bit mask */
+        pMessage->frameType = CAN_FRAME_STANDARD;
+        pMessage->frameFormat = CAN_FRAME_DATA;
+        pMessage->dataLength = dataLength;
+        pMessage->timestamp_ms = 0U;
+
+        if ((pData != NULL) && (dataLength > 0U))
+        {
+            (void)memcpy(pMessage->data, pData, dataLength);
+        }
+        else
+        {
+            (void)memset(pMessage->data, 0, BSP_CAN_MAX_DATA_LEN);
+        }
+
+        status = STATUS_OK;
+    }
+
+    return status;
+}
+
+/**
+ * @brief Build extended CAN message (29-bit ID)
+ */
+Status_t BSP_CAN_BuildExtendedMessage(CAN_Message_t *pMessage, uint32_t id,
+                                      const uint8_t *pData, uint8_t dataLength)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if ((pMessage != NULL) && (dataLength <= BSP_CAN_MAX_DATA_LEN))
+    {
+        pMessage->id = id & 0x1FFFFFFFU;  /* 29-bit mask */
+        pMessage->frameType = CAN_FRAME_EXTENDED;
+        pMessage->frameFormat = CAN_FRAME_DATA;
+        pMessage->dataLength = dataLength;
+        pMessage->timestamp_ms = 0U;
+
+        if ((pData != NULL) && (dataLength > 0U))
+        {
+            (void)memcpy(pMessage->data, pData, dataLength);
+        }
+        else
+        {
+            (void)memset(pMessage->data, 0, BSP_CAN_MAX_DATA_LEN);
+        }
+
+        status = STATUS_OK;
     }
 
     return status;
@@ -555,7 +882,7 @@ static CAN_Instance_t* can_get_instance(uint8_t instance)
 /**
  * @brief Process received CAN message
  */
-static void can_process_rx_message(CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *pRxHeader, uint8_t *pData)
+static void can_process_rx_message(uint8_t instance, CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *pRxHeader, uint8_t *pData)
 {
     if ((pInst != NULL) && (pRxHeader != NULL) && (pData != NULL))
     {
@@ -565,17 +892,17 @@ static void can_process_rx_message(CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *p
         if (pRxHeader->IDE == CAN_ID_EXT)
         {
             message.id = pRxHeader->ExtId;
-            message.ide = CAN_IDE_EXTENDED;
+            message.frameType = CAN_FRAME_EXTENDED;
         }
         else
         {
             message.id = pRxHeader->StdId;
-            message.ide = CAN_IDE_STANDARD;
+            message.frameType = CAN_FRAME_STANDARD;
         }
 
-        message.rtr = (pRxHeader->RTR == CAN_RTR_REMOTE);
-        message.dlc = (uint8_t)pRxHeader->DLC;
-        (void)memcpy(message.data, pData, message.dlc);
+        message.frameFormat = (pRxHeader->RTR == CAN_RTR_REMOTE) ? CAN_FRAME_REMOTE : CAN_FRAME_DATA;
+        message.dataLength = (uint8_t)pRxHeader->DLC;
+        (void)memcpy(message.data, pData, message.dataLength);
         message.timestamp_ms = HAL_GetTick();
 
         /* Add to RX FIFO */
@@ -587,12 +914,12 @@ static void can_process_rx_message(CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *p
             /* Call RX callback if registered */
             if (pInst->rxCallback != NULL)
             {
-                pInst->rxCallback(&message);
+                pInst->rxCallback(instance, &message);
             }
         }
         else
         {
-            pInst->stats.rxDropped++;
+            pInst->stats.rxOverrunCount++;
         }
     }
 }
@@ -600,54 +927,45 @@ static void can_process_rx_message(CAN_Instance_t *pInst, CAN_RxHeaderTypeDef *p
 /**
  * @brief Process CAN errors
  */
-static void can_process_errors(CAN_Instance_t *pInst, uint32_t errorCode)
+static void can_process_errors(uint8_t instance, CAN_Instance_t *pInst, uint32_t errorCode)
 {
     if (pInst != NULL)
     {
-        if ((errorCode & HAL_CAN_ERROR_EWG) != 0U)
-        {
-            pInst->stats.errorWarning++;
-        }
+        /* Store last error code */
+        pInst->stats.lastErrorCode = errorCode;
 
-        if ((errorCode & HAL_CAN_ERROR_EPV) != 0U)
-        {
-            pInst->stats.errorPassive++;
-        }
-
+        /* Increment bus-off counter */
         if ((errorCode & HAL_CAN_ERROR_BOF) != 0U)
         {
-            pInst->stats.busOff++;
+            pInst->stats.busOffCount++;
         }
 
-        if ((errorCode & HAL_CAN_ERROR_STF) != 0U)
+        /* Increment TX error counter for TX-related errors */
+        if ((errorCode & (HAL_CAN_ERROR_TX_ALST0 | HAL_CAN_ERROR_TX_TERR0 |
+                          HAL_CAN_ERROR_TX_ALST1 | HAL_CAN_ERROR_TX_TERR1 |
+                          HAL_CAN_ERROR_TX_ALST2 | HAL_CAN_ERROR_TX_TERR2)) != 0U)
         {
-            pInst->stats.stuffError++;
+            pInst->stats.txErrorCount++;
         }
 
-        if ((errorCode & HAL_CAN_ERROR_FOR) != 0U)
+        /* Increment RX error counter for RX-related errors */
+        if ((errorCode & (HAL_CAN_ERROR_RX_FOV0 | HAL_CAN_ERROR_RX_FOV1)) != 0U)
         {
-            pInst->stats.formError++;
+            pInst->stats.rxErrorCount++;
         }
 
-        if ((errorCode & HAL_CAN_ERROR_ACK) != 0U)
+        /* Protocol errors increment general error counters */
+        if ((errorCode & (HAL_CAN_ERROR_STF | HAL_CAN_ERROR_FOR |
+                          HAL_CAN_ERROR_ACK | HAL_CAN_ERROR_BR |
+                          HAL_CAN_ERROR_BD | HAL_CAN_ERROR_CRC)) != 0U)
         {
-            pInst->stats.ackError++;
-        }
-
-        if ((errorCode & HAL_CAN_ERROR_BR) != 0U)
-        {
-            pInst->stats.bitError++;
-        }
-
-        if ((errorCode & HAL_CAN_ERROR_CRC) != 0U)
-        {
-            pInst->stats.crcError++;
+            pInst->stats.rxErrorCount++;
         }
 
         /* Call error callback if registered */
         if (pInst->errorCallback != NULL)
         {
-            pInst->errorCallback(errorCode);
+            pInst->errorCallback(instance, errorCode);
         }
     }
 }
@@ -664,22 +982,25 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     CAN_RxHeaderTypeDef rxHeader;
     uint8_t rxData[8];
     CAN_Instance_t *pInst = NULL;
+    uint8_t instance = 0U;
 
     /* Determine which instance */
     if (hcan->Instance == CAN1)
     {
         pInst = &can1_instance;
+        instance = BSP_CAN_INSTANCE_1;
     }
     else if (hcan->Instance == CAN2)
     {
         pInst = &can2_instance;
+        instance = BSP_CAN_INSTANCE_2;
     }
 
     if (pInst != NULL)
     {
         if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData) == HAL_OK)
         {
-            can_process_rx_message(pInst, &rxHeader, rxData);
+            can_process_rx_message(instance, pInst, &rxHeader, rxData);
         }
     }
 }
@@ -692,22 +1013,25 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
     CAN_RxHeaderTypeDef rxHeader;
     uint8_t rxData[8];
     CAN_Instance_t *pInst = NULL;
+    uint8_t instance = 0U;
 
     /* Determine which instance */
     if (hcan->Instance == CAN1)
     {
         pInst = &can1_instance;
+        instance = BSP_CAN_INSTANCE_1;
     }
     else if (hcan->Instance == CAN2)
     {
         pInst = &can2_instance;
+        instance = BSP_CAN_INSTANCE_2;
     }
 
     if (pInst != NULL)
     {
         if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rxHeader, rxData) == HAL_OK)
         {
-            can_process_rx_message(pInst, &rxHeader, rxData);
+            can_process_rx_message(instance, pInst, &rxHeader, rxData);
         }
     }
 }
@@ -718,21 +1042,102 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 {
     CAN_Instance_t *pInst = NULL;
+    uint8_t instance = 0U;
     uint32_t errorCode = HAL_CAN_GetError(hcan);
 
     /* Determine which instance */
     if (hcan->Instance == CAN1)
     {
         pInst = &can1_instance;
+        instance = BSP_CAN_INSTANCE_1;
     }
     else if (hcan->Instance == CAN2)
     {
         pInst = &can2_instance;
+        instance = BSP_CAN_INSTANCE_2;
     }
 
     if (pInst != NULL)
     {
-        can_process_errors(pInst, errorCode);
+        can_process_errors(instance, pInst, errorCode);
+    }
+}
+
+/**
+ * @brief TX mailbox 0 complete callback
+ */
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    CAN_Instance_t *pInst = NULL;
+    uint8_t instance = 0U;
+
+    /* Determine which instance */
+    if (hcan->Instance == CAN1)
+    {
+        pInst = &can1_instance;
+        instance = BSP_CAN_INSTANCE_1;
+    }
+    else if (hcan->Instance == CAN2)
+    {
+        pInst = &can2_instance;
+        instance = BSP_CAN_INSTANCE_2;
+    }
+
+    if ((pInst != NULL) && (pInst->txCallback != NULL))
+    {
+        pInst->txCallback(instance, 0U);
+    }
+}
+
+/**
+ * @brief TX mailbox 1 complete callback
+ */
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    CAN_Instance_t *pInst = NULL;
+    uint8_t instance = 0U;
+
+    /* Determine which instance */
+    if (hcan->Instance == CAN1)
+    {
+        pInst = &can1_instance;
+        instance = BSP_CAN_INSTANCE_1;
+    }
+    else if (hcan->Instance == CAN2)
+    {
+        pInst = &can2_instance;
+        instance = BSP_CAN_INSTANCE_2;
+    }
+
+    if ((pInst != NULL) && (pInst->txCallback != NULL))
+    {
+        pInst->txCallback(instance, 1U);
+    }
+}
+
+/**
+ * @brief TX mailbox 2 complete callback
+ */
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+    CAN_Instance_t *pInst = NULL;
+    uint8_t instance = 0U;
+
+    /* Determine which instance */
+    if (hcan->Instance == CAN1)
+    {
+        pInst = &can1_instance;
+        instance = BSP_CAN_INSTANCE_1;
+    }
+    else if (hcan->Instance == CAN2)
+    {
+        pInst = &can2_instance;
+        instance = BSP_CAN_INSTANCE_2;
+    }
+
+    if ((pInst != NULL) && (pInst->txCallback != NULL))
+    {
+        pInst->txCallback(instance, 2U);
     }
 }
 

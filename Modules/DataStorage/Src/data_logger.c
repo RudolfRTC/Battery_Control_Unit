@@ -191,7 +191,7 @@ Status_t DataLog_GetLatest(DataLog_Entry_t *pEntry)
         }
         else
         {
-            status = STATUS_ERROR_NO_DATA;
+            status = STATUS_ERROR_NOT_FOUND;
         }
     }
 
@@ -208,7 +208,7 @@ Status_t DataLog_Clear(void)
     if (datalog_initialized)
     {
         /* Erase FRAM log area */
-        status = FRAM_Erase(DATALOG_FRAM_BASE_ADDR, DATALOG_MAX_ENTRIES * DATALOG_ENTRY_SIZE);
+        status = FRAM_Clear(DATALOG_FRAM_BASE_ADDR, DATALOG_MAX_ENTRIES * DATALOG_ENTRY_SIZE);
 
         if (status == STATUS_OK)
         {

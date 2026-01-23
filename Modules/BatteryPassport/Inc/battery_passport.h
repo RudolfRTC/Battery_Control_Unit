@@ -39,7 +39,7 @@ extern "C" {
 #define BATTERY_PASSPORT_VERSION_MINOR      (0U)
 
 /** @brief FRAM record magic number for validation */
-#define BATTERY_PASSPORT_MAGIC              (0xBCUPA55U)
+#define BATTERY_PASSPORT_MAGIC              (0xBCB0A55U)
 
 /** @brief String field sizes (fixed for MISRA compliance) */
 #define BATTERY_PASSPORT_UUID_SIZE          (16U)   /**< 128-bit UUID */

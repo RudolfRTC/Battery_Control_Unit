@@ -18,6 +18,7 @@
 #include "app_config.h"
 #include "fram_driver.h"
 #include "crc.h"
+#include "temp_sensor.h"
 #include <string.h>
 
 /*============================================================================*/

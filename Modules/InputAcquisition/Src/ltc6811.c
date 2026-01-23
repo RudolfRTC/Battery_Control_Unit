@@ -160,7 +160,7 @@ Status_t LTC6811_Init(uint8_t numDevices)
         spi_config.clockSpeed = BSP_SPI_SPEED_MEDIUM;  /* 2 MHz for ISO-SPI */
         spi_config.mode = SPI_MODE_3;                   /* CPOL=1, CPHA=1 */
         spi_config.bitOrder = SPI_BITORDER_MSB_FIRST;
-        spi_config.dataSize = SPI_DATASIZE_8BIT;
+        spi_config.dataSize = BSP_SPI_DATASIZE_8BIT;
         spi_config.useDMA = false;
 
         status = BSP_SPI_Init(BSP_SPI_INSTANCE_4, &spi_config);
@@ -792,8 +792,6 @@ Status_t LTC6811_GetDeviceState(uint8_t deviceIndex, LTC6811_Device_t *pDevice)
 Status_t LTC6811_UpdateAllMeasurements(uint8_t deviceIndex)
 {
     Status_t status = STATUS_OK;
-    bool adc_ready = false;
-    uint32_t timeout;
 
     /* Parameter validation */
     if (deviceIndex >= num_devices)

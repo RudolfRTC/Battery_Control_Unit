@@ -78,8 +78,8 @@ typedef enum {
  * @brief SPI data size
  */
 typedef enum {
-    SPI_DATASIZE_8BIT  = 0x00U,  /**< 8-bit data frame */
-    SPI_DATASIZE_16BIT = 0x01U   /**< 16-bit data frame */
+    BSP_SPI_DATASIZE_8BIT  = 0x00U,  /**< 8-bit data frame */
+    BSP_SPI_DATASIZE_16BIT = 0x01U   /**< 16-bit data frame */
 } SPI_DataSize_t;
 
 /**

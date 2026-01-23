@@ -350,6 +350,84 @@ Status_t BTT6200_DeInit(void)
     return STATUS_OK;
 }
 
+/**
+ * @brief Get output channel state
+ */
+Status_t BTT6200_GetChannelState(uint8_t channel, BTT6200_ChannelState_t *pState)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if ((channel < BTT6200_TOTAL_CHANNELS) && (pState != NULL) && btt6200_initialized)
+    {
+        uint8_t icNum = channel / 4U;
+        uint8_t chNum = channel % 4U;
+
+        *pState = ic_status[icNum].state[chNum];
+        status = STATUS_OK;
+    }
+
+    return status;
+}
+
+/**
+ * @brief Enable/disable all outputs globally
+ */
+Status_t BTT6200_EnableOutputs(bool enable)
+{
+    Status_t status = STATUS_OK;
+
+    if (btt6200_initialized)
+    {
+        if (enable)
+        {
+            /* Re-enable outputs based on stored configuration */
+            for (uint8_t ch = 0U; ch < BTT6200_TOTAL_CHANNELS; ch++)
+            {
+                if (channel_config[ch].enabled)
+                {
+                    uint8_t icNum = ch / 4U;
+                    uint8_t chNum = ch % 4U;
+
+                    ic_status[icNum].state[chNum] = BTT6200_STATE_ON;
+
+                    /* Update input pins for this IC */
+                    uint8_t currentMask = 0U;
+                    for (uint8_t i = 0U; i < 4U; i++)
+                    {
+                        if (ic_status[icNum].state[i] == BTT6200_STATE_ON)
+                        {
+                            currentMask |= (1U << i);
+                        }
+                    }
+                    btt6200_set_input_pins(icNum, currentMask);
+                }
+            }
+        }
+        else
+        {
+            /* Disable all outputs but keep configuration */
+            for (uint8_t ic = 0U; ic < BTT6200_IC_COUNT; ic++)
+            {
+                btt6200_set_input_pins(ic, 0x00U);
+
+                for (uint8_t ch = 0U; ch < 4U; ch++)
+                {
+                    if (ic_status[ic].state[ch] == BTT6200_STATE_ON)
+                    {
+                        ic_status[ic].state[ch] = BTT6200_STATE_OFF;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        status = STATUS_ERROR_NOT_INIT;
+    }
+
+    return status;
+}
+
 /*============================================================================*/
 /* PRIVATE FUNCTIONS                                                          */
 /*============================================================================*/

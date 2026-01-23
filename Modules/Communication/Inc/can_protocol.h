@@ -30,14 +30,30 @@ extern "C" {
 /*============================================================================*/
 
 /** @brief CAN message IDs */
+#ifndef CAN_ID_BCU_STATUS
 #define CAN_ID_BCU_STATUS           (0x100U)
+#endif
+#ifndef CAN_ID_BCU_CURRENT
 #define CAN_ID_BCU_CURRENT          (0x101U)
+#endif
+#ifndef CAN_ID_BCU_VOLTAGE
 #define CAN_ID_BCU_VOLTAGE          (0x102U)
+#endif
+#ifndef CAN_ID_BCU_TEMPERATURE
 #define CAN_ID_BCU_TEMPERATURE      (0x103U)
+#endif
+#ifndef CAN_ID_BCU_OUTPUTS
 #define CAN_ID_BCU_OUTPUTS          (0x104U)
+#endif
+#ifndef CAN_ID_BCU_INPUTS
 #define CAN_ID_BCU_INPUTS           (0x105U)
+#endif
+#ifndef CAN_ID_BCU_FAULTS
 #define CAN_ID_BCU_FAULTS           (0x106U)
+#endif
+#ifndef CAN_ID_BCU_DIAGNOSTICS
 #define CAN_ID_BCU_DIAGNOSTICS      (0x107U)
+#endif
 
 /** @brief UDS diagnostic request/response IDs */
 #define CAN_ID_UDS_REQUEST          (0x7E0U)

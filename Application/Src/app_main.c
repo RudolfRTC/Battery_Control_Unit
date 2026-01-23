@@ -41,6 +41,13 @@
 #include <string.h>
 
 /*============================================================================*/
+/* EXTERNAL FUNCTION DECLARATIONS                                             */
+/*============================================================================*/
+
+/** @brief System clock configuration (defined in main.c) */
+extern void SystemClock_Config(void);
+
+/*============================================================================*/
 /* PRIVATE VARIABLES                                                          */
 /*============================================================================*/
 
@@ -84,7 +91,7 @@ static void Job_CANRx_EveryLoop(uint32_t now_ms);
 static void app_lem_overcurrent_handler(uint8_t sensorId, Current_mA_t current);
 static void app_btt_fault_handler(uint8_t channel, BTT6200_FaultType_t faultType);
 static void app_power_fault_handler(uint8_t railId, PM_RailStatus_t status);
-static void app_temp_alarm_handler(TempSensor_AlarmType_t alarmType, int32_t temp_mC);
+static void app_temp_alarm_handler(int32_t temp_mC, bool isOverTemp);
 static void app_error_handler(ErrorCode_t code, uint32_t p1, uint32_t p2, uint32_t p3);
 static void app_safety_fault_handler(SafetyLevel_t level, const char *pName);
 static void app_di_state_change_handler(uint8_t inputId, bool state);
@@ -107,7 +114,7 @@ Status_t App_Init(void)
     SystemClock_Config();
 
     /* Initialize timestamp module */
-    status = Timestamp_Init();
+    status = Timestamp_ModuleInit();
 
     if (status == STATUS_OK)
     {
@@ -322,7 +329,7 @@ void App_SlowTasks(void)
     log_counter++;
     if ((log_counter % 100U) == 0U)
     {
-        (void)DataLogger_LogEntry();
+        (void)DataLog_LogData();
     }
 
     /* LED indicators */
@@ -608,9 +615,9 @@ static Status_t app_init_modules(void)
         status = TempSensor_Init();
     }
 
+    /* LTC6811 scanner disabled for testing - causes DMA interrupt loop if not connected
     if (status == STATUS_OK)
     {
-        /* Initialize LTC6811 scanner (48 modules via LTC6820) */
         LTCScanner_Config_t ltc_config = {
             .num_devices = 48U,
             .current_threshold_A = CURRENT_ACTIVE_THRESHOLD_A,
@@ -620,15 +627,18 @@ static Status_t app_init_modules(void)
         };
         status = LTCScanner_Init(&ltc_config);
     }
+    */
 
     if (status == STATUS_OK)
     {
         /* Initialize CAN bus */
         CAN_Config_t canConfig = {
-            .baudrate = 500000U,
-            .loopback = false,
+            .bitrate = 500000U,
+            .mode = BSP_CAN_MODE_NORMAL,
             .autoRetransmit = true,
-            .autoBusOff = true
+            .rxFifo0Overrun = false,
+            .rxFifo1Overrun = false,
+            .txPriority = 0U
         };
         status = BSP_CAN_Init(BSP_CAN_INSTANCE_1, &canConfig);
 
@@ -665,17 +675,22 @@ static Status_t app_init_modules(void)
  */
 static void app_update_status(void)
 {
+    bool powerGood = false;
+    uint32_t errorCount = 0U;
+
     app_status.state = app_state;
     app_status.uptime_ms = Timestamp_GetMillis();
 
     /* Check power good */
-    (void)PM_Monitor_IsSystemPowerGood(&app_status.powerGood);
+    (void)PM_Monitor_IsSystemPowerGood(&powerGood);
+    app_status.powerGood = powerGood;
 
     /* Check safety OK */
     app_status.safetyOK = SafetyMonitor_IsSafe();
 
     /* Get active error count */
-    (void)ErrorHandler_GetActiveDTCCount(&app_status.activeErrors);
+    (void)ErrorHandler_GetActiveDTCCount(&errorCount);
+    app_status.activeErrors = (uint16_t)errorCount;
 }
 
 /**
@@ -727,7 +742,7 @@ static void app_state_machine(void)
         case APP_STATE_SHUTDOWN:
             /* Shutdown sequence */
             /* Save any pending data to FRAM */
-            (void)DataLogger_LogEntry();
+            (void)DataLog_LogData();
             /* Disable all outputs safely */
             (void)BTT6200_SetSafeState();
             (void)BTT6200_EnableOutputs(false);
@@ -832,13 +847,13 @@ static void app_power_fault_handler(uint8_t railId, PM_RailStatus_t status)
 /**
  * @brief Temperature alarm callback handler
  */
-static void app_temp_alarm_handler(TempSensor_AlarmType_t alarmType, int32_t temp_mC)
+static void app_temp_alarm_handler(int32_t temp_mC, bool isOverTemp)
 {
     /* Log temperature fault */
-    ErrorHandler_LogError(ERROR_TEMPERATURE_FAULT, (uint32_t)alarmType, (uint32_t)temp_mC, 0U);
+    ErrorHandler_LogError(ERROR_TEMPERATURE_FAULT, (uint32_t)isOverTemp, (uint32_t)temp_mC, 0U);
 
     /* For overtemperature, enter safe state */
-    if (alarmType == TEMP_ALARM_HIGH)
+    if (isOverTemp)
     {
         App_EnterSafeState();
     }
@@ -926,12 +941,13 @@ static void Job_Critical_1ms(uint32_t now_ms)
         ErrorHandler_LogError(ERROR_SAFETY_WATCHDOG, 2U, __LINE__, 0U);
     }
 
-    /* LTC scanner state machine step (non-blocking) */
+    /* LTC scanner disabled for testing
     status = LTCScanner_Task_Step(now_ms);
     if (status != STATUS_OK)
     {
-        /* LTC errors handled internally */
     }
+    */
+    (void)now_ms;
 
     (void)Scheduler_WCET_Stop("Critical_1ms", start_us, WCET_CRITICAL_MAX_US);
 }
@@ -952,13 +968,14 @@ static void Job_Fast_2ms(uint32_t now_ms)
         ErrorHandler_LogError(ERROR_LEM_COMMUNICATION, 0U, __LINE__, 0U);
     }
 
-    /* Update LTC scanner with pack current (for adaptive mode) */
+    /* LTC scanner disabled for testing
     Current_mA_t pack_current_mA = 0;
     if (LEM_ReadCurrent(0U, &pack_current_mA) == STATUS_OK)
     {
         float pack_current_A = (float)pack_current_mA / 1000.0f;
         (void)LTCScanner_UpdatePackCurrent(pack_current_A);
     }
+    */
 
     (void)Scheduler_WCET_Stop("Fast_2ms", start_us, 0U);
 }
@@ -1034,7 +1051,7 @@ static void Job_VerySlow_100ms(uint32_t now_ms)
     log_counter++;
     if ((log_counter % 100U) == 0U)
     {
-        (void)DataLogger_LogEntry();
+        (void)DataLog_LogData();
     }
 
     /* Diagnostics */

@@ -34,7 +34,7 @@ extern "C" {
 #define CONFIG_VERSION          (0x0100U)  /* v1.0 */
 
 /** @brief Configuration magic number */
-#define CONFIG_MAGIC            (0xBCU2026U)
+#define CONFIG_MAGIC            (0xBC2026U)
 
 /*============================================================================*/
 /* TYPES                                                                      */

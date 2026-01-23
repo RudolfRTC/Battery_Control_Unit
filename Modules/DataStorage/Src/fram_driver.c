@@ -34,14 +34,26 @@
 #define FRAM_PAGE_SIZE          (256U)
 
 /** @brief FRAM total size (bytes) */
+#ifndef FRAM_TOTAL_SIZE
 #define FRAM_TOTAL_SIZE         (32768U)
+#endif
 
 /** @brief Memory region sizes */
+#ifndef FRAM_CONFIG_SIZE
 #define FRAM_CONFIG_SIZE        (1024U)
+#endif
+#ifndef FRAM_CALIBRATION_SIZE
 #define FRAM_CALIBRATION_SIZE   (2048U)
+#endif
+#ifndef FRAM_FAULT_LOG_SIZE
 #define FRAM_FAULT_LOG_SIZE     (4096U)
+#endif
+#ifndef FRAM_DATA_LOG_SIZE
 #define FRAM_DATA_LOG_SIZE      (8192U)
+#endif
+#ifndef FRAM_USER_SIZE
 #define FRAM_USER_SIZE          (16384U)
+#endif
 
 /** @brief Memory region offsets */
 #define FRAM_CONFIG_OFFSET      (0U)
@@ -51,7 +63,7 @@
 #define FRAM_USER_OFFSET        (FRAM_DATA_LOG_OFFSET + FRAM_DATA_LOG_SIZE)
 
 /** @brief Magic number for config validation */
-#define FRAM_CONFIG_MAGIC       (0xBCU2026U)
+#define FRAM_CONFIG_MAGIC       (0xBCB02026U)
 
 /** @brief FRAM config header structure */
 typedef struct {
@@ -130,11 +142,10 @@ Status_t FRAM_Read(uint16_t address, uint8_t *pData, uint16_t length)
         if (status == STATUS_OK)
         {
             fram_stats.readCount++;
-            fram_stats.bytesRead += (uint32_t)length;
         }
         else
         {
-            fram_stats.readErrors++;
+            fram_stats.i2cErrorCount++;
         }
     }
 
@@ -152,8 +163,8 @@ Status_t FRAM_Write(uint16_t address, const uint8_t *pData, uint16_t length)
     {
         if (fram_write_protected)
         {
-            status = STATUS_ERROR_WRITE_PROTECTED;
-            fram_stats.writeErrors++;
+            status = STATUS_ERROR_NOT_SUPPORTED;
+            fram_stats.i2cErrorCount++;
         }
         else
         {
@@ -162,11 +173,10 @@ Status_t FRAM_Write(uint16_t address, const uint8_t *pData, uint16_t length)
             if (status == STATUS_OK)
             {
                 fram_stats.writeCount++;
-                fram_stats.bytesWritten += (uint32_t)length;
             }
             else
             {
-                fram_stats.writeErrors++;
+                fram_stats.i2cErrorCount++;
             }
         }
     }
@@ -177,7 +187,7 @@ Status_t FRAM_Write(uint16_t address, const uint8_t *pData, uint16_t length)
 /**
  * @brief Erase FRAM region (fill with 0xFF)
  */
-Status_t FRAM_Erase(uint16_t address, uint16_t length)
+Status_t FRAM_Clear(uint16_t address, uint16_t length)
 {
     Status_t status = STATUS_ERROR_PARAM;
 
@@ -185,7 +195,7 @@ Status_t FRAM_Erase(uint16_t address, uint16_t length)
     {
         if (fram_write_protected)
         {
-            status = STATUS_ERROR_WRITE_PROTECTED;
+            status = STATUS_ERROR_NOT_SUPPORTED;
         }
         else
         {

@@ -19,6 +19,7 @@
 #include "bsp_gpio.h"
 #include "bsp_adc.h"
 #include "filter.h"
+#include "app_config.h"
 #include <string.h>
 
 /*============================================================================*/
@@ -32,10 +33,14 @@
 #define DI_DEBOUNCE_TIME_MS     (20U)
 
 /** @brief ACS772 sensitivity (mV per A) */
+#ifndef ACS772_SENSITIVITY_MV
 #define ACS772_SENSITIVITY_MV   (40U)  /* 40 mV/A for ACS772-050U */
+#endif
 
 /** @brief ACS772 zero current voltage (mV) */
+#ifndef ACS772_ZERO_CURRENT_MV
 #define ACS772_ZERO_CURRENT_MV  (2500U)  /* VCC/2 @ 5V supply */
+#endif
 
 /** @brief ADC channel mapping for current sense */
 static const uint8_t DI_CURRENT_SENSE_ADC_CHANNELS[DI_COUNT] = {
@@ -140,7 +145,7 @@ Status_t DI_Init(void)
             di_state[i].status = DI_STATUS_OK;
 
             /* Initialize debounce filter */
-            (void)Filter_Debounce_Init(&di_debounce[i], DI_DEBOUNCE_TIME_MS);
+            (void)Filter_Debounce_Init(&di_debounce[i], DI_DEBOUNCE_TIME_MS, 100U);
 
             /* No callback by default */
             di_callbacks[i] = NULL;
@@ -225,7 +230,7 @@ Status_t DI_ReadInput(uint8_t inputId, bool *pState)
         }
         else
         {
-            status = STATUS_ERROR_DISABLED;
+            status = STATUS_ERROR_NOT_SUPPORTED;
         }
     }
 
@@ -268,7 +273,7 @@ Status_t DI_ReadInputCurrent(uint8_t inputId, Current_mA_t *pCurrent_mA)
         }
         else
         {
-            status = STATUS_ERROR_DISABLED;
+            status = STATUS_ERROR_NOT_SUPPORTED;
         }
     }
 
@@ -352,7 +357,6 @@ Status_t DI_ResetStatistics(uint8_t inputId)
     if ((inputId < DI_COUNT) && di_initialized)
     {
         di_state[inputId].changeCount = 0U;
-        di_state[inputId].faultCount = 0U;
         di_state[inputId].lastChangeTime_ms = 0U;
         status = STATUS_OK;
     }
@@ -458,19 +462,16 @@ static void di_check_diagnostics(uint8_t inputId)
                 (current < -di_config[inputId].currentLimit_mA))
             {
                 di_state[inputId].status = DI_STATUS_OVERCURRENT;
-                di_state[inputId].faultCount++;
             }
             /* Check open circuit (current too low when active) */
             else if (di_state[inputId].currentState && (current < 10))
             {
                 di_state[inputId].status = DI_STATUS_OPEN_CIRCUIT;
-                di_state[inputId].faultCount++;
             }
             /* Check short circuit (current too high immediately) */
             else if (current > (di_config[inputId].currentLimit_mA * 110 / 100))
             {
                 di_state[inputId].status = DI_STATUS_SHORT_CIRCUIT;
-                di_state[inputId].faultCount++;
             }
             else
             {

@@ -30,9 +30,15 @@ extern "C" {
 /*============================================================================*/
 
 /** @brief FRAM device configuration */
+#ifndef FRAM_I2C_ADDRESS
 #define FRAM_I2C_ADDRESS      (0xA0U >> 1)  /**< 7-bit I2C address (0x50) */
+#endif
+#ifndef FRAM_SIZE_BYTES
 #define FRAM_SIZE_BYTES       (32768U)      /**< 32 KB total size */
+#endif
+#ifndef FRAM_PAGE_SIZE
 #define FRAM_PAGE_SIZE        (256U)        /**< Page size for operations */
+#endif
 
 /** @brief Memory regions (from app_config.h) */
 #define FRAM_REGION_CONFIG    FRAM_ADDR_CONFIG_START
@@ -175,6 +181,43 @@ Status_t FRAM_ResetStatistics(void);
  * @return STATUS_OK if test passed, error code otherwise
  */
 Status_t FRAM_SelfTest(void);
+
+/**
+ * @brief Save configuration to FRAM
+ * @param[in] pData  Pointer to configuration data
+ * @param[in] length Configuration data length
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t FRAM_SaveConfig(const uint8_t *pData, uint16_t length);
+
+/**
+ * @brief Load configuration from FRAM
+ * @param[out] pData         Pointer to configuration data buffer
+ * @param[in]  maxLength     Maximum buffer length
+ * @param[out] pActualLength Actual configuration length read
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t FRAM_LoadConfig(uint8_t *pData, uint16_t maxLength, uint16_t *pActualLength);
+
+/** @brief Fault log entry structure */
+typedef struct {
+    uint32_t errorCode;      /**< Error code */
+    uint32_t timestamp_ms;   /**< Timestamp */
+    uint32_t param1;         /**< Parameter 1 */
+    uint32_t param2;         /**< Parameter 2 */
+    uint32_t param3;         /**< Parameter 3 */
+} FRAM_FaultLogEntry_t;
+
+/** @brief Fault log size constant */
+#define FRAM_FAULT_LOG_SIZE   FRAM_ADDR_FAULT_LOG_SIZE
+
+/**
+ * @brief Write fault log entry to FRAM
+ * @param[in] index     Fault log entry index
+ * @param[in] pFaultLog Pointer to fault log entry
+ * @return STATUS_OK on success, error code otherwise
+ */
+Status_t FRAM_WriteFaultLog(uint16_t index, const FRAM_FaultLogEntry_t *pFaultLog);
 
 #ifdef __cplusplus
 }

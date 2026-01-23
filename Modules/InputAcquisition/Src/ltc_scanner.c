@@ -361,8 +361,7 @@ static void ltc_sm_start_conversion(uint32_t now_ms)
     /* Start cell voltage conversion on all devices */
     Status_t status = LTC6811_StartCellVoltageConversion(
         LTC6811_ADC_MODE_7KHZ_3KHZ,  /* Normal mode */
-        false,                        /* All cells */
-        false                         /* Discharge not permitted during conversion */
+        LTC6811_CELL_ALL             /* All cells */
     );
 
     if (status == STATUS_OK)
@@ -566,7 +565,7 @@ static void ltc_sm_error(uint32_t now_ms)
     else
     {
         /* Too many consecutive errors - log critical error */
-        ErrorHandler_LogError(ERROR_LTC_COMMUNICATION, scanner_stats.consecutive_errors, 0U, 0U);
+        ErrorHandler_LogError(ERROR_LEM_COMMUNICATION, scanner_stats.consecutive_errors, 0U, 0U);
 
         /* Stay in error state - manual recovery needed */
         /* Could trigger safe state here if critical */

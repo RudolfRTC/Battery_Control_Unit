@@ -20,6 +20,7 @@
 #include "timestamp.h"
 #include "bsp_gpio.h"
 #include "btt6200.h"
+#include "watchdog.h"
 #include <string.h>
 
 /*============================================================================*/
@@ -73,7 +74,7 @@ typedef struct {
 static ErrorHandler_State_t error_state;
 
 /** @brief Error callback */
-static ErrorCallback_t error_callback = NULL;
+static ErrorHandlerCallback_t error_callback = NULL;
 
 /** @brief Initialization flag */
 static bool error_handler_initialized = false;
@@ -357,7 +358,7 @@ Status_t ErrorHandler_Update(void)
 /**
  * @brief Register error callback
  */
-Status_t ErrorHandler_RegisterCallback(ErrorCallback_t callback)
+Status_t ErrorHandler_RegisterCallback(ErrorHandlerCallback_t callback)
 {
     error_callback = callback;
     return STATUS_OK;

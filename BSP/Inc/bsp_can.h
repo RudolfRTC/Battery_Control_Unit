@@ -81,10 +81,10 @@ typedef enum {
  * @brief CAN operating mode
  */
 typedef enum {
-    CAN_MODE_NORMAL     = 0x00U,  /**< Normal operation */
-    CAN_MODE_LOOPBACK   = 0x01U,  /**< Loopback mode (testing) */
-    CAN_MODE_SILENT     = 0x02U,  /**< Silent mode (listen only) */
-    CAN_MODE_SILENT_LOOPBACK = 0x03U  /**< Silent loopback */
+    BSP_CAN_MODE_NORMAL     = 0x00U,  /**< Normal operation */
+    BSP_CAN_MODE_LOOPBACK   = 0x01U,  /**< Loopback mode (testing) */
+    BSP_CAN_MODE_SILENT     = 0x02U,  /**< Silent mode (listen only) */
+    BSP_CAN_MODE_SILENT_LOOPBACK = 0x03U  /**< Silent loopback */
 } CAN_Mode_t;
 
 /**

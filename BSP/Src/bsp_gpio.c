@@ -102,29 +102,29 @@ Status_t BSP_GPIO_ConfigurePin(const GPIO_Config_t *pConfig)
         /* Set mode */
         switch (pConfig->mode)
         {
-            case GPIO_MODE_INPUT:
+            case BSP_GPIO_MODE_INPUT:
                 GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
                 break;
 
-            case GPIO_MODE_OUTPUT_PP:
+            case BSP_GPIO_MODE_OUTPUT_PP:
                 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
                 break;
 
-            case GPIO_MODE_OUTPUT_OD:
+            case BSP_GPIO_MODE_OUTPUT_OD:
                 GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
                 break;
 
-            case GPIO_MODE_AF_PP:
+            case BSP_GPIO_MODE_AF_PP:
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
                 GPIO_InitStruct.Alternate = pConfig->alternate;
                 break;
 
-            case GPIO_MODE_AF_OD:
+            case BSP_GPIO_MODE_AF_OD:
                 GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
                 GPIO_InitStruct.Alternate = pConfig->alternate;
                 break;
 
-            case GPIO_MODE_ANALOG:
+            case BSP_GPIO_MODE_ANALOG:
                 GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
                 break;
 

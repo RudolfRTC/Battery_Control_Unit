@@ -51,7 +51,6 @@ CAN_HandleTypeDef hcan2;
 I2C_HandleTypeDef hi2c2;
 
 SPI_HandleTypeDef hspi4;
-DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_spi4_rx;
 DMA_HandleTypeDef hdma_spi4_tx;
 
@@ -114,7 +113,7 @@ int main(void)
   MX_CAN1_Init();
   MX_CAN2_Init();
   MX_I2C2_Init();
-  MX_SPI4_Init();
+  /* MX_SPI4_Init(); */  /* Disabled - LTC6811 not connected */
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
@@ -390,8 +389,8 @@ static void MX_SPI4_Init(void)
   hspi4.Init.Mode = SPI_MODE_MASTER;
   hspi4.Init.Direction = SPI_DIRECTION_2LINES;
   hspi4.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi4.Init.CLKPolarity = SPI_POLARITY_HIGH;
-  hspi4.Init.CLKPhase = SPI_PHASE_2EDGE;
+  hspi4.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi4.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi4.Init.NSS = SPI_NSS_HARD_OUTPUT;
   hspi4.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi4.Init.FirstBit = SPI_FIRSTBIT_MSB;

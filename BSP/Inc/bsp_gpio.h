@@ -112,31 +112,31 @@ typedef enum {
  * @brief GPIO pin mode
  */
 typedef enum {
-    GPIO_MODE_INPUT        = 0x00U,  /**< Input mode */
-    GPIO_MODE_OUTPUT_PP    = 0x01U,  /**< Output push-pull */
-    GPIO_MODE_OUTPUT_OD    = 0x02U,  /**< Output open-drain */
-    GPIO_MODE_AF_PP        = 0x03U,  /**< Alternate function push-pull */
-    GPIO_MODE_AF_OD        = 0x04U,  /**< Alternate function open-drain */
-    GPIO_MODE_ANALOG       = 0x05U   /**< Analog mode */
+    BSP_GPIO_MODE_INPUT        = 0x00U,  /**< Input mode */
+    BSP_GPIO_MODE_OUTPUT_PP    = 0x01U,  /**< Output push-pull */
+    BSP_GPIO_MODE_OUTPUT_OD    = 0x02U,  /**< Output open-drain */
+    BSP_GPIO_MODE_AF_PP        = 0x03U,  /**< Alternate function push-pull */
+    BSP_GPIO_MODE_AF_OD        = 0x04U,  /**< Alternate function open-drain */
+    BSP_GPIO_MODE_ANALOG       = 0x05U   /**< Analog mode */
 } GPIO_Mode_t;
 
 /**
  * @brief GPIO pull-up/pull-down
  */
 typedef enum {
-    GPIO_PULL_NONE = 0x00U,  /**< No pull */
-    GPIO_PULL_UP   = 0x01U,  /**< Pull-up */
-    GPIO_PULL_DOWN = 0x02U   /**< Pull-down */
+    BSP_GPIO_PULL_NONE = 0x00U,  /**< No pull */
+    BSP_GPIO_PULL_UP   = 0x01U,  /**< Pull-up */
+    BSP_GPIO_PULL_DOWN = 0x02U   /**< Pull-down */
 } GPIO_Pull_t;
 
 /**
  * @brief GPIO speed
  */
 typedef enum {
-    GPIO_SPEED_LOW    = 0x00U,  /**< Low speed (2 MHz) */
-    GPIO_SPEED_MEDIUM = 0x01U,  /**< Medium speed (25 MHz) */
-    GPIO_SPEED_HIGH   = 0x02U,  /**< High speed (50 MHz) */
-    GPIO_SPEED_VERY_HIGH = 0x03U /**< Very high speed (100 MHz) */
+    BSP_GPIO_SPEED_LOW    = 0x00U,  /**< Low speed (2 MHz) */
+    BSP_GPIO_SPEED_MEDIUM = 0x01U,  /**< Medium speed (25 MHz) */
+    BSP_GPIO_SPEED_HIGH   = 0x02U,  /**< High speed (50 MHz) */
+    BSP_GPIO_SPEED_VERY_HIGH = 0x03U /**< Very high speed (100 MHz) */
 } GPIO_Speed_t;
 
 /**

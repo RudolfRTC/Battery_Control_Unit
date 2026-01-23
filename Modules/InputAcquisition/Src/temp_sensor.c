@@ -18,6 +18,7 @@
 #include "temp_sensor.h"
 #include "bsp_i2c.h"
 #include "filter.h"
+#include "app_config.h"
 #include <string.h>
 
 /*============================================================================*/
@@ -367,42 +368,42 @@ static Status_t tmp1075_read_temperature_raw(int16_t *pTempRaw)
 static void temp_check_limits(void)
 {
     bool alarmTriggered = false;
-    TempSensor_AlarmType_t alarmType = TEMP_ALARM_NONE;
+    bool isOverTemp = false;
 
     /* Check low limit */
     if (temp_data.currentTemp_mC < temp_config.lowLimit_mC)
     {
-        if (!temp_data.undertemperature)
+        if (!temp_data.underTemp)
         {
-            temp_data.undertemperature = true;
+            temp_data.underTemp = true;
             alarmTriggered = true;
-            alarmType = TEMP_ALARM_LOW;
+            isOverTemp = false;
         }
     }
     else if (temp_data.currentTemp_mC > (temp_config.lowLimit_mC + temp_config.hysteresis_mC))
     {
-        temp_data.undertemperature = false;
+        temp_data.underTemp = false;
     }
 
     /* Check high limit */
     if (temp_data.currentTemp_mC > temp_config.highLimit_mC)
     {
-        if (!temp_data.overtemperature)
+        if (!temp_data.overTemp)
         {
-            temp_data.overtemperature = true;
+            temp_data.overTemp = true;
             alarmTriggered = true;
-            alarmType = TEMP_ALARM_HIGH;
+            isOverTemp = true;
         }
     }
     else if (temp_data.currentTemp_mC < (temp_config.highLimit_mC - temp_config.hysteresis_mC))
     {
-        temp_data.overtemperature = false;
+        temp_data.overTemp = false;
     }
 
     /* Call alarm callback */
     if (alarmTriggered && (temp_alarm_callback != NULL))
     {
-        temp_alarm_callback(alarmType, temp_data.currentTemp_mC);
+        temp_alarm_callback(temp_data.currentTemp_mC, isOverTemp);
     }
 }
 

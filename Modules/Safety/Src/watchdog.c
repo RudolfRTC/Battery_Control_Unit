@@ -7,6 +7,7 @@
  *
  * @note    MISRA C:2012 compliant
  * @note    ISO 26262 ASIL-B safety requirements
+ * @note    Stubbed out when HAL watchdog modules not enabled
  *
  * @copyright Copyright (c) 2026
  */
@@ -22,11 +23,15 @@
 /* PRIVATE VARIABLES                                                          */
 /*============================================================================*/
 
+#ifdef HAL_IWDG_MODULE_ENABLED
 /** @brief IWDG handle */
 static IWDG_HandleTypeDef hiwdg;
+#endif
 
+#ifdef HAL_WWDG_MODULE_ENABLED
 /** @brief WWDG handle */
 static WWDG_HandleTypeDef hwwdg;
+#endif
 
 /** @brief Watchdog status */
 static WDG_Status_t watchdog_status = {0};
@@ -75,11 +80,10 @@ Status_t Watchdog_StartIWDG(void)
 {
     Status_t status = STATUS_OK;
 
+#ifdef HAL_IWDG_MODULE_ENABLED
     if (!watchdog_status.iwdgEnabled)
     {
         /* Configure IWDG (500ms timeout) */
-        /* LSI clock = 32 kHz, Prescaler = 64, Reload = 250 */
-        /* Timeout = (64 * 250) / 32000 = 0.5s */
         hiwdg.Instance = IWDG;
         hiwdg.Init.Prescaler = IWDG_PRESCALER_64;
         hiwdg.Init.Reload = 250;
@@ -93,6 +97,10 @@ Status_t Watchdog_StartIWDG(void)
             watchdog_status.iwdgEnabled = true;
         }
     }
+#else
+    /* IWDG not available - stub */
+    (void)status;
+#endif
 
     return status;
 }
@@ -104,13 +112,13 @@ Status_t Watchdog_StartWWDG(void)
 {
     Status_t status = STATUS_OK;
 
+#ifdef HAL_WWDG_MODULE_ENABLED
     if (!watchdog_status.wwdgEnabled)
     {
         /* Enable WWDG clock */
         __HAL_RCC_WWDG_CLK_ENABLE();
 
-        /* Configure WWDG (100ms timeout, 30-100ms window) */
-        /* PCLK1 = 50 MHz, Prescaler = 8, Window = 80, Counter = 127 */
+        /* Configure WWDG */
         hwwdg.Instance = WWDG;
         hwwdg.Init.Prescaler = WWDG_PRESCALER_8;
         hwwdg.Init.Window = 80;
@@ -126,6 +134,10 @@ Status_t Watchdog_StartWWDG(void)
             watchdog_status.wwdgEnabled = true;
         }
     }
+#else
+    /* WWDG not available - stub */
+    (void)status;
+#endif
 
     return status;
 }
@@ -137,6 +149,7 @@ Status_t Watchdog_RefreshIWDG(void)
 {
     Status_t status = STATUS_OK;
 
+#ifdef HAL_IWDG_MODULE_ENABLED
     if (watchdog_status.iwdgEnabled)
     {
         HAL_IWDG_Refresh(&hiwdg);
@@ -147,6 +160,10 @@ Status_t Watchdog_RefreshIWDG(void)
     {
         status = STATUS_ERROR_NOT_INIT;
     }
+#else
+    /* IWDG not available - stub */
+    watchdog_status.lastRefreshTime_ms = HAL_GetTick();
+#endif
 
     return status;
 }
@@ -158,6 +175,7 @@ Status_t Watchdog_RefreshWWDG(void)
 {
     Status_t status = STATUS_OK;
 
+#ifdef HAL_WWDG_MODULE_ENABLED
     if (watchdog_status.wwdgEnabled)
     {
         if (HAL_WWDG_Refresh(&hwwdg) == HAL_OK)
@@ -173,6 +191,10 @@ Status_t Watchdog_RefreshWWDG(void)
     {
         status = STATUS_ERROR_NOT_INIT;
     }
+#else
+    /* WWDG not available - stub */
+    (void)status;
+#endif
 
     return status;
 }
@@ -243,6 +265,38 @@ Status_t Watchdog_WasWatchdogReset(bool *pWatchdogReset)
     {
         *pWatchdogReset = ((last_reset_cause == RESET_CAUSE_IWDG) ||
                           (last_reset_cause == RESET_CAUSE_WWDG));
+        status = STATUS_OK;
+    }
+
+    return status;
+}
+
+/**
+ * @brief Check if IWDG is running
+ */
+Status_t Watchdog_IsIWDGRunning(bool *pRunning)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (pRunning != NULL)
+    {
+        *pRunning = watchdog_status.iwdgEnabled;
+        status = STATUS_OK;
+    }
+
+    return status;
+}
+
+/**
+ * @brief Check if WWDG is running
+ */
+Status_t Watchdog_IsWWDGRunning(bool *pRunning)
+{
+    Status_t status = STATUS_ERROR_PARAM;
+
+    if (pRunning != NULL)
+    {
+        *pRunning = watchdog_status.wwdgEnabled;
         status = STATUS_OK;
     }
 

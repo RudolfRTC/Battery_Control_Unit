@@ -93,7 +93,7 @@ Status_t BSP_SPI_Init(uint8_t instance, const SPI_Config_t *pConfig)
             pHandle->Init.Direction = SPI_DIRECTION_2LINES;
 
             /* Data size */
-            if (pConfig->dataSize == SPI_DATASIZE_16BIT)
+            if (pConfig->dataSize == BSP_SPI_DATASIZE_16BIT)
             {
                 pHandle->Init.DataSize = SPI_DATASIZE_16BIT;
             }
@@ -588,54 +588,6 @@ static Status_t bsp_spi_get_handle(uint8_t instance, SPI_HandleTypeDef **ppHandl
     return status;
 }
 
-/**
- * @brief SPI4 MSP initialization callback
+/* Note: HAL_SPI_MspInit and HAL_SPI_MspDeInit are defined in stm32f4xx_hal_msp.c
+ * with DMA configuration. Do not duplicate here to avoid linker errors.
  */
-void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
-{
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    if (hspi->Instance == SPI4)
-    {
-        /* Enable GPIO clocks */
-        __HAL_RCC_GPIOE_CLK_ENABLE();
-
-        /* SPI4 GPIO Configuration
-         * PE2  -> SPI4_SCK
-         * PE5  -> SPI4_MISO
-         * PE6  -> SPI4_MOSI
-         * PE4  -> SPI4_CS (software controlled)
-         */
-        GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_5 | GPIO_PIN_6;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-        GPIO_InitStruct.Alternate = GPIO_AF5_SPI4;
-        HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-        /* Configure CS pin as output */
-        GPIO_InitStruct.Pin = GPIO_PIN_4;
-        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-        HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-        /* Set CS high initially (deselected) */
-        HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
-    }
-}
-
-/**
- * @brief SPI4 MSP de-initialization callback
- */
-void HAL_SPI_MspDeInit(SPI_HandleTypeDef *hspi)
-{
-    if (hspi->Instance == SPI4)
-    {
-        /* Disable SPI4 clock */
-        __HAL_RCC_SPI4_CLK_DISABLE();
-
-        /* De-configure GPIO pins */
-        HAL_GPIO_DeInit(GPIOE, GPIO_PIN_2 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6);
-    }
-}

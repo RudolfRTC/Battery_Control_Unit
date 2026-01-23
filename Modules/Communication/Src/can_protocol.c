@@ -114,12 +114,12 @@ Status_t CANProto_ProcessRxMessages(void)
         uint32_t available = 0U;
 
         /* Check for available messages */
-        (void)BSP_CAN_Available(BSP_CAN_INSTANCE_1, &available);
+        (void)BSP_CAN_IsMessageAvailable(BSP_CAN_INSTANCE_1, 0U, &available);
 
         while (available > 0U)
         {
             /* Receive message */
-            if (BSP_CAN_Receive(BSP_CAN_INSTANCE_1, &msg, 10U) == STATUS_OK)
+            if (BSP_CAN_Receive(BSP_CAN_INSTANCE_1, 0U, &msg, 10U) == STATUS_OK)
             {
                 /* Process based on message ID */
                 if (msg.id == CAN_ID_UDS_REQUEST)
@@ -136,7 +136,7 @@ Status_t CANProto_ProcessRxMessages(void)
             }
 
             /* Check for more messages */
-            (void)BSP_CAN_Available(BSP_CAN_INSTANCE_1, &available);
+            (void)BSP_CAN_IsMessageAvailable(BSP_CAN_INSTANCE_1, 0U, &available);
         }
     }
     else
@@ -218,9 +218,9 @@ Status_t CANProto_SendStatus(void)
 
         /* Build status message */
         msg.id = CAN_ID_BCU_STATUS;
-        msg.ide = CAN_IDE_STANDARD;
-        msg.rtr = false;
-        msg.dlc = 8U;
+        msg.frameType = CAN_FRAME_STANDARD;
+        msg.frameFormat = CAN_FRAME_DATA;
+        msg.dataLength =8U;
 
         msg.data[0] = (uint8_t)appStatus.state;
         msg.data[1] = appStatus.powerGood ? 0x01U : 0x00U;
@@ -232,7 +232,7 @@ Status_t CANProto_SendStatus(void)
         msg.data[7] = (uint8_t)(appStatus.uptime_ms & 0xFFU);
 
         /* Transmit */
-        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 10U);
+        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 10U);
 
         if (status == STATUS_OK)
         {
@@ -263,9 +263,9 @@ Status_t CANProto_SendCurrents(void)
         if (LEM_ReadCurrent(0U, &current) == STATUS_OK)
         {
             msg.id = CAN_ID_BCU_CURRENT;
-            msg.ide = CAN_IDE_STANDARD;
-            msg.rtr = false;
-            msg.dlc = 8U;
+            msg.frameType = CAN_FRAME_STANDARD;
+            msg.frameFormat = CAN_FRAME_DATA;
+            msg.dataLength =8U;
 
             msg.data[0] = 0U;  /* Sensor ID */
             msg.data[1] = (uint8_t)(current >> 24);
@@ -276,7 +276,7 @@ Status_t CANProto_SendCurrents(void)
             msg.data[6] = 0U;
             msg.data[7] = 0U;
 
-            status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 10U);
+            status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 10U);
 
             if (status == STATUS_OK)
             {
@@ -305,9 +305,9 @@ Status_t CANProto_SendVoltages(void)
         Voltage_mV_t voltage;
 
         msg.id = CAN_ID_BCU_VOLTAGE;
-        msg.ide = CAN_IDE_STANDARD;
-        msg.rtr = false;
-        msg.dlc = 8U;
+        msg.frameType = CAN_FRAME_STANDARD;
+        msg.frameFormat = CAN_FRAME_DATA;
+        msg.dataLength =8U;
 
         /* Get power rail voltages */
         (void)PM_Monitor_GetRailVoltage(PM_RAIL_INPUT_12V, &voltage);
@@ -327,7 +327,7 @@ Status_t CANProto_SendVoltages(void)
         msg.data[7] = (uint8_t)(voltage & 0xFFU);
 
         /* Transmit */
-        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 10U);
+        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 10U);
 
         if (status == STATUS_OK)
         {
@@ -357,9 +357,9 @@ Status_t CANProto_SendTemperature(void)
         if (TempSensor_ReadTemperature(&temp_mC) == STATUS_OK)
         {
             msg.id = CAN_ID_BCU_TEMPERATURE;
-            msg.ide = CAN_IDE_STANDARD;
-            msg.rtr = false;
-            msg.dlc = 8U;
+            msg.frameType = CAN_FRAME_STANDARD;
+            msg.frameFormat = CAN_FRAME_DATA;
+            msg.dataLength =8U;
 
             msg.data[0] = (uint8_t)(temp_mC >> 24);
             msg.data[1] = (uint8_t)(temp_mC >> 16);
@@ -370,7 +370,7 @@ Status_t CANProto_SendTemperature(void)
             msg.data[6] = 0U;
             msg.data[7] = 0U;
 
-            status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 10U);
+            status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 10U);
 
             if (status == STATUS_OK)
             {
@@ -398,9 +398,9 @@ Status_t CANProto_SendIOStates(void)
         CAN_Message_t msg;
 
         msg.id = CAN_ID_BCU_OUTPUTS;
-        msg.ide = CAN_IDE_STANDARD;
-        msg.rtr = false;
-        msg.dlc = 8U;
+        msg.frameType = CAN_FRAME_STANDARD;
+        msg.frameFormat = CAN_FRAME_DATA;
+        msg.dataLength =8U;
 
         /* Pack first 8 output states into bytes 0-1 (4 channels per byte, 2 bits each) */
         msg.data[0] = 0U;
@@ -430,7 +430,7 @@ Status_t CANProto_SendIOStates(void)
         }
 
         /* Transmit */
-        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 10U);
+        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 10U);
 
         if (status == STATUS_OK)
         {
@@ -460,9 +460,9 @@ Status_t CANProto_SendFaults(void)
         (void)ErrorHandler_GetActiveDTCCount(&activeDTCCount);
 
         msg.id = CAN_ID_BCU_FAULTS;
-        msg.ide = CAN_IDE_STANDARD;
-        msg.rtr = false;
-        msg.dlc = 8U;
+        msg.frameType = CAN_FRAME_STANDARD;
+        msg.frameFormat = CAN_FRAME_DATA;
+        msg.dataLength =8U;
 
         msg.data[0] = (uint8_t)(activeDTCCount & 0xFFU);
         msg.data[1] = 0U;  /* Reserved for fault severity */
@@ -474,7 +474,7 @@ Status_t CANProto_SendFaults(void)
         msg.data[7] = 0U;
 
         /* Transmit */
-        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 10U);
+        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 10U);
 
         if (status == STATUS_OK)
         {
@@ -542,14 +542,14 @@ static Status_t canproto_process_uds_request(const CAN_Message_t *pMsg)
 {
     Status_t status = STATUS_OK;
 
-    if ((pMsg != NULL) && (pMsg->dlc > 0U))
+    if ((pMsg != NULL) && (pMsg->dataLength > 0U))
     {
         uint8_t serviceId = pMsg->data[0];
 
         switch (serviceId)
         {
             case UDS_SID_READ_DATA_BY_ID:
-                status = canproto_handle_read_data_by_id(pMsg->data, pMsg->dlc);
+                status = canproto_handle_read_data_by_id(pMsg->data, pMsg->dataLength);
                 break;
 
             case UDS_SID_CLEAR_DTC:
@@ -698,12 +698,12 @@ static Status_t canproto_send_uds_response(const uint8_t *pData, uint8_t length)
         CAN_Message_t msg;
 
         msg.id = CAN_ID_UDS_RESPONSE;
-        msg.ide = CAN_IDE_STANDARD;
-        msg.rtr = false;
-        msg.dlc = length;
+        msg.frameType = CAN_FRAME_STANDARD;
+        msg.frameFormat = CAN_FRAME_DATA;
+        msg.dataLength =length;
         (void)memcpy(msg.data, pData, length);
 
-        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, 100U);
+        status = BSP_CAN_Transmit(BSP_CAN_INSTANCE_1, &msg, NULL, 100U);
     }
 
     return status;

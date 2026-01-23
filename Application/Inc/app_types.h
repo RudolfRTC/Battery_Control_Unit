@@ -38,13 +38,7 @@ extern "C" {
 #define TRUE  (1U)
 #define FALSE (0U)
 
-/** @brief Enable/Disable definitions */
-#define ENABLE  (1U)
-#define DISABLE (0U)
-
-/** @brief Set/Reset definitions */
-#define SET   (1U)
-#define RESET (0U)
+/* Note: ENABLE, DISABLE, SET, RESET are defined by STM32 HAL */
 
 /** @brief Bit manipulation macros */
 #define BIT_SET(REG, BIT)     ((REG) |= (BIT))
@@ -60,7 +54,9 @@ extern "C" {
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 /** @brief Unused parameter macro for MISRA compliance */
+#ifndef UNUSED
 #define UNUSED(x) ((void)(x))
+#endif
 
 /*============================================================================*/
 /* TYPE DEFINITIONS                                                           */
@@ -86,7 +82,9 @@ typedef enum {
     STATUS_ERROR_NO_MEMORY   = 0x0CU,  /**< Memory allocation failed */
     STATUS_ERROR_RANGE       = 0x0DU,  /**< Value out of range */
     STATUS_ERROR_INVALID_STATE = 0x0EU, /**< Invalid state transition */
-    STATUS_ERROR_SAFETY      = 0x0FU   /**< Safety violation detected */
+    STATUS_ERROR_SAFETY      = 0x0FU,  /**< Safety violation detected */
+    STATUS_ERROR_NOT_FOUND   = 0x10U,  /**< Item not found */
+    STATUS_ERROR_INVALID_DATA = 0x11U  /**< Invalid data */
 } Status_t;
 
 /**

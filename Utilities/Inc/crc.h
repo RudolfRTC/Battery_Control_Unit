@@ -1,12 +1,11 @@
 /**
  * @file    crc.h
- * @brief   CRC calculation utilities (CRC-16, CRC-32)
+ * @brief   CRC calculation utilities
  * @author  Battery Control Unit Development Team
  * @date    2026-01-09
  * @version 1.0.0
  *
  * @note    MISRA C:2012 compliant
- * @note    Hardware CRC peripheral used when available
  *
  * @copyright Copyright (c) 2026
  */
@@ -21,93 +20,52 @@ extern "C" {
 /*============================================================================*/
 /* INCLUDES                                                                   */
 /*============================================================================*/
-#include "app_types.h"
+#include <stdint.h>
+#include <stddef.h>
 
 /*============================================================================*/
-/* CONSTANTS                                                                  */
-/*============================================================================*/
-
-/** @brief CRC-16 polynomial (CCITT) */
-#define CRC16_POLY_CCITT    (0x1021U)
-
-/** @brief CRC-32 polynomial (IEEE 802.3) */
-#define CRC32_POLY_IEEE     (0x04C11DB7UL)
-
-/** @brief Initial CRC values */
-#define CRC16_INIT_VALUE    (0xFFFFU)
-#define CRC32_INIT_VALUE    (0xFFFFFFFFUL)
-
-/*============================================================================*/
-/* FUNCTION PROTOTYPES                                                        */
+/* PUBLIC FUNCTION PROTOTYPES                                                 */
 /*============================================================================*/
 
 /**
- * @brief Initialize CRC module (configure hardware if available)
- * @return STATUS_OK on success, error code otherwise
- */
-Status_t CRC_Init(void);
-
-/**
- * @brief Calculate CRC-16 (CCITT)
+ * @brief Calculate CRC-32 checksum
  * @param[in] pData Pointer to data buffer
  * @param[in] length Data length in bytes
- * @return Calculated CRC-16 value
- * @note  NULL pointer check performed
+ * @return CRC-32 checksum
  */
-uint16_t CRC_Calculate16(const uint8_t *pData, uint32_t length);
+uint32_t CRC_Calculate32(const void *pData, uint32_t length);
 
 /**
- * @brief Calculate CRC-32 (IEEE 802.3)
+ * @brief Calculate CRC-32 checksum incrementally
+ * @param[in] crc Initial/previous CRC value
  * @param[in] pData Pointer to data buffer
  * @param[in] length Data length in bytes
- * @return Calculated CRC-32 value
- * @note  Uses hardware CRC peripheral if available
+ * @return Updated CRC-32 checksum
  */
-uint32_t CRC_Calculate32(const uint8_t *pData, uint32_t length);
+uint32_t CRC_Calculate32_Incremental(uint32_t crc, const void *pData, uint32_t length);
 
 /**
- * @brief Calculate CRC-32 using hardware peripheral
+ * @brief Calculate CRC-16 checksum
  * @param[in] pData Pointer to data buffer
  * @param[in] length Data length in bytes
- * @return Calculated CRC-32 value
- * @note  Faster than software implementation
+ * @return CRC-16 checksum
  */
-uint32_t CRC_Calculate32_Hardware(const uint8_t *pData, uint32_t length);
+uint16_t CRC_Calculate16(const void *pData, uint32_t length);
 
 /**
- * @brief Verify CRC-16 checksum
- * @param[in] pData Pointer to data buffer (includes CRC at end)
- * @param[in] length Total length including CRC bytes
- * @return true if CRC is valid, false otherwise
+ * @brief Calculate CRC-8 checksum
+ * @param[in] pData Pointer to data buffer
+ * @param[in] length Data length in bytes
+ * @return CRC-8 checksum
  */
-bool CRC_Verify16(const uint8_t *pData, uint32_t length);
-
-/**
- * @brief Verify CRC-32 checksum
- * @param[in] pData Pointer to data buffer (includes CRC at end)
- * @param[in] length Total length including CRC bytes
- * @return true if CRC is valid, false otherwise
- */
-bool CRC_Verify32(const uint8_t *pData, uint32_t length);
-
-/**
- * @brief Append CRC-16 to data buffer
- * @param[in,out] pData Pointer to data buffer (must have space for CRC)
- * @param[in] length Data length (excluding CRC)
- * @return STATUS_OK on success
- */
-Status_t CRC_Append16(uint8_t *pData, uint32_t length);
-
-/**
- * @brief Append CRC-32 to data buffer
- * @param[in,out] pData Pointer to data buffer (must have space for CRC)
- * @param[in] length Data length (excluding CRC)
- * @return STATUS_OK on success
- */
-Status_t CRC_Append32(uint8_t *pData, uint32_t length);
+uint8_t CRC_Calculate8(const void *pData, uint32_t length);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* CRC_H */
+
+/*============================================================================*/
+/* END OF FILE                                                                */
+/*============================================================================*/

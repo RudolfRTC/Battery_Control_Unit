@@ -177,6 +177,20 @@ Status_t Watchdog_NeedRefresh(bool *pNeedRefresh);
  */
 Status_t Watchdog_GetTimeRemaining(uint32_t *pTimeRemaining_ms);
 
+/**
+ * @brief Check if IWDG is running
+ * @param[out] pRunning true if IWDG is running, false otherwise
+ * @return STATUS_OK on success
+ */
+Status_t Watchdog_IsIWDGRunning(bool *pRunning);
+
+/**
+ * @brief Check if WWDG is running
+ * @param[out] pRunning true if WWDG is running, false otherwise
+ * @return STATUS_OK on success
+ */
+Status_t Watchdog_IsWWDGRunning(bool *pRunning);
+
 #ifdef __cplusplus
 }
 #endif

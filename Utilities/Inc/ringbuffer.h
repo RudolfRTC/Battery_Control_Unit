@@ -1,12 +1,12 @@
 /**
  * @file    ringbuffer.h
- * @brief   Thread-safe ring buffer (circular buffer) implementation
+ * @brief   Ring buffer (circular buffer) utilities
  * @author  Battery Control Unit Development Team
  * @date    2026-01-09
  * @version 1.0.0
  *
  * @note    MISRA C:2012 compliant
- * @note    Lock-free implementation for single producer/consumer
+ * @note    Thread-safe for single producer / single consumer
  *
  * @copyright Copyright (c) 2026
  */
@@ -22,6 +22,9 @@ extern "C" {
 /* INCLUDES                                                                   */
 /*============================================================================*/
 #include "app_types.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 /*============================================================================*/
 /* TYPE DEFINITIONS                                                           */
@@ -31,132 +34,92 @@ extern "C" {
  * @brief Ring buffer structure
  */
 typedef struct {
-    uint8_t  *pBuffer;      /**< Pointer to buffer memory */
-    uint32_t size;          /**< Buffer size in bytes */
-    uint32_t head;          /**< Write index (producer) */
-    uint32_t tail;          /**< Read index (consumer) */
-    uint32_t count;         /**< Number of bytes in buffer */
-    bool     initialized;   /**< Initialization flag */
+    uint8_t *pBuffer;      /**< Pointer to buffer memory */
+    uint32_t size;         /**< Total buffer size */
+    volatile uint32_t head; /**< Write index */
+    volatile uint32_t tail; /**< Read index */
 } RingBuffer_t;
 
 /*============================================================================*/
-/* FUNCTION PROTOTYPES                                                        */
+/* PUBLIC FUNCTION PROTOTYPES                                                 */
 /*============================================================================*/
 
 /**
  * @brief Initialize ring buffer
- * @param[out] pRingBuf Pointer to ring buffer structure
- * @param[in]  pBuffer  Pointer to buffer memory
- * @param[in]  size     Buffer size in bytes
- * @return STATUS_OK on success, error code otherwise
- * @note  Buffer memory must be provided by caller
+ * @param[out] pRB Pointer to ring buffer structure
+ * @param[in] pBuffer Pointer to buffer memory
+ * @param[in] size Buffer size in bytes
+ * @return Status code
  */
-Status_t RingBuffer_Init(RingBuffer_t *pRingBuf, uint8_t *pBuffer, uint32_t size);
+Status_t RingBuffer_Init(RingBuffer_t *pRB, uint8_t *pBuffer, uint32_t size);
 
 /**
- * @brief Reset ring buffer (clear all data)
- * @param[in,out] pRingBuf Pointer to ring buffer structure
- * @return STATUS_OK on success
+ * @brief Write data to ring buffer
+ * @param[in,out] pRB Pointer to ring buffer
+ * @param[in] pData Data to write
+ * @param[in] length Data length
+ * @return Status code (STATUS_OK or STATUS_ERROR_FULL)
  */
-Status_t RingBuffer_Reset(RingBuffer_t *pRingBuf);
+Status_t RingBuffer_Write(RingBuffer_t *pRB, const uint8_t *pData, uint32_t length);
 
 /**
- * @brief Write single byte to ring buffer
- * @param[in,out] pRingBuf Pointer to ring buffer structure
- * @param[in]     data     Byte to write
- * @return STATUS_OK on success, STATUS_ERROR_OVERFLOW if buffer full
+ * @brief Read data from ring buffer
+ * @param[in,out] pRB Pointer to ring buffer
+ * @param[out] pData Buffer to read into
+ * @param[in] length Number of bytes to read
+ * @return Status code (STATUS_OK or STATUS_ERROR_EMPTY)
  */
-Status_t RingBuffer_WriteByte(RingBuffer_t *pRingBuf, uint8_t data);
+Status_t RingBuffer_Read(RingBuffer_t *pRB, uint8_t *pData, uint32_t length);
 
 /**
- * @brief Write multiple bytes to ring buffer
- * @param[in,out] pRingBuf   Pointer to ring buffer structure
- * @param[in]     pData      Pointer to source data
- * @param[in]     length     Number of bytes to write
- * @param[out]    pWritten   Number of bytes actually written (can be NULL)
- * @return STATUS_OK if all bytes written, STATUS_ERROR_OVERFLOW if partial write
+ * @brief Peek data without removing from buffer
+ * @param[in] pRB Pointer to ring buffer
+ * @param[out] pData Buffer to read into
+ * @param[in] length Number of bytes to peek
+ * @return Status code
  */
-Status_t RingBuffer_Write(RingBuffer_t *pRingBuf, const uint8_t *pData,
-                          uint32_t length, uint32_t *pWritten);
-
-/**
- * @brief Read single byte from ring buffer
- * @param[in,out] pRingBuf Pointer to ring buffer structure
- * @param[out]    pData    Pointer to store read byte
- * @return STATUS_OK on success, STATUS_ERROR_UNDERFLOW if buffer empty
- */
-Status_t RingBuffer_ReadByte(RingBuffer_t *pRingBuf, uint8_t *pData);
-
-/**
- * @brief Read multiple bytes from ring buffer
- * @param[in,out] pRingBuf Pointer to ring buffer structure
- * @param[out]    pData    Pointer to destination buffer
- * @param[in]     length   Maximum number of bytes to read
- * @param[out]    pRead    Number of bytes actually read (can be NULL)
- * @return STATUS_OK if requested bytes read, STATUS_ERROR_UNDERFLOW if less available
- */
-Status_t RingBuffer_Read(RingBuffer_t *pRingBuf, uint8_t *pData,
-                         uint32_t length, uint32_t *pRead);
-
-/**
- * @brief Peek at data without removing from buffer
- * @param[in]  pRingBuf Pointer to ring buffer structure
- * @param[out] pData    Pointer to destination buffer
- * @param[in]  length   Number of bytes to peek
- * @param[out] pPeeked  Number of bytes actually peeked (can be NULL)
- * @return STATUS_OK on success
- * @note  Data remains in buffer after peek
- */
-Status_t RingBuffer_Peek(const RingBuffer_t *pRingBuf, uint8_t *pData,
-                         uint32_t length, uint32_t *pPeeked);
+Status_t RingBuffer_Peek(const RingBuffer_t *pRB, uint8_t *pData, uint32_t length);
 
 /**
  * @brief Get number of bytes available to read
- * @param[in] pRingBuf Pointer to ring buffer structure
+ * @param[in] pRB Pointer to ring buffer
  * @return Number of bytes available
  */
-uint32_t RingBuffer_GetCount(const RingBuffer_t *pRingBuf);
+uint32_t RingBuffer_Available(const RingBuffer_t *pRB);
 
 /**
- * @brief Get free space available for writing
- * @param[in] pRingBuf Pointer to ring buffer structure
- * @return Number of bytes free
+ * @brief Get free space in buffer
+ * @param[in] pRB Pointer to ring buffer
+ * @return Number of free bytes
  */
-uint32_t RingBuffer_GetFree(const RingBuffer_t *pRingBuf);
+uint32_t RingBuffer_Free(const RingBuffer_t *pRB);
 
 /**
- * @brief Check if ring buffer is empty
- * @param[in] pRingBuf Pointer to ring buffer structure
- * @return true if empty, false otherwise
+ * @brief Check if buffer is empty
+ * @param[in] pRB Pointer to ring buffer
+ * @return true if empty
  */
-bool RingBuffer_IsEmpty(const RingBuffer_t *pRingBuf);
+bool RingBuffer_IsEmpty(const RingBuffer_t *pRB);
 
 /**
- * @brief Check if ring buffer is full
- * @param[in] pRingBuf Pointer to ring buffer structure
- * @return true if full, false otherwise
+ * @brief Check if buffer is full
+ * @param[in] pRB Pointer to ring buffer
+ * @return true if full
  */
-bool RingBuffer_IsFull(const RingBuffer_t *pRingBuf);
+bool RingBuffer_IsFull(const RingBuffer_t *pRB);
 
 /**
- * @brief Discard bytes from ring buffer
- * @param[in,out] pRingBuf Pointer to ring buffer structure
- * @param[in]     count    Number of bytes to discard
- * @return Number of bytes actually discarded
+ * @brief Clear/reset buffer
+ * @param[out] pRB Pointer to ring buffer
  */
-uint32_t RingBuffer_Discard(RingBuffer_t *pRingBuf, uint32_t count);
-
-/**
- * @brief Find byte in ring buffer
- * @param[in]  pRingBuf Pointer to ring buffer structure
- * @param[in]  byte     Byte to search for
- * @param[out] pIndex   Index of byte if found (can be NULL)
- * @return true if byte found, false otherwise
- */
-bool RingBuffer_Find(const RingBuffer_t *pRingBuf, uint8_t byte, uint32_t *pIndex);
+void RingBuffer_Clear(RingBuffer_t *pRB);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* RINGBUFFER_H */
+
+/*============================================================================*/
+/* END OF FILE                                                                */
+/*============================================================================*/

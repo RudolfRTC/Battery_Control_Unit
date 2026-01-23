@@ -109,7 +109,7 @@ Status_t BSP_ADC_Init(const ADC_Config_t *pConfig)
             /* Channel 0: Power IMON (PA3) */
             sConfig.Channel = ADC_CHANNEL_3;
             sConfig.Rank = 1;
-            sConfig.SamplingTime = ADC_SAMPLETIME_480_CYCLES;
+            sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
             HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 
             /* Channels 1-10: LEM HOYS sensors */
@@ -125,7 +125,7 @@ Status_t BSP_ADC_Init(const ADC_Config_t *pConfig)
             {
                 sConfig.Channel = lem_channels[i];
                 sConfig.Rank = i + 2U;
-                sConfig.SamplingTime = ADC_SAMPLETIME_480_CYCLES;
+                sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
                 HAL_ADC_ConfigChannel(&hadc1, &sConfig);
             }
 
@@ -140,7 +140,7 @@ Status_t BSP_ADC_Init(const ADC_Config_t *pConfig)
             {
                 sConfig.Channel = btt_channels[i];
                 sConfig.Rank = i + 12U;
-                sConfig.SamplingTime = ADC_SAMPLETIME_144_CYCLES;
+                sConfig.SamplingTime = ADC_SAMPLETIME_144CYCLES;
                 HAL_ADC_ConfigChannel(&hadc1, &sConfig);
             }
 
@@ -334,14 +334,9 @@ Status_t BSP_ADC_Calibrate(void)
 
     if (adc_initialized)
     {
-        if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) == HAL_OK)
-        {
-            status = STATUS_OK;
-        }
-        else
-        {
-            status = STATUS_ERROR_HW_FAULT;
-        }
+        /* STM32F4 ADC is factory-calibrated, no software calibration available */
+        /* User calibration can be applied via gain/offset adjustment */
+        status = STATUS_OK;
     }
 
     return status;
@@ -456,7 +451,7 @@ static void adc_process_dma_buffer(void)
             else
             {
                 /* Log error and skip invalid samples */
-                adc_stats.errorCount++;
+                adc_stats.overrunCount++;
                 break;
             }
         }

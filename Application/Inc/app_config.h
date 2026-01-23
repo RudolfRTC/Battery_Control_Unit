@@ -95,6 +95,8 @@ extern "C" {
 /*============================================================================*/
 /** @brief CAN bus configuration */
 #define CAN_BITRATE_KBPS              (500U)      /**< 500 kbit/s */
+#define CAN1_BAUDRATE                 (500000U)   /**< CAN1 baudrate 500kbps */
+#define CAN2_BAUDRATE                 (500000U)   /**< CAN2 baudrate 500kbps */
 #define CAN_TX_MAILBOX_COUNT          (3U)        /**< 3 TX mailboxes */
 #define CAN_RX_FIFO_SIZE              (3U)        /**< 3 RX FIFO depth */
 #define CAN_FILTER_COUNT              (14U)       /**< 14 filter banks */
@@ -105,12 +107,24 @@ extern "C" {
 #define CAN_MSG_PERIOD_OUTPUTS_MS     (100U)      /**< Output status */
 
 /** @brief CAN identifiers (11-bit standard) */
+#ifndef CAN_ID_BCU_STATUS
 #define CAN_ID_BCU_STATUS             (0x100U)    /**< BCU status */
+#endif
+#ifndef CAN_ID_BCU_SENSORS
 #define CAN_ID_BCU_SENSORS            (0x101U)    /**< Sensor data */
+#endif
+#ifndef CAN_ID_BCU_OUTPUTS
 #define CAN_ID_BCU_OUTPUTS            (0x102U)    /**< Output status */
+#endif
+#ifndef CAN_ID_BCU_FAULTS
 #define CAN_ID_BCU_FAULTS             (0x103U)    /**< Fault messages */
+#endif
+#ifndef CAN_ID_BCU_CONFIG_REQ
 #define CAN_ID_BCU_CONFIG_REQ         (0x7E0U)    /**< Config request */
+#endif
+#ifndef CAN_ID_BCU_CONFIG_RESP
 #define CAN_ID_BCU_CONFIG_RESP        (0x7E8U)    /**< Config response */
+#endif
 
 /*============================================================================*/
 /* INPUT CONFIGURATION                                                        */
