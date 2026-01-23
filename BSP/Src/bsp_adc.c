@@ -36,8 +36,8 @@
 /** @brief ADC handle */
 static ADC_HandleTypeDef hadc1;
 
-/** @brief DMA handle */
-static DMA_HandleTypeDef hdma_adc1;
+/** @brief DMA handle (non-static for IRQ handler access) */
+DMA_HandleTypeDef hdma_adc1;
 
 /** @brief DMA buffer for ADC results (volatile - accessed by DMA ISR) */
 static volatile uint16_t adc_dma_buffer[ADC_DMA_BUFFER_SIZE] __attribute__((aligned(32)));
