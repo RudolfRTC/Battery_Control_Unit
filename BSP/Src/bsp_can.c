@@ -180,6 +180,11 @@ Status_t BSP_CAN_Init(uint8_t instance, const CAN_Config_t *pConfig)
 
                     if (halStatus == HAL_OK)
                     {
+                        /* Enable transceiver (take out of standby mode) */
+                        /* TCAN3404: STB=LOW for normal mode */
+                        uint16_t stb_pin = (instance == BSP_CAN_INSTANCE_1) ? GPIO_PIN_0 : GPIO_PIN_1;
+                        HAL_GPIO_WritePin(GPIOB, stb_pin, GPIO_PIN_RESET);
+                        
                         pInst->initialized = true;
                         status = STATUS_OK;
                     }
@@ -680,16 +685,21 @@ Status_t BSP_CAN_RegisterTxCallback(uint8_t instance, CAN_TxCallback_t callback)
 
 /**
  * @brief Enable/disable CAN transceiver standby mode
+ * @note  TCAN3404 standby pin: LOW = Normal mode, HIGH = Standby mode
+ *        CAN1_STB = PB0, CAN2_STB = PB1
  */
 Status_t BSP_CAN_SetStandbyMode(uint8_t instance, bool enable)
 {
     Status_t status = STATUS_ERROR_PARAM;
-    (void)enable;  /* Placeholder - implement based on TCAN3404 GPIO control */
 
     if (instance <= BSP_CAN_INSTANCE_2)
     {
-        /* TCAN3404 standby control would be implemented via GPIO */
-        /* For now, just return OK as placeholder */
+        /* TCAN3404 standby control via GPIO */
+        /* STB pin: LOW = Normal (active), HIGH = Standby (disabled) */
+        uint16_t stb_pin = (instance == BSP_CAN_INSTANCE_1) ? GPIO_PIN_0 : GPIO_PIN_1;
+        GPIO_PinState pinState = enable ? GPIO_PIN_SET : GPIO_PIN_RESET;
+        
+        HAL_GPIO_WritePin(GPIOB, stb_pin, pinState);
         status = STATUS_OK;
     }
 

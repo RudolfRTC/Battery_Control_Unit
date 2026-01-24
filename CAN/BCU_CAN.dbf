@@ -1,0 +1,517 @@
+//******************************BUSMASTER Messages and signals Database ******************************//
+
+[DATABASE_VERSION] 1.3
+
+[PROTOCOL] CAN
+
+[BUSMASTER_VERSION] [3.2.2]
+[NUMBER_OF_MESSAGES] 24
+
+[START_MSG] BCU_Status,256,8,5,1,S,BCU
+[START_SIGNALS] State,8,1,0,U,7,0,1,0,1,,,HOST
+[VALUE_DESCRIPTION] "INIT",0
+[VALUE_DESCRIPTION] "STARTUP",1
+[VALUE_DESCRIPTION] "POWER_ON",2
+[VALUE_DESCRIPTION] "RUNNING",3
+[VALUE_DESCRIPTION] "IDLE",4
+[VALUE_DESCRIPTION] "SHUTDOWN",5
+[VALUE_DESCRIPTION] "ERROR",6
+[VALUE_DESCRIPTION] "SAFE",7
+[START_SIGNALS] PowerGood,8,2,0,U,1,0,1,0,1,,,HOST
+[VALUE_DESCRIPTION] "NOT_OK",0
+[VALUE_DESCRIPTION] "OK",1
+[START_SIGNALS] SafetyOK,8,3,0,U,1,0,1,0,1,,,HOST
+[VALUE_DESCRIPTION] "FAULT",0
+[VALUE_DESCRIPTION] "OK",1
+[START_SIGNALS] ActiveErrors,8,4,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] Uptime_ms,32,8,0,U,4294967295,0,0,0,1,ms,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Current_1,257,8,4,0,S,BCU
+[START_SIGNALS] LEM0_Current,16,2,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM1_Current,16,4,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM2_Current,16,6,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM3_Current,16,8,0,I,32767,-32768,0,0,10,mA,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Current_2,258,8,4,0,S,BCU
+[START_SIGNALS] LEM4_Current,16,2,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM5_Current,16,4,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM6_Current,16,6,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM7_Current,16,8,0,I,32767,-32768,0,0,10,mA,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Current_3,259,8,3,0,S,BCU
+[START_SIGNALS] LEM8_Current,16,2,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] LEM9_Current,16,4,0,I,32767,-32768,0,0,10,mA,,HOST
+[START_SIGNALS] Reserved_C3,32,5,0,U,4294967295,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Voltage,260,8,4,0,S,BCU
+[START_SIGNALS] Rail_12V,16,2,0,U,65535,0,0,0,1,mV,,HOST
+[START_SIGNALS] Rail_5V,16,4,0,U,65535,0,0,0,1,mV,,HOST
+[START_SIGNALS] Rail_3V3_Digital,16,6,0,U,65535,0,0,0,1,mV,,HOST
+[START_SIGNALS] Rail_3V3_Analog,16,8,0,U,65535,0,0,0,1,mV,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Temperature,261,8,2,1,S,BCU
+[START_SIGNALS] BoardTemp,32,4,0,I,125000,-40000,0,0,0.001,degC,,HOST
+[START_SIGNALS] Reserved_T1,32,5,0,U,4294967295,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Outputs,262,8,20,1,S,BCU
+[START_SIGNALS] Out_0,1,1,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_1,1,1,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_2,1,1,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_3,1,1,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_4,1,1,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_5,1,1,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_6,1,1,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_7,1,1,7,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_8,1,2,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_9,1,2,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_10,1,2,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_11,1,2,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_12,1,2,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_13,1,2,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_14,1,2,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_15,1,2,7,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_16,1,3,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_17,1,3,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_18,1,3,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] Out_19,1,3,3,B,1,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Inputs,263,8,20,1,S,BCU
+[START_SIGNALS] In_0,1,1,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_1,1,1,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_2,1,1,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_3,1,1,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_4,1,1,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_5,1,1,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_6,1,1,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_7,1,1,7,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_8,1,2,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_9,1,2,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_10,1,2,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_11,1,2,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_12,1,2,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_13,1,2,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_14,1,2,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_15,1,2,7,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_16,1,3,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_17,1,3,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_18,1,3,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] In_19,1,3,3,B,1,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_Faults,264,8,4,1,S,BCU
+[START_SIGNALS] ActiveDTCCount,8,1,0,U,32,0,1,0,1,,,HOST
+[START_SIGNALS] HighestSeverity,8,2,0,U,4,0,1,0,1,,,HOST
+[VALUE_DESCRIPTION] "NONE",0
+[VALUE_DESCRIPTION] "LOW",1
+[VALUE_DESCRIPTION] "MEDIUM",2
+[VALUE_DESCRIPTION] "HIGH",3
+[VALUE_DESCRIPTION] "CRITICAL",4
+[START_SIGNALS] LastFaultCode,16,3,0,U,65535,0,1,0,1,,,HOST
+[START_SIGNALS] FaultFlags,32,5,0,U,4294967295,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_BTT_Diag_1,272,8,16,1,S,BCU
+[START_SIGNALS] IC0_Ch0_State,1,1,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch1_State,1,1,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch2_State,1,1,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch3_State,1,1,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch0_Fault,1,1,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch1_Fault,1,1,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch2_Fault,1,1,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC0_Ch3_Fault,1,1,7,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch0_State,1,2,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch1_State,1,2,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch2_State,1,2,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch3_State,1,2,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch0_Fault,1,2,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch1_Fault,1,2,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch2_Fault,1,2,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC1_Ch3_Fault,1,2,7,B,1,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_BTT_Diag_2,273,8,16,1,S,BCU
+[START_SIGNALS] IC2_Ch0_State,1,1,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch1_State,1,1,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch2_State,1,1,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch3_State,1,1,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch0_Fault,1,1,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch1_Fault,1,1,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch2_Fault,1,1,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC2_Ch3_Fault,1,1,7,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch0_State,1,2,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch1_State,1,2,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch2_State,1,2,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch3_State,1,2,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch0_Fault,1,2,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch1_Fault,1,2,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch2_Fault,1,2,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC3_Ch3_Fault,1,2,7,B,1,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_BTT_Diag_3,274,8,8,1,S,BCU
+[START_SIGNALS] IC4_Ch0_State,1,1,0,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch1_State,1,1,1,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch2_State,1,1,2,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch3_State,1,1,3,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch0_Fault,1,1,4,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch1_Fault,1,1,5,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch2_Fault,1,1,6,B,1,0,1,0,1,,,HOST
+[START_SIGNALS] IC4_Ch3_Fault,1,1,7,B,1,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_BTT_Current_1,275,8,3,0,S,BCU
+[START_SIGNALS] IC0_IS_mA,16,2,0,U,65535,0,0,0,1,mA,,HOST
+[START_SIGNALS] IC1_IS_mA,16,4,0,U,65535,0,0,0,1,mA,,HOST
+[START_SIGNALS] Reserved_B1,32,5,0,U,4294967295,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_BTT_Current_2,276,8,3,0,S,BCU
+[START_SIGNALS] IC2_IS_mA,16,2,0,U,65535,0,0,0,1,mA,,HOST
+[START_SIGNALS] IC3_IS_mA,16,4,0,U,65535,0,0,0,1,mA,,HOST
+[START_SIGNALS] Reserved_B2,32,5,0,U,4294967295,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_BTT_Current_3,277,8,2,1,S,BCU
+[START_SIGNALS] IC4_IS_mA,16,2,0,U,65535,0,0,0,1,mA,,HOST
+[START_SIGNALS] Reserved_B3,48,3,0,U,140737488355327,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_MSG] BCU_RUL_Status,288,8,5,0,S,BCU
+[START_SIGNALS] SoH_Percent,16,2,0,U,10000,0,0,0,0.01,%,,HOST
+[START_SIGNALS] RemainingCycles,16,4,0,U,65535,0,0,0,1,cycles,,HOST
+[START_SIGNALS] RemainingDays,16,6,0,U,65535,0,0,0,1,days,,HOST
+[START_SIGNALS] Confidence,8,7,0,U,100,0,1,0,1,%,,HOST
+[START_SIGNALS] RUL_Valid,8,8,0,U,1,0,1,0,1,,,HOST
+[VALUE_DESCRIPTION] "INVALID",0
+[VALUE_DESCRIPTION] "VALID",1
+[END_MSG]
+
+[START_MSG] BCU_Timing,289,8,2,0,S,BCU
+[START_SIGNALS] CycleTime_us,32,4,0,U,4294967295,0,0,0,1,us,,HOST
+[START_SIGNALS] MaxCycleTime_us,32,8,0,U,4294967295,0,0,0,1,us,,HOST
+[END_MSG]
+
+[START_MSG] CMD_Output_Set,512,8,3,1,S,HOST
+[START_SIGNALS] ChannelID,8,1,0,U,19,0,1,0,1,,,BCU
+[START_SIGNALS] OutputState,8,2,0,U,1,0,1,0,1,,,BCU
+[VALUE_DESCRIPTION] "OFF",0
+[VALUE_DESCRIPTION] "ON",1
+[START_SIGNALS] Reserved_OS,48,3,0,U,140737488355327,0,1,0,1,,,BCU
+[END_MSG]
+
+[START_MSG] CMD_Output_All,513,8,20,1,S,HOST
+[START_SIGNALS] Out_0,1,1,0,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_1,1,1,1,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_2,1,1,2,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_3,1,1,3,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_4,1,1,4,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_5,1,1,5,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_6,1,1,6,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_7,1,1,7,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_8,1,2,0,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_9,1,2,1,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_10,1,2,2,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_11,1,2,3,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_12,1,2,4,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_13,1,2,5,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_14,1,2,6,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_15,1,2,7,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_16,1,3,0,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_17,1,3,1,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_18,1,3,2,B,1,0,1,0,1,,,BCU
+[START_SIGNALS] Out_19,1,3,3,B,1,0,1,0,1,,,BCU
+[END_MSG]
+
+[START_MSG] CMD_Output_PWM,514,8,4,1,S,HOST
+[START_SIGNALS] ChannelID,8,1,0,U,19,0,1,0,1,,,BCU
+[START_SIGNALS] DutyCycle,8,2,0,U,100,0,1,0,1,%,,BCU
+[START_SIGNALS] Frequency,16,3,0,U,10000,0,1,0,1,Hz,,BCU
+[START_SIGNALS] Reserved_PWM,32,5,0,U,4294967295,0,1,0,1,,,BCU
+[END_MSG]
+
+[START_MSG] CMD_System,528,8,5,1,S,HOST
+[START_SIGNALS] Command,8,1,0,U,255,0,1,0,1,,,BCU
+[VALUE_DESCRIPTION] "NOP",0
+[VALUE_DESCRIPTION] "RESET",1
+[VALUE_DESCRIPTION] "SAFE_STATE",2
+[VALUE_DESCRIPTION] "CLEAR_FAULTS",3
+[VALUE_DESCRIPTION] "ENABLE_OUTPUTS",16
+[VALUE_DESCRIPTION] "DISABLE_OUTPUTS",17
+[START_SIGNALS] Param1,8,2,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] Param2,8,3,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] Param3,8,4,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] Reserved_Sys,32,5,0,U,4294967295,0,1,0,1,,,BCU
+[END_MSG]
+
+[START_MSG] CMD_Config,529,8,3,1,S,HOST
+[START_SIGNALS] ConfigID,8,1,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] ConfigValue,32,5,0,U,4294967295,0,0,0,1,,,BCU
+[START_SIGNALS] Reserved_Cfg,16,7,0,U,65535,0,1,0,1,,,BCU
+[END_MSG]
+
+[START_MSG] UDS_Request,2016,8,8,1,S,HOST
+[START_SIGNALS] UDS_Byte0,8,1,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte1,8,2,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte2,8,3,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte3,8,4,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte4,8,5,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte5,8,6,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte6,8,7,0,U,255,0,1,0,1,,,BCU
+[START_SIGNALS] UDS_Byte7,8,8,0,U,255,0,1,0,1,,,BCU
+[END_MSG]
+
+[START_MSG] UDS_Response,2024,8,8,1,S,BCU
+[START_SIGNALS] UDS_Byte0,8,1,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte1,8,2,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte2,8,3,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte3,8,4,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte4,8,5,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte5,8,6,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte6,8,7,0,U,255,0,1,0,1,,,HOST
+[START_SIGNALS] UDS_Byte7,8,8,0,U,255,0,1,0,1,,,HOST
+[END_MSG]
+
+[START_VALUE_TABLE]
+[START_TABLE] AppState
+[VALUE_DESCRIPTION] "INIT",0
+[VALUE_DESCRIPTION] "STARTUP",1
+[VALUE_DESCRIPTION] "POWER_ON",2
+[VALUE_DESCRIPTION] "RUNNING",3
+[VALUE_DESCRIPTION] "IDLE",4
+[VALUE_DESCRIPTION] "SHUTDOWN",5
+[VALUE_DESCRIPTION] "ERROR",6
+[VALUE_DESCRIPTION] "SAFE",7
+[END_TABLE]
+[START_TABLE] BoolOK
+[VALUE_DESCRIPTION] "NOT_OK",0
+[VALUE_DESCRIPTION] "OK",1
+[END_TABLE]
+[START_TABLE] OnOff
+[VALUE_DESCRIPTION] "OFF",0
+[VALUE_DESCRIPTION] "ON",1
+[END_TABLE]
+[START_TABLE] ValidFlag
+[VALUE_DESCRIPTION] "INVALID",0
+[VALUE_DESCRIPTION] "VALID",1
+[END_TABLE]
+[START_TABLE] SysCommand
+[VALUE_DESCRIPTION] "NOP",0
+[VALUE_DESCRIPTION] "RESET",1
+[VALUE_DESCRIPTION] "SAFE_STATE",2
+[VALUE_DESCRIPTION] "CLEAR_FAULTS",3
+[VALUE_DESCRIPTION] "ENABLE_OUTPUTS",16
+[VALUE_DESCRIPTION] "DISABLE_OUTPUTS",17
+[END_TABLE]
+[START_TABLE] BTTState
+[VALUE_DESCRIPTION] "OFF",0
+[VALUE_DESCRIPTION] "ON",1
+[VALUE_DESCRIPTION] "PWM",2
+[VALUE_DESCRIPTION] "FAULT",3
+[END_TABLE]
+[START_TABLE] FaultLevel
+[VALUE_DESCRIPTION] "NONE",0
+[VALUE_DESCRIPTION] "LOW",1
+[VALUE_DESCRIPTION] "MEDIUM",2
+[VALUE_DESCRIPTION] "HIGH",3
+[VALUE_DESCRIPTION] "CRITICAL",4
+[END_TABLE]
+[END_VALUE_TABLE]
+
+[NODE] BCU,HOST
+
+[START_DESC]
+[START_DESC_NET]
+[END_DESC_NET]
+
+[START_DESC_NODE]
+BCU "Battery Control Unit - STM32F413ZHT based controller for battery system management";
+HOST "Host PC, PLC, or external controller connected via CAN bus";
+[END_DESC_NODE]
+
+[START_DESC_MSG]
+256 S "System status message containing application state, power status, safety status, error count and uptime. Transmitted every 100ms.";
+257 S "LEM HOYS current sensor readings for channels 0-3. Signed 16-bit values with 10mA resolution. Transmitted every 50ms.";
+258 S "LEM HOYS current sensor readings for channels 4-7. Signed 16-bit values with 10mA resolution. Transmitted every 50ms.";
+259 S "LEM HOYS current sensor readings for channels 8-9. Signed 16-bit values with 10mA resolution. Transmitted every 50ms.";
+260 S "Power rail voltage measurements: 12V input, 5V regulated, 3.3V digital, 3.3V analog. Transmitted every 100ms.";
+261 S "Board temperature from TMP1075 I2C sensor in degrees Celsius with 0.001 resolution. Transmitted every 1000ms.";
+262 S "Output channel states as bitmap. 20 outputs controlled via 5x BTT6200-2EKA drivers. Transmitted every 100ms.";
+263 S "Digital input states as bitmap. 20 inputs with hardware debouncing for relay auxiliary contacts. Transmitted every 100ms.";
+264 S "Fault information: active DTC count, highest severity level, last fault code, and fault flags bitmap. Transmitted every 100ms.";
+272 S "BTT6200 IC0 and IC1 diagnostic status. Per-channel ON/OFF state and fault flags.";
+273 S "BTT6200 IC2 and IC3 diagnostic status. Per-channel ON/OFF state and fault flags.";
+274 S "BTT6200 IC4 diagnostic status. Per-channel ON/OFF state and fault flags.";
+275 S "BTT6200 IC0 and IC1 sense current readings from IS pins via ADC.";
+276 S "BTT6200 IC2 and IC3 sense current readings from IS pins via ADC.";
+277 S "BTT6200 IC4 sense current reading from IS pin via ADC.";
+288 S "Remaining Useful Life prediction: State of Health, remaining cycles, remaining days, confidence level. Transmitted every 1000ms.";
+289 S "Scheduler timing diagnostics: current and maximum cycle execution time in microseconds. Transmitted every 100ms.";
+512 S "Command to set a single output channel ON or OFF. ChannelID 0-19, State 0=OFF/1=ON.";
+513 S "Command to set all 20 outputs simultaneously via bitmap.";
+514 S "Command to set PWM duty cycle for an output channel. Duty 0-100%.";
+528 S "System control commands: NOP, RESET, SAFE_STATE, CLEAR_FAULTS, ENABLE/DISABLE_OUTPUTS.";
+529 S "Configuration parameter write command.";
+2016 S "UDS diagnostic request message (ISO 14229). Physical addressing.";
+2024 S "UDS diagnostic response message (ISO 14229). Physical addressing.";
+[END_DESC_MSG]
+
+[START_DESC_SIG]
+256 S State "Application state machine: INIT->STARTUP->POWER_ON->RUNNING. ERROR/SAFE are fault states.";
+256 S PowerGood "All power rails within specification: 0=Fault, 1=OK";
+256 S SafetyOK "Safety monitor status: 0=Fault detected, 1=All OK";
+256 S ActiveErrors "Number of active Diagnostic Trouble Codes (0-32)";
+256 S Uptime_ms "System uptime since last reset in milliseconds (big-endian)";
+257 S LEM0_Current "LEM sensor 0 current in mA. Factor 10, signed. Range: -32768 to +32767 = -327.68A to +327.67A";
+257 S LEM1_Current "LEM sensor 1 current in mA. Factor 10, signed.";
+257 S LEM2_Current "LEM sensor 2 current in mA. Factor 10, signed.";
+257 S LEM3_Current "LEM sensor 3 current in mA. Factor 10, signed.";
+260 S Rail_12V "12V input rail voltage in mV (typically 10000-14000mV)";
+260 S Rail_5V "5V regulated rail voltage in mV (typically 4750-5250mV)";
+260 S Rail_3V3_Digital "3.3V digital rail voltage in mV";
+260 S Rail_3V3_Analog "3.3V analog rail voltage in mV";
+261 S BoardTemp "PCB temperature in degrees Celsius. Factor 0.001 for milli-degree resolution.";
+264 S ActiveDTCCount "Number of confirmed active DTCs (max 32)";
+264 S HighestSeverity "Highest severity among active faults: 0=None, 1=Low, 2=Medium, 3=High, 4=Critical";
+264 S LastFaultCode "Most recent fault code for quick diagnostics";
+288 S SoH_Percent "State of Health as percentage (0.00-100.00%). Factor 0.01.";
+288 S RemainingCycles "Estimated remaining charge/discharge cycles before EOL";
+288 S RemainingDays "Estimated remaining calendar days before EOL";
+288 S Confidence "Prediction confidence level 0-100%";
+288 S RUL_Valid "Prediction validity: 0=Invalid/insufficient data, 1=Valid";
+289 S CycleTime_us "Current scheduler main loop execution time in microseconds";
+289 S MaxCycleTime_us "Maximum recorded scheduler cycle time (worst case)";
+512 S ChannelID "Output channel number 0-19 (IC0:0-3, IC1:4-7, IC2:8-11, IC3:12-15, IC4:16-19)";
+512 S OutputState "Desired output state: 0=OFF, 1=ON";
+514 S DutyCycle "PWM duty cycle 0-100%";
+528 S Command "System command code (see VAL_TABLE_ SysCommand)";
+[END_DESC_SIG]
+[END_DESC]
+
+[START_PARAM]
+[START_PARAM_NET]
+[END_PARAM_NET]
+
+[START_PARAM_NODE]
+"NodeLayerModules",STRING,
+"ECU",STRING,
+"NmNode",INT,0,0,255
+[END_PARAM_NODE]
+
+[START_PARAM_MSG]
+"GenMsgCycleTime",INT,0,0,10000
+"GenMsgDelayTime",INT,0,0,10000
+"GenMsgStartDelayTime",INT,0,0,10000
+"GenMsgSendType",ENUM,"","Cyclic","Event","IfActive","NoMsgSendType"
+[END_PARAM_MSG]
+
+[START_PARAM_SIG]
+"GenSigStartValue",FLOAT,1.17549e-038,1.17549e-038,1e+011
+[END_PARAM_SIG]
+
+[START_PARAM_NODE_RX_SIG]
+[END_PARAM_NODE_RX_SIG]
+
+[START_PARAM_NODE_TX_MSG]
+[END_PARAM_NODE_TX_MSG]
+[END_PARAM]
+
+[START_PARAM_VAL]
+[START_PARAM_NET_VAL]
+[END_PARAM_NET_VAL]
+
+[START_PARAM_NODE_VAL]
+BCU,"ECU","STM32F413ZHT"
+HOST,"ECU","PC/PLC"
+[END_PARAM_NODE_VAL]
+
+[START_PARAM_MSG_VAL]
+256,S,"GenMsgCycleTime",100
+257,S,"GenMsgCycleTime",50
+258,S,"GenMsgCycleTime",50
+259,S,"GenMsgCycleTime",50
+260,S,"GenMsgCycleTime",100
+261,S,"GenMsgCycleTime",1000
+262,S,"GenMsgCycleTime",100
+263,S,"GenMsgCycleTime",100
+264,S,"GenMsgCycleTime",100
+272,S,"GenMsgCycleTime",100
+273,S,"GenMsgCycleTime",100
+274,S,"GenMsgCycleTime",100
+275,S,"GenMsgCycleTime",100
+276,S,"GenMsgCycleTime",100
+277,S,"GenMsgCycleTime",100
+288,S,"GenMsgCycleTime",1000
+289,S,"GenMsgCycleTime",100
+256,S,"GenMsgSendType",""Cyclic""
+257,S,"GenMsgSendType",""Cyclic""
+258,S,"GenMsgSendType",""Cyclic""
+259,S,"GenMsgSendType",""Cyclic""
+260,S,"GenMsgSendType",""Cyclic""
+261,S,"GenMsgSendType",""Cyclic""
+262,S,"GenMsgSendType",""Cyclic""
+263,S,"GenMsgSendType",""Cyclic""
+264,S,"GenMsgSendType",""Cyclic""
+272,S,"GenMsgSendType",""Cyclic""
+273,S,"GenMsgSendType",""Cyclic""
+274,S,"GenMsgSendType",""Cyclic""
+275,S,"GenMsgSendType",""Cyclic""
+276,S,"GenMsgSendType",""Cyclic""
+277,S,"GenMsgSendType",""Cyclic""
+288,S,"GenMsgSendType",""Cyclic""
+289,S,"GenMsgSendType",""Cyclic""
+512,S,"GenMsgSendType",""Event""
+513,S,"GenMsgSendType",""Event""
+514,S,"GenMsgSendType",""Event""
+528,S,"GenMsgSendType",""Event""
+529,S,"GenMsgSendType",""Event""
+2016,S,"GenMsgSendType",""Event""
+2024,S,"GenMsgSendType",""Event""
+[END_PARAM_MSG_VAL]
+
+[START_PARAM_SIG_VAL]
+[END_PARAM_SIG_VAL]
+
+[END_PARAM_VAL]
+
+
+[START_NOT_SUPPORTED]
+[END_NOT_SUPPORTED]
+
+[START_NOT_PROCESSED]
+	PZ_
+	ON_QRS_
+	ON_
+	INY_
+	PNG_QRS_
+	PNG_
+	SVYGRE
+	ON_QRS_QRS_
+	RI_QNGN_
+	RAIINE_QNGN_
+	FTGLCR_
+	FTGLCR_INY_
+	ON_QRS_FTGLCR_
+	ON_FTGLCR_
+	FVT_GLCR_ERS_
+	INY_GNOYR_
+	FVT_TEBHC_
+	FVT_INYGLCR_
+	FVTGLCR_INYGLCR_
+	OB_GK_OH_
+	ON_ERY_
+	ON_FTGLCR_ERY_
+	FT_ZHY_INY_
+OF_: 500000
+FVT_TEBHC_ 262 BhgchgTebhc 1 : Bhg_0 Bhg_1 Bhg_2 Bhg_3 Bhg_4 Bhg_5 Bhg_6 Bhg_7 Bhg_8 Bhg_9 Bhg_10 Bhg_11 Bhg_12 Bhg_13 Bhg_14 Bhg_15 Bhg_16 Bhg_17 Bhg_18 Bhg_19;
+FVT_TEBHC_ 263 VachgTebhc 1 : Va_0 Va_1 Va_2 Va_3 Va_4 Va_5 Va_6 Va_7 Va_8 Va_9 Va_10 Va_11 Va_12 Va_13 Va_14 Va_15 Va_16 Va_17 Va_18 Va_19;
+FVT_TEBHC_ 257 PheeragTebhc1 1 : YRZ0_Pheerag YRZ1_Pheerag YRZ2_Pheerag YRZ3_Pheerag;
+FVT_TEBHC_ 260 IbygntrTebhc 1 : Envy_12I Envy_5I Envy_3I3_Qvtvgny Envy_3I3_Nanybt;
+
+[END_NOT_PROCESSED]

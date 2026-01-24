@@ -307,9 +307,16 @@ void App_MediumTasks(void)
 
 /**
  * @brief Execute slow tasks (100ms period)
+ * @note  DEPRECATED: This function is not called when using Scheduler_Run().
+ *        Actual slow task execution happens in Job_VerySlow_100ms().
+ *        Kept for API compatibility.
  */
 void App_SlowTasks(void)
 {
+    /* NOTE: This function is legacy code from manual mainloop execution.
+     * The scheduler-based execution (Scheduler_Run) uses Job_VerySlow_100ms() instead.
+     * Data logging and LED toggling are handled there to avoid duplicate execution. */
+
     /* Temperature monitoring */
     int32_t temperature_mC;
     (void)TempSensor_ReadTemperature(&temperature_mC);
@@ -324,22 +331,9 @@ void App_SlowTasks(void)
     /* Update timing for safety monitor */
     (void)SafetyMonitor_UpdateTiming(app_status.cycleTime_us);
 
-    /* Data logging - log every 10 seconds (10000ms / 100ms = 100 cycles) */
-    static uint32_t log_counter = 0U;
-    log_counter++;
-    if ((log_counter % 100U) == 0U)
-    {
-        (void)DataLog_LogData();
-    }
+    /* Data logging moved to Job_VerySlow_100ms() to avoid duplicate logging */
 
-    /* LED indicators */
-    static uint32_t led_toggle_count = 0U;
-    led_toggle_count++;
-
-    if ((led_toggle_count % 5U) == 0U)  /* Toggle every 500ms */
-    {
-        (void)BSP_GPIO_TogglePin(GPIOH, GPIO_PIN_9);  /* Status LED */
-    }
+    /* LED indicators moved to Job_VerySlow_100ms() to avoid duplicate toggling */
 }
 
 /**
@@ -799,8 +793,8 @@ static Status_t app_register_callbacks(void)
     /* Register safety monitor fault callback */
     (void)SafetyMonitor_RegisterFaultCallback(app_safety_fault_handler);
 
-    /* Register digital input callbacks (example for first 5 inputs) */
-    for (uint8_t i = 0U; i < 5U; i++)
+    /* Register digital input callbacks for all 20 inputs (relay auxiliary contacts) */
+    for (uint8_t i = 0U; i < 20U; i++)
     {
         (void)DI_RegisterCallback(i, app_di_state_change_handler);
     }
@@ -876,15 +870,14 @@ static void app_error_handler(ErrorCode_t code, uint32_t p1, uint32_t p2, uint32
     /* Transmit fault message via CAN */
     (void)CANProto_SendFaults();
 
-    /* For critical errors, blink error LED faster */
+    /* For critical errors, set error LED ON (non-blocking)
+     * NOTE: HAL_Delay() was removed because it blocks the system.
+     * If called from ISR context, HAL_Delay() would hang indefinitely.
+     * The error LED state will be managed by the main loop or watchdog reset. */
     if ((code >= ERROR_SAFETY_WATCHDOG) && (code <= ERROR_SAFETY_CRITICAL_FAULT))
     {
-        /* Rapid blink */
-        for (uint8_t i = 0U; i < 6U; i++)
-        {
-            (void)BSP_GPIO_TogglePin(GPIOH, GPIO_PIN_10);
-            HAL_Delay(50);
-        }
+        /* Turn error LED ON to indicate critical fault */
+        (void)BSP_GPIO_WritePin(GPIOH, GPIO_PIN_10, GPIO_PIN_SET);
     }
 
     (void)p1;  /* Suppress unused warnings */
@@ -911,14 +904,39 @@ static void app_safety_fault_handler(SafetyLevel_t level, const char *pName)
 
 /**
  * @brief Digital input state change callback handler
+ * @details Called when a digital input (relay auxiliary contact) changes state.
+ *          Inputs 0-19 correspond to relay auxiliary contacts.
+ *          When contact closes (state=true), the corresponding relay is confirmed ON.
+ *          When contact opens (state=false), the corresponding relay is confirmed OFF.
  */
 static void app_di_state_change_handler(uint8_t inputId, bool state)
 {
-    /* Example: Log state changes for important inputs */
-    /* This can be used for emergency stop, ignition key, etc. */
+    /* Log state change for diagnostic purposes */
+    /* Input ID maps to relay: DI0->Relay0, DI1->Relay1, etc. */
 
-    (void)inputId;  /* Suppress unused warnings */
-    (void)state;
+    if (inputId < 20U)
+    {
+        /* Get corresponding output state */
+        BTT6200_ChannelState_t outputState;
+        if (BTT6200_GetChannelState(inputId, &outputState) == STATUS_OK)
+        {
+            /* Check for mismatch between commanded output and feedback */
+            bool outputOn = (outputState == BTT6200_STATE_ON) || (outputState == BTT6200_STATE_PWM);
+
+            if (outputOn && !state)
+            {
+                /* Output ON but auxiliary contact open - relay may not have closed */
+                /* This could indicate relay failure, wiring issue, or timing */
+                /* Don't log immediately - debounce handles timing */
+            }
+            else if (!outputOn && state)
+            {
+                /* Output OFF but auxiliary contact closed - relay stuck ON */
+                ErrorHandler_LogError(ERROR_ACTUATOR_FAULT, (uint32_t)inputId,
+                                     (uint32_t)state, (uint32_t)outputState);
+            }
+        }
+    }
 }
 
 /*============================================================================*/
@@ -1090,18 +1108,30 @@ static void Job_VerySlow_100ms(uint32_t now_ms)
         /* Update operating time */
         (void)RUL_UpdateOperatingTime(&rul_context, 100U);  /* 100ms increment */
 
-        /* Predict RUL every 10 seconds */
-        if ((log_counter % 100U) == 0U)
+        /* Predict and send RUL every 1 second (10 × 100ms) */
+        if ((log_counter % 10U) == 0U)
         {
             RUL_Prediction_t prediction;
+            RUL_HealthMetrics_t health;
+
             if (RUL_PredictLife(&rul_context, &prediction) == STATUS_OK)
             {
-                /* Prediction available - could be sent via CAN or logged */
-                if (prediction.isValid)
+                /* Get SoH for CAN message */
+                if (RUL_GetHealthMetrics(&rul_context, &health) == STATUS_OK)
                 {
-                    /* Log RUL prediction to FRAM or transmit via CAN */
+                    /* Send RUL status via CAN (0x120) */
+                    (void)CANProto_SendRULStatus(&prediction, health.soh);
                 }
             }
+        }
+    }
+
+    /* Send timing message every 100ms */
+    {
+        SchedulerStats_t stats;
+        if (Scheduler_GetStats(&stats) == STATUS_OK)
+        {
+            (void)CANProto_SendTiming(stats.last_loop_time_us, stats.max_loop_time_us);
         }
     }
 

@@ -22,8 +22,8 @@
 /* PRIVATE VARIABLES                                                          */
 /*============================================================================*/
 
-/** @brief I2C handle */
-static I2C_HandleTypeDef hi2c2;
+/** @brief I2C handle (use global from main.c) */
+extern I2C_HandleTypeDef hi2c2;
 
 /** @brief I2C statistics */
 static I2C_Statistics_t i2c_stats;
@@ -50,32 +50,23 @@ Status_t BSP_I2C_Init(uint8_t instance, const I2C_Config_t *pConfig)
 
     if ((instance == BSP_I2C_INSTANCE_2) && (pConfig != NULL))
     {
-        /* Enable I2C clock */
-        __HAL_RCC_I2C2_CLK_ENABLE();
+        /* Ensure I2C2 clock is enabled - direct register write */
+        RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
+        __DSB();  /* Memory barrier to ensure write completes */
 
-        /* Configure I2C */
-        hi2c2.Instance = I2C2;
-        hi2c2.Init.ClockSpeed = pConfig->clockSpeed;
-        hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
-        hi2c2.Init.OwnAddress1 = (uint32_t)pConfig->ownAddress << 1;
-        hi2c2.Init.AddressingMode = (pConfig->addrMode == I2C_ADDR_7BIT) ?
-                                     I2C_ADDRESSINGMODE_7BIT : I2C_ADDRESSINGMODE_10BIT;
-        hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-        hi2c2.Init.OwnAddress2 = 0;
-        hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-        hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-
-        if (HAL_I2C_Init(&hi2c2) != HAL_OK)
-        {
-            status = STATUS_ERROR_HW_FAULT;
-        }
-        else
+        /* I2C2 is already initialized by MX_I2C2_Init() in main.c */
+        /* Just verify it's ready and mark BSP as initialized */
+        if (hi2c2.State == HAL_I2C_STATE_READY)
         {
             /* Reset statistics */
             (void)memset(&i2c_stats, 0, sizeof(i2c_stats));
 
             i2c_initialized = true;
             status = STATUS_OK;
+        }
+        else
+        {
+            status = STATUS_ERROR_NOT_INIT;
         }
     }
 

@@ -1,0 +1,394 @@
+VERSION "1.1.0"
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_REL_
+	BA_SGTYPE_REL_
+	SG_MUL_VAL_
+
+BS_: 500000
+
+BU_: BCU HOST
+
+VAL_TABLE_ AppState 0 "INIT" 1 "STARTUP" 2 "POWER_ON" 3 "RUNNING" 4 "IDLE" 5 "SHUTDOWN" 6 "ERROR" 7 "SAFE" ;
+VAL_TABLE_ BoolOK 0 "NOT_OK" 1 "OK" ;
+VAL_TABLE_ OnOff 0 "OFF" 1 "ON" ;
+VAL_TABLE_ ValidFlag 0 "INVALID" 1 "VALID" ;
+VAL_TABLE_ SysCommand 0 "NOP" 1 "RESET" 2 "SAFE_STATE" 3 "CLEAR_FAULTS" 16 "ENABLE_OUTPUTS" 17 "DISABLE_OUTPUTS" ;
+VAL_TABLE_ BTTState 0 "OFF" 1 "ON" 2 "PWM" 3 "FAULT" ;
+VAL_TABLE_ FaultLevel 0 "NONE" 1 "LOW" 2 "MEDIUM" 3 "HIGH" 4 "CRITICAL" ;
+
+BO_ 256 BCU_Status: 8 BCU
+ SG_ State : 0|8@1+ (1,0) [0|7] "" HOST
+ SG_ PowerGood : 8|8@1+ (1,0) [0|1] "" HOST
+ SG_ SafetyOK : 16|8@1+ (1,0) [0|1] "" HOST
+ SG_ ActiveErrors : 24|8@1+ (1,0) [0|255] "" HOST
+ SG_ Uptime_ms : 39|32@0+ (1,0) [0|4294967295] "ms" HOST
+
+BO_ 257 BCU_Current_1: 8 BCU
+ SG_ LEM0_Current : 7|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM1_Current : 23|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM2_Current : 39|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM3_Current : 55|16@0- (10,0) [-327680|327670] "mA" HOST
+
+BO_ 258 BCU_Current_2: 8 BCU
+ SG_ LEM4_Current : 7|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM5_Current : 23|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM6_Current : 39|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM7_Current : 55|16@0- (10,0) [-327680|327670] "mA" HOST
+
+BO_ 259 BCU_Current_3: 8 BCU
+ SG_ LEM8_Current : 7|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ LEM9_Current : 23|16@0- (10,0) [-327680|327670] "mA" HOST
+ SG_ Reserved_C3 : 32|32@1+ (1,0) [0|0] "" HOST
+
+BO_ 260 BCU_Voltage: 8 BCU
+ SG_ Rail_12V : 7|16@0+ (1,0) [0|65535] "mV" HOST
+ SG_ Rail_5V : 23|16@0+ (1,0) [0|65535] "mV" HOST
+ SG_ Rail_3V3_Digital : 39|16@0+ (1,0) [0|65535] "mV" HOST
+ SG_ Rail_3V3_Analog : 55|16@0+ (1,0) [0|65535] "mV" HOST
+
+BO_ 261 BCU_Temperature: 8 BCU
+ SG_ BoardTemp : 7|32@0- (0.001,0) [-40|125] "degC" HOST
+ SG_ Reserved_T1 : 32|32@1+ (1,0) [0|0] "" HOST
+
+BO_ 262 BCU_Outputs: 8 BCU
+ SG_ Out_0 : 0|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_1 : 1|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_2 : 2|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_3 : 3|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_4 : 4|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_5 : 5|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_6 : 6|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_7 : 7|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_8 : 8|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_9 : 9|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_10 : 10|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_11 : 11|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_12 : 12|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_13 : 13|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_14 : 14|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_15 : 15|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_16 : 16|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_17 : 17|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_18 : 18|1@1+ (1,0) [0|1] "" HOST
+ SG_ Out_19 : 19|1@1+ (1,0) [0|1] "" HOST
+
+BO_ 263 BCU_Inputs: 8 BCU
+ SG_ In_0 : 0|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_1 : 1|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_2 : 2|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_3 : 3|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_4 : 4|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_5 : 5|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_6 : 6|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_7 : 7|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_8 : 8|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_9 : 9|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_10 : 10|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_11 : 11|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_12 : 12|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_13 : 13|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_14 : 14|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_15 : 15|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_16 : 16|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_17 : 17|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_18 : 18|1@1+ (1,0) [0|1] "" HOST
+ SG_ In_19 : 19|1@1+ (1,0) [0|1] "" HOST
+
+BO_ 264 BCU_Faults: 8 BCU
+ SG_ ActiveDTCCount : 0|8@1+ (1,0) [0|32] "" HOST
+ SG_ HighestSeverity : 8|8@1+ (1,0) [0|4] "" HOST
+ SG_ LastFaultCode : 16|16@1+ (1,0) [0|65535] "" HOST
+ SG_ FaultFlags : 32|32@1+ (1,0) [0|4294967295] "" HOST
+
+BO_ 272 BCU_BTT_Diag_1: 8 BCU
+ SG_ IC0_Ch0_State : 0|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch1_State : 1|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch2_State : 2|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch3_State : 3|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch0_Fault : 4|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch1_Fault : 5|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch2_Fault : 6|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC0_Ch3_Fault : 7|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch0_State : 8|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch1_State : 9|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch2_State : 10|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch3_State : 11|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch0_Fault : 12|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch1_Fault : 13|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch2_Fault : 14|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC1_Ch3_Fault : 15|1@1+ (1,0) [0|1] "" HOST
+
+BO_ 273 BCU_BTT_Diag_2: 8 BCU
+ SG_ IC2_Ch0_State : 0|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch1_State : 1|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch2_State : 2|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch3_State : 3|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch0_Fault : 4|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch1_Fault : 5|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch2_Fault : 6|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC2_Ch3_Fault : 7|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch0_State : 8|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch1_State : 9|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch2_State : 10|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch3_State : 11|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch0_Fault : 12|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch1_Fault : 13|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch2_Fault : 14|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC3_Ch3_Fault : 15|1@1+ (1,0) [0|1] "" HOST
+
+BO_ 274 BCU_BTT_Diag_3: 8 BCU
+ SG_ IC4_Ch0_State : 0|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch1_State : 1|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch2_State : 2|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch3_State : 3|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch0_Fault : 4|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch1_Fault : 5|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch2_Fault : 6|1@1+ (1,0) [0|1] "" HOST
+ SG_ IC4_Ch3_Fault : 7|1@1+ (1,0) [0|1] "" HOST
+
+BO_ 275 BCU_BTT_Current_1: 8 BCU
+ SG_ IC0_IS_mA : 7|16@0+ (1,0) [0|65535] "mA" HOST
+ SG_ IC1_IS_mA : 23|16@0+ (1,0) [0|65535] "mA" HOST
+ SG_ Reserved_B1 : 32|32@1+ (1,0) [0|0] "" HOST
+
+BO_ 276 BCU_BTT_Current_2: 8 BCU
+ SG_ IC2_IS_mA : 7|16@0+ (1,0) [0|65535] "mA" HOST
+ SG_ IC3_IS_mA : 23|16@0+ (1,0) [0|65535] "mA" HOST
+ SG_ Reserved_B2 : 32|32@1+ (1,0) [0|0] "" HOST
+
+BO_ 277 BCU_BTT_Current_3: 8 BCU
+ SG_ IC4_IS_mA : 7|16@0+ (1,0) [0|65535] "mA" HOST
+ SG_ Reserved_B3 : 16|48@1+ (1,0) [0|0] "" HOST
+
+BO_ 288 BCU_RUL_Status: 8 BCU
+ SG_ SoH_Percent : 7|16@0+ (0.01,0) [0|100] "%" HOST
+ SG_ RemainingCycles : 23|16@0+ (1,0) [0|65535] "cycles" HOST
+ SG_ RemainingDays : 39|16@0+ (1,0) [0|65535] "days" HOST
+ SG_ Confidence : 48|8@1+ (1,0) [0|100] "%" HOST
+ SG_ RUL_Valid : 56|8@1+ (1,0) [0|1] "" HOST
+
+BO_ 289 BCU_Timing: 8 BCU
+ SG_ CycleTime_us : 7|32@0+ (1,0) [0|4294967295] "us" HOST
+ SG_ MaxCycleTime_us : 39|32@0+ (1,0) [0|4294967295] "us" HOST
+
+BO_ 512 CMD_Output_Set: 8 HOST
+ SG_ ChannelID : 0|8@1+ (1,0) [0|19] "" BCU
+ SG_ OutputState : 8|8@1+ (1,0) [0|1] "" BCU
+ SG_ Reserved_OS : 16|48@1+ (1,0) [0|0] "" BCU
+
+BO_ 513 CMD_Output_All: 8 HOST
+ SG_ Out_0 : 0|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_1 : 1|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_2 : 2|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_3 : 3|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_4 : 4|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_5 : 5|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_6 : 6|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_7 : 7|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_8 : 8|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_9 : 9|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_10 : 10|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_11 : 11|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_12 : 12|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_13 : 13|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_14 : 14|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_15 : 15|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_16 : 16|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_17 : 17|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_18 : 18|1@1+ (1,0) [0|1] "" BCU
+ SG_ Out_19 : 19|1@1+ (1,0) [0|1] "" BCU
+
+BO_ 514 CMD_Output_PWM: 8 HOST
+ SG_ ChannelID : 0|8@1+ (1,0) [0|19] "" BCU
+ SG_ DutyCycle : 8|8@1+ (1,0) [0|100] "%" BCU
+ SG_ Frequency : 16|16@1+ (1,0) [0|10000] "Hz" BCU
+ SG_ Reserved_PWM : 32|32@1+ (1,0) [0|0] "" BCU
+
+BO_ 528 CMD_System: 8 HOST
+ SG_ Command : 0|8@1+ (1,0) [0|255] "" BCU
+ SG_ Param1 : 8|8@1+ (1,0) [0|255] "" BCU
+ SG_ Param2 : 16|8@1+ (1,0) [0|255] "" BCU
+ SG_ Param3 : 24|8@1+ (1,0) [0|255] "" BCU
+ SG_ Reserved_Sys : 32|32@1+ (1,0) [0|0] "" BCU
+
+BO_ 529 CMD_Config: 8 HOST
+ SG_ ConfigID : 0|8@1+ (1,0) [0|255] "" BCU
+ SG_ ConfigValue : 15|32@0+ (1,0) [0|4294967295] "" BCU
+ SG_ Reserved_Cfg : 48|16@1+ (1,0) [0|0] "" BCU
+
+BO_ 2016 UDS_Request: 8 HOST
+ SG_ UDS_Byte0 : 0|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte1 : 8|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte2 : 16|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte3 : 24|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte4 : 32|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte5 : 40|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte6 : 48|8@1+ (1,0) [0|255] "" BCU
+ SG_ UDS_Byte7 : 56|8@1+ (1,0) [0|255] "" BCU
+
+BO_ 2024 UDS_Response: 8 BCU
+ SG_ UDS_Byte0 : 0|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte1 : 8|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte2 : 16|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte3 : 24|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte4 : 32|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte5 : 40|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte6 : 48|8@1+ (1,0) [0|255] "" HOST
+ SG_ UDS_Byte7 : 56|8@1+ (1,0) [0|255] "" HOST
+
+CM_ BU_ BCU "Battery Control Unit - STM32F413ZHT based controller for battery system management";
+CM_ BU_ HOST "Host PC, PLC, or external controller connected via CAN bus";
+
+CM_ BO_ 256 "System status message containing application state, power status, safety status, error count and uptime. Transmitted every 100ms.";
+CM_ BO_ 257 "LEM HOYS current sensor readings for channels 0-3. Signed 16-bit values with 10mA resolution. Transmitted every 50ms.";
+CM_ BO_ 258 "LEM HOYS current sensor readings for channels 4-7. Signed 16-bit values with 10mA resolution. Transmitted every 50ms.";
+CM_ BO_ 259 "LEM HOYS current sensor readings for channels 8-9. Signed 16-bit values with 10mA resolution. Transmitted every 50ms.";
+CM_ BO_ 260 "Power rail voltage measurements: 12V input, 5V regulated, 3.3V digital, 3.3V analog. Transmitted every 100ms.";
+CM_ BO_ 261 "Board temperature from TMP1075 I2C sensor in degrees Celsius with 0.001 resolution. Transmitted every 1000ms.";
+CM_ BO_ 262 "Output channel states as bitmap. 20 outputs controlled via 5x BTT6200-2EKA drivers. Transmitted every 100ms.";
+CM_ BO_ 263 "Digital input states as bitmap. 20 inputs with hardware debouncing for relay auxiliary contacts. Transmitted every 100ms.";
+CM_ BO_ 264 "Fault information: active DTC count, highest severity level, last fault code, and fault flags bitmap. Transmitted every 100ms.";
+CM_ BO_ 272 "BTT6200 IC0 and IC1 diagnostic status. Per-channel ON/OFF state and fault flags.";
+CM_ BO_ 273 "BTT6200 IC2 and IC3 diagnostic status. Per-channel ON/OFF state and fault flags.";
+CM_ BO_ 274 "BTT6200 IC4 diagnostic status. Per-channel ON/OFF state and fault flags.";
+CM_ BO_ 275 "BTT6200 IC0 and IC1 sense current readings from IS pins via ADC.";
+CM_ BO_ 276 "BTT6200 IC2 and IC3 sense current readings from IS pins via ADC.";
+CM_ BO_ 277 "BTT6200 IC4 sense current reading from IS pin via ADC.";
+CM_ BO_ 288 "Remaining Useful Life prediction: State of Health, remaining cycles, remaining days, confidence level. Transmitted every 1000ms.";
+CM_ BO_ 289 "Scheduler timing diagnostics: current and maximum cycle execution time in microseconds. Transmitted every 100ms.";
+CM_ BO_ 512 "Command to set a single output channel ON or OFF. ChannelID 0-19, State 0=OFF/1=ON.";
+CM_ BO_ 513 "Command to set all 20 outputs simultaneously via bitmap.";
+CM_ BO_ 514 "Command to set PWM duty cycle for an output channel. Duty 0-100%.";
+CM_ BO_ 528 "System control commands: NOP, RESET, SAFE_STATE, CLEAR_FAULTS, ENABLE/DISABLE_OUTPUTS.";
+CM_ BO_ 529 "Configuration parameter write command.";
+CM_ BO_ 2016 "UDS diagnostic request message (ISO 14229). Physical addressing.";
+CM_ BO_ 2024 "UDS diagnostic response message (ISO 14229). Physical addressing.";
+
+CM_ SG_ 256 State "Application state machine: INIT->STARTUP->POWER_ON->RUNNING. ERROR/SAFE are fault states.";
+CM_ SG_ 256 PowerGood "All power rails within specification: 0=Fault, 1=OK";
+CM_ SG_ 256 SafetyOK "Safety monitor status: 0=Fault detected, 1=All OK";
+CM_ SG_ 256 ActiveErrors "Number of active Diagnostic Trouble Codes (0-32)";
+CM_ SG_ 256 Uptime_ms "System uptime since last reset in milliseconds (big-endian)";
+CM_ SG_ 257 LEM0_Current "LEM sensor 0 current in mA. Factor 10, signed. Range: -32768 to +32767 = -327.68A to +327.67A";
+CM_ SG_ 257 LEM1_Current "LEM sensor 1 current in mA. Factor 10, signed.";
+CM_ SG_ 257 LEM2_Current "LEM sensor 2 current in mA. Factor 10, signed.";
+CM_ SG_ 257 LEM3_Current "LEM sensor 3 current in mA. Factor 10, signed.";
+CM_ SG_ 260 Rail_12V "12V input rail voltage in mV (typically 10000-14000mV)";
+CM_ SG_ 260 Rail_5V "5V regulated rail voltage in mV (typically 4750-5250mV)";
+CM_ SG_ 260 Rail_3V3_Digital "3.3V digital rail voltage in mV";
+CM_ SG_ 260 Rail_3V3_Analog "3.3V analog rail voltage in mV";
+CM_ SG_ 261 BoardTemp "PCB temperature in degrees Celsius. Factor 0.001 for milli-degree resolution.";
+CM_ SG_ 264 ActiveDTCCount "Number of confirmed active DTCs (max 32)";
+CM_ SG_ 264 HighestSeverity "Highest severity among active faults: 0=None, 1=Low, 2=Medium, 3=High, 4=Critical";
+CM_ SG_ 264 LastFaultCode "Most recent fault code for quick diagnostics";
+CM_ SG_ 288 SoH_Percent "State of Health as percentage (0.00-100.00%). Factor 0.01.";
+CM_ SG_ 288 RemainingCycles "Estimated remaining charge/discharge cycles before EOL";
+CM_ SG_ 288 RemainingDays "Estimated remaining calendar days before EOL";
+CM_ SG_ 288 Confidence "Prediction confidence level 0-100%";
+CM_ SG_ 288 RUL_Valid "Prediction validity: 0=Invalid/insufficient data, 1=Valid";
+CM_ SG_ 289 CycleTime_us "Current scheduler main loop execution time in microseconds";
+CM_ SG_ 289 MaxCycleTime_us "Maximum recorded scheduler cycle time (worst case)";
+CM_ SG_ 512 ChannelID "Output channel number 0-19 (IC0:0-3, IC1:4-7, IC2:8-11, IC3:12-15, IC4:16-19)";
+CM_ SG_ 512 OutputState "Desired output state: 0=OFF, 1=ON";
+CM_ SG_ 514 DutyCycle "PWM duty cycle 0-100%";
+CM_ SG_ 528 Command "System command code (see VAL_TABLE_ SysCommand)";
+
+VAL_ 256 State 0 "INIT" 1 "STARTUP" 2 "POWER_ON" 3 "RUNNING" 4 "IDLE" 5 "SHUTDOWN" 6 "ERROR" 7 "SAFE" ;
+VAL_ 256 PowerGood 0 "NOT_OK" 1 "OK" ;
+VAL_ 256 SafetyOK 0 "FAULT" 1 "OK" ;
+VAL_ 264 HighestSeverity 0 "NONE" 1 "LOW" 2 "MEDIUM" 3 "HIGH" 4 "CRITICAL" ;
+VAL_ 288 RUL_Valid 0 "INVALID" 1 "VALID" ;
+VAL_ 512 OutputState 0 "OFF" 1 "ON" ;
+VAL_ 528 Command 0 "NOP" 1 "RESET" 2 "SAFE_STATE" 3 "CLEAR_FAULTS" 16 "ENABLE_OUTPUTS" 17 "DISABLE_OUTPUTS" ;
+
+BA_DEF_ BU_ "NodeLayerModules" STRING;
+BA_DEF_ BU_ "ECU" STRING;
+BA_DEF_ BU_ "NmNode" INT 0 255;
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 10000;
+BA_DEF_ BO_ "GenMsgDelayTime" INT 0 10000;
+BA_DEF_ BO_ "GenMsgStartDelayTime" INT 0 10000;
+BA_DEF_ BO_ "GenMsgSendType" ENUM "Cyclic","Event","IfActive","NoMsgSendType";
+BA_DEF_ SG_ "GenSigStartValue" FLOAT 0 100000000000;
+
+BA_DEF_DEF_ "NodeLayerModules" "";
+BA_DEF_DEF_ "ECU" "";
+BA_DEF_DEF_ "NmNode" 0;
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+BA_DEF_DEF_ "GenMsgDelayTime" 0;
+BA_DEF_DEF_ "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_ "GenMsgSendType" "Cyclic";
+BA_DEF_DEF_ "GenSigStartValue" 0;
+
+BA_ "ECU" BU_ BCU "STM32F413ZHT";
+BA_ "ECU" BU_ HOST "PC/PLC";
+
+BA_ "GenMsgCycleTime" BO_ 256 100;
+BA_ "GenMsgCycleTime" BO_ 257 50;
+BA_ "GenMsgCycleTime" BO_ 258 50;
+BA_ "GenMsgCycleTime" BO_ 259 50;
+BA_ "GenMsgCycleTime" BO_ 260 100;
+BA_ "GenMsgCycleTime" BO_ 261 1000;
+BA_ "GenMsgCycleTime" BO_ 262 100;
+BA_ "GenMsgCycleTime" BO_ 263 100;
+BA_ "GenMsgCycleTime" BO_ 264 100;
+BA_ "GenMsgCycleTime" BO_ 272 100;
+BA_ "GenMsgCycleTime" BO_ 273 100;
+BA_ "GenMsgCycleTime" BO_ 274 100;
+BA_ "GenMsgCycleTime" BO_ 275 100;
+BA_ "GenMsgCycleTime" BO_ 276 100;
+BA_ "GenMsgCycleTime" BO_ 277 100;
+BA_ "GenMsgCycleTime" BO_ 288 1000;
+BA_ "GenMsgCycleTime" BO_ 289 100;
+
+BA_ "GenMsgSendType" BO_ 256 "Cyclic";
+BA_ "GenMsgSendType" BO_ 257 "Cyclic";
+BA_ "GenMsgSendType" BO_ 258 "Cyclic";
+BA_ "GenMsgSendType" BO_ 259 "Cyclic";
+BA_ "GenMsgSendType" BO_ 260 "Cyclic";
+BA_ "GenMsgSendType" BO_ 261 "Cyclic";
+BA_ "GenMsgSendType" BO_ 262 "Cyclic";
+BA_ "GenMsgSendType" BO_ 263 "Cyclic";
+BA_ "GenMsgSendType" BO_ 264 "Cyclic";
+BA_ "GenMsgSendType" BO_ 272 "Cyclic";
+BA_ "GenMsgSendType" BO_ 273 "Cyclic";
+BA_ "GenMsgSendType" BO_ 274 "Cyclic";
+BA_ "GenMsgSendType" BO_ 275 "Cyclic";
+BA_ "GenMsgSendType" BO_ 276 "Cyclic";
+BA_ "GenMsgSendType" BO_ 277 "Cyclic";
+BA_ "GenMsgSendType" BO_ 288 "Cyclic";
+BA_ "GenMsgSendType" BO_ 289 "Cyclic";
+BA_ "GenMsgSendType" BO_ 512 "Event";
+BA_ "GenMsgSendType" BO_ 513 "Event";
+BA_ "GenMsgSendType" BO_ 514 "Event";
+BA_ "GenMsgSendType" BO_ 528 "Event";
+BA_ "GenMsgSendType" BO_ 529 "Event";
+BA_ "GenMsgSendType" BO_ 2016 "Event";
+BA_ "GenMsgSendType" BO_ 2024 "Event";
+
+SIG_GROUP_ 262 OutputGroup 1 : Out_0 Out_1 Out_2 Out_3 Out_4 Out_5 Out_6 Out_7 Out_8 Out_9 Out_10 Out_11 Out_12 Out_13 Out_14 Out_15 Out_16 Out_17 Out_18 Out_19;
+SIG_GROUP_ 263 InputGroup 1 : In_0 In_1 In_2 In_3 In_4 In_5 In_6 In_7 In_8 In_9 In_10 In_11 In_12 In_13 In_14 In_15 In_16 In_17 In_18 In_19;
+SIG_GROUP_ 257 CurrentGroup1 1 : LEM0_Current LEM1_Current LEM2_Current LEM3_Current;
+SIG_GROUP_ 260 VoltageGroup 1 : Rail_12V Rail_5V Rail_3V3_Digital Rail_3V3_Analog;
+

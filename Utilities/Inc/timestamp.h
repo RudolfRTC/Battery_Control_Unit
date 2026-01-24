@@ -67,6 +67,13 @@ bool Timestamp_IsElapsed(uint32_t start_ms, uint32_t timeout_ms);
  */
 void Timestamp_DelayMs(uint32_t ms);
 
+/**
+ * @brief Delay for specified microseconds (blocking)
+ * @param[in] us Microseconds to delay (uses DWT cycle counter)
+ * @note Accurate to within a few cycles at 100MHz
+ */
+void Timestamp_DelayUs(uint32_t us);
+
 #ifdef __cplusplus
 }
 #endif

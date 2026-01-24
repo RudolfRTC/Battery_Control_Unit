@@ -128,6 +128,32 @@ void Timestamp_DelayMs(uint32_t ms)
     HAL_Delay(ms);
 }
 
+/**
+ * @brief Blocking delay in microseconds using DWT cycle counter
+ * @param us Delay in microseconds (max ~40 seconds at 100MHz)
+ * @note Uses DWT CYCCNT register for accurate timing
+ */
+void Timestamp_DelayUs(uint32_t us)
+{
+    if (us == 0U)
+    {
+        return;
+    }
+
+    /* Get system core clock frequency */
+    uint32_t cycles_per_us = SystemCoreClock / 1000000U;
+    uint32_t cycles_to_wait = us * cycles_per_us;
+
+    /* Capture start cycle count */
+    uint32_t start_cycles = DWT->CYCCNT;
+
+    /* Wait until the required cycles have elapsed */
+    while ((DWT->CYCCNT - start_cycles) < cycles_to_wait)
+    {
+        /* Spin wait */
+    }
+}
+
 /*============================================================================*/
 /* END OF FILE                                                                */
 /*============================================================================*/

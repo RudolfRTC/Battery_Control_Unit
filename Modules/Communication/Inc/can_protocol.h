@@ -24,40 +24,45 @@ extern "C" {
 /*============================================================================*/
 #include "app_types.h"
 #include "bsp_can.h"
+#include "rul.h"
 
 /*============================================================================*/
 /* CONSTANTS                                                                  */
 /*============================================================================*/
 
-/** @brief CAN message IDs */
-#ifndef CAN_ID_BCU_STATUS
-#define CAN_ID_BCU_STATUS           (0x100U)
-#endif
-#ifndef CAN_ID_BCU_CURRENT
-#define CAN_ID_BCU_CURRENT          (0x101U)
-#endif
-#ifndef CAN_ID_BCU_VOLTAGE
-#define CAN_ID_BCU_VOLTAGE          (0x102U)
-#endif
-#ifndef CAN_ID_BCU_TEMPERATURE
-#define CAN_ID_BCU_TEMPERATURE      (0x103U)
-#endif
-#ifndef CAN_ID_BCU_OUTPUTS
-#define CAN_ID_BCU_OUTPUTS          (0x104U)
-#endif
-#ifndef CAN_ID_BCU_INPUTS
-#define CAN_ID_BCU_INPUTS           (0x105U)
-#endif
-#ifndef CAN_ID_BCU_FAULTS
-#define CAN_ID_BCU_FAULTS           (0x106U)
-#endif
-#ifndef CAN_ID_BCU_DIAGNOSTICS
-#define CAN_ID_BCU_DIAGNOSTICS      (0x107U)
-#endif
+/** @brief CAN message IDs - TX (BCU -> Host) */
+#define CAN_ID_BCU_STATUS           (0x100U)  /**< System status */
+#define CAN_ID_BCU_CURRENT_1        (0x101U)  /**< LEM currents 0-3 */
+#define CAN_ID_BCU_CURRENT_2        (0x102U)  /**< LEM currents 4-7 */
+#define CAN_ID_BCU_CURRENT_3        (0x103U)  /**< LEM currents 8-9 */
+#define CAN_ID_BCU_VOLTAGE          (0x104U)  /**< Power rail voltages */
+#define CAN_ID_BCU_TEMPERATURE      (0x105U)  /**< Board temperature */
+#define CAN_ID_BCU_OUTPUTS          (0x106U)  /**< Output states (bitmap) */
+#define CAN_ID_BCU_INPUTS           (0x107U)  /**< Digital input states (bitmap) */
+#define CAN_ID_BCU_FAULTS           (0x108U)  /**< Active fault count and codes */
+#define CAN_ID_BCU_BTT_DIAG_1       (0x110U)  /**< BTT6200 IC0-1 diagnostics */
+#define CAN_ID_BCU_BTT_DIAG_2       (0x111U)  /**< BTT6200 IC2-3 diagnostics */
+#define CAN_ID_BCU_BTT_DIAG_3       (0x112U)  /**< BTT6200 IC4 diagnostics */
+#define CAN_ID_BCU_BTT_CURRENT_1    (0x113U)  /**< BTT6200 IC0-1 sense currents */
+#define CAN_ID_BCU_BTT_CURRENT_2    (0x114U)  /**< BTT6200 IC2-3 sense currents */
+#define CAN_ID_BCU_BTT_CURRENT_3    (0x115U)  /**< BTT6200 IC4 sense current */
+#define CAN_ID_BCU_RUL_STATUS       (0x120U)  /**< RUL prediction status */
+#define CAN_ID_BCU_TIMING           (0x121U)  /**< Scheduler timing info */
+
+/** @brief CAN message IDs - RX (Host -> BCU) Control Commands */
+#define CAN_ID_CMD_OUTPUT_SET       (0x200U)  /**< Set single output ON/OFF */
+#define CAN_ID_CMD_OUTPUT_ALL       (0x201U)  /**< Set all outputs (bitmap) */
+#define CAN_ID_CMD_OUTPUT_PWM       (0x202U)  /**< Set output PWM duty cycle */
+#define CAN_ID_CMD_SYSTEM           (0x210U)  /**< System commands (reset, safe state) */
+#define CAN_ID_CMD_CONFIG           (0x211U)  /**< Configuration commands */
 
 /** @brief UDS diagnostic request/response IDs */
 #define CAN_ID_UDS_REQUEST          (0x7E0U)
 #define CAN_ID_UDS_RESPONSE         (0x7E8U)
+
+/** @brief Backwards compatibility aliases */
+#define CAN_ID_BCU_CURRENT          CAN_ID_BCU_CURRENT_1
+#define CAN_ID_BCU_DIAGNOSTICS      CAN_ID_BCU_BTT_DIAG_1
 
 /** @brief Message transmission periods */
 #define CAN_TX_PERIOD_STATUS_MS     (100U)
@@ -65,10 +70,22 @@ extern "C" {
 #define CAN_TX_PERIOD_VOLTAGE_MS    (100U)
 #define CAN_TX_PERIOD_TEMP_MS       (1000U)
 #define CAN_TX_PERIOD_IO_MS         (100U)
+#define CAN_TX_PERIOD_BTT_DIAG_MS   (100U)
+#define CAN_TX_PERIOD_RUL_MS        (1000U)
 
 /*============================================================================*/
 /* TYPES                                                                      */
 /*============================================================================*/
+
+/** @brief System command codes (for CAN_ID_CMD_SYSTEM) */
+typedef enum {
+    CMD_SYS_NOP             = 0x00U,  /**< No operation */
+    CMD_SYS_RESET           = 0x01U,  /**< Software reset */
+    CMD_SYS_SAFE_STATE      = 0x02U,  /**< Enter safe state */
+    CMD_SYS_CLEAR_FAULTS    = 0x03U,  /**< Clear all faults */
+    CMD_SYS_ENABLE_OUTPUTS  = 0x10U,  /**< Enable output drivers */
+    CMD_SYS_DISABLE_OUTPUTS = 0x11U   /**< Disable output drivers */
+} SystemCommand_t;
 
 /** @brief UDS service IDs */
 typedef enum {
@@ -191,6 +208,46 @@ Status_t CANProto_SendIOStates(void);
  * @return Status code
  */
 Status_t CANProto_SendFaults(void);
+
+/**
+ * @brief Transmit digital input states
+ * @return Status code
+ */
+Status_t CANProto_SendInputStates(void);
+
+/**
+ * @brief Transmit BTT6200 diagnostics (all ICs)
+ * @return Status code
+ */
+Status_t CANProto_SendBTTDiagnostics(void);
+
+/**
+ * @brief Transmit BTT6200 sense currents (all ICs)
+ * @return Status code
+ */
+Status_t CANProto_SendBTTCurrents(void);
+
+/**
+ * @brief Transmit all LEM sensor currents (10 channels)
+ * @return Status code
+ */
+Status_t CANProto_SendAllCurrents(void);
+
+/**
+ * @brief Transmit RUL status message
+ * @param[in] pPrediction Pointer to RUL prediction data
+ * @param[in] soh State of Health percentage (0-10000 = 0-100%)
+ * @return Status code
+ */
+Status_t CANProto_SendRULStatus(const RUL_Prediction_t *pPrediction, Percentage_t soh);
+
+/**
+ * @brief Transmit scheduler timing message
+ * @param[in] cycleTime_us Current cycle time in microseconds
+ * @param[in] maxCycleTime_us Maximum cycle time in microseconds
+ * @return Status code
+ */
+Status_t CANProto_SendTiming(uint32_t cycleTime_us, uint32_t maxCycleTime_us);
 
 /**
  * @brief Get protocol statistics

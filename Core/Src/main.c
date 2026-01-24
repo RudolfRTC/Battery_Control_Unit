@@ -112,7 +112,10 @@ int main(void)
   MX_ADC1_Init();
   MX_CAN1_Init();
   MX_CAN2_Init();
-  MX_I2C2_Init();
+  /* Explicitly enable I2C2 clock before HAL init */
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_I2C2_CLK_ENABLE();
+  MX_I2C2_Init();  /* Re-enabled - BSP will use global hi2c2 */
   /* MX_SPI4_Init(); */  /* Disabled - LTC6811 not connected */
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */

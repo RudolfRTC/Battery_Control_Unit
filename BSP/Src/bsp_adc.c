@@ -129,11 +129,14 @@ Status_t BSP_ADC_Init(const ADC_Config_t *pConfig)
                 HAL_ADC_ConfigChannel(&hadc1, &sConfig);
             }
 
-            /* Channels 11-15: BTT6200 current sense */
-            /* PC7, PC15, PD7, PD15, PE11 */
+            /* Channels 11-15: BTT6200 current sense (IS pins) */
+            /* IC0: PC0=CH10, IC1: PC1=CH11, IC2: PC3=CH13, IC3: PC2=CH12, IC4: PC4=CH14 */
             uint32_t btt_channels[] = {
-                ADC_CHANNEL_7, ADC_CHANNEL_15, ADC_CHANNEL_7,
-                ADC_CHANNEL_15, ADC_CHANNEL_11
+                ADC_CHANNEL_10,  /* IS_0: PC0 - BTT6200 IC0 */
+                ADC_CHANNEL_11,  /* IS_1: PC1 - BTT6200 IC1 */
+                ADC_CHANNEL_13,  /* IS_2: PC3 - BTT6200 IC2 */
+                ADC_CHANNEL_12,  /* IS_3: PC2 - BTT6200 IC3 */
+                ADC_CHANNEL_14   /* IS_4: PC4 - BTT6200 IC4 */
             };
 
             for (uint8_t i = 0; i < 5U; i++)

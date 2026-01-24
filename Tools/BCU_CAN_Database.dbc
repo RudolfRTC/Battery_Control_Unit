@@ -1,0 +1,127 @@
+VERSION ""
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_REL_
+	BA_SGTYPE_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: BCU Tester
+
+VAL_TABLE_ AppState 0 "Init" 1 "PostInit" 2 "Running" 3 "Standby" 4 "Fault" 5 "Shutdown" 6 "Error" 7 "Safe" ;
+VAL_TABLE_ BoolState 0 "Fault" 1 "OK" ;
+
+BO_ 256 BCU_Status: 8 BCU
+ SG_ State : 0|8@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ PowerGood : 8|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ SafetyOK : 16|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ActiveErrors : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Uptime : 32|32@1+ (1,0) [0|4294967295] "ms" Vector__XXX
+
+BO_ 257 BCU_Current: 8 BCU
+ SG_ SensorID : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Current : 8|32@1- (1,0) [-2147483648|2147483647] "mA" Vector__XXX
+
+BO_ 258 BCU_Voltage: 8 BCU
+ SG_ Voltage_12V : 0|16@1+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ Voltage_5V : 16|16@1+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ Voltage_3V3_Digital : 32|16@1+ (1,0) [0|65535] "mV" Vector__XXX
+ SG_ Voltage_3V3_Analog : 48|16@1+ (1,0) [0|65535] "mV" Vector__XXX
+
+BO_ 259 BCU_Temperature: 8 BCU
+ SG_ Temperature : 0|32@1- (0.001,0) [-40|125] "degC" Vector__XXX
+
+BO_ 260 BCU_Outputs: 8 BCU
+ SG_ OutputStates : 0|20@1+ (1,0) [0|1048575] "" Vector__XXX
+
+BO_ 261 BCU_Inputs: 8 BCU
+ SG_ InputStates : 0|20@1+ (1,0) [0|1048575] "" Vector__XXX
+
+BO_ 262 BCU_Faults: 8 BCU
+ SG_ FaultCount : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ FaultCode1 : 8|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ FaultCode2 : 24|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ FaultCode3 : 40|16@1+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 263 BCU_Diagnostics: 8 BCU
+ SG_ DiagData : 0|64@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 2016 UDS_Request: 8 Tester
+ SG_ ServiceID : 0|8@1+ (1,0) [0|255] "" BCU
+ SG_ SubFunction : 8|8@1+ (1,0) [0|255] "" BCU
+ SG_ RequestData : 16|48@1+ (1,0) [0|0] "" BCU
+
+BO_ 2024 UDS_Response: 8 BCU
+ SG_ ResponseSID : 0|8@1+ (1,0) [0|255] "" Tester
+ SG_ SubFunction : 8|8@1+ (1,0) [0|255] "" Tester
+ SG_ ResponseData : 16|48@1+ (1,0) [0|0] "" Tester
+
+CM_ BU_ BCU "Battery Control Unit";
+CM_ BU_ Tester "Diagnostic Tester";
+
+CM_ BO_ 256 "BCU System Status - 100ms cycle";
+CM_ BO_ 257 "BCU Current Measurement - 50ms cycle";
+CM_ BO_ 258 "BCU Voltage Rails - 100ms cycle";
+CM_ BO_ 259 "BCU Temperature - 1000ms cycle";
+CM_ BO_ 260 "BCU Output States - 100ms cycle";
+CM_ BO_ 261 "BCU Input States - 100ms cycle";
+CM_ BO_ 262 "BCU Active Faults - on event";
+CM_ BO_ 263 "BCU Diagnostics - on request";
+CM_ BO_ 2016 "UDS Diagnostic Request (ISO 14229)";
+CM_ BO_ 2024 "UDS Diagnostic Response (ISO 14229)";
+
+CM_ SG_ 256 State "Application state machine state";
+CM_ SG_ 256 PowerGood "System power rails status";
+CM_ SG_ 256 SafetyOK "Safety monitor status";
+CM_ SG_ 256 ActiveErrors "Number of active DTCs";
+CM_ SG_ 256 Uptime "System uptime in milliseconds";
+
+CM_ SG_ 257 SensorID "LEM current sensor ID (0-9)";
+CM_ SG_ 257 Current "Measured current in mA (signed)";
+
+CM_ SG_ 258 Voltage_12V "12V input rail voltage";
+CM_ SG_ 258 Voltage_5V "5V regulated rail voltage";
+CM_ SG_ 258 Voltage_3V3_Digital "3.3V digital rail voltage";
+CM_ SG_ 258 Voltage_3V3_Analog "3.3V analog rail voltage";
+
+CM_ SG_ 259 Temperature "Board temperature in degC (factor 0.001)";
+
+CM_ SG_ 260 OutputStates "BTT6200 output channel states bitmap (20 channels)";
+CM_ SG_ 261 InputStates "Digital input states bitmap (20 inputs)";
+
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 10000;
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+
+BA_ "GenMsgCycleTime" BO_ 256 100;
+BA_ "GenMsgCycleTime" BO_ 257 50;
+BA_ "GenMsgCycleTime" BO_ 258 100;
+BA_ "GenMsgCycleTime" BO_ 259 1000;
+BA_ "GenMsgCycleTime" BO_ 260 100;
+BA_ "GenMsgCycleTime" BO_ 261 100;
+
+VAL_ 256 State 0 "Init" 1 "PostInit" 2 "Running" 3 "Standby" 4 "Fault" 5 "Shutdown" 6 "Error" 7 "Safe" ;
+VAL_ 256 PowerGood 0 "Fault" 1 "OK" ;
+VAL_ 256 SafetyOK 0 "Fault" 1 "OK" ;
+

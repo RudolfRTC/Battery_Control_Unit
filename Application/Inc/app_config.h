@@ -107,24 +107,8 @@ extern "C" {
 #define CAN_MSG_PERIOD_OUTPUTS_MS     (100U)      /**< Output status */
 
 /** @brief CAN identifiers (11-bit standard) */
-#ifndef CAN_ID_BCU_STATUS
-#define CAN_ID_BCU_STATUS             (0x100U)    /**< BCU status */
-#endif
-#ifndef CAN_ID_BCU_SENSORS
-#define CAN_ID_BCU_SENSORS            (0x101U)    /**< Sensor data */
-#endif
-#ifndef CAN_ID_BCU_OUTPUTS
-#define CAN_ID_BCU_OUTPUTS            (0x102U)    /**< Output status */
-#endif
-#ifndef CAN_ID_BCU_FAULTS
-#define CAN_ID_BCU_FAULTS             (0x103U)    /**< Fault messages */
-#endif
-#ifndef CAN_ID_BCU_CONFIG_REQ
-#define CAN_ID_BCU_CONFIG_REQ         (0x7E0U)    /**< Config request */
-#endif
-#ifndef CAN_ID_BCU_CONFIG_RESP
-#define CAN_ID_BCU_CONFIG_RESP        (0x7E8U)    /**< Config response */
-#endif
+/* CAN IDs are now defined in can_protocol.h - removed duplicates to avoid conflicts */
+/* See Modules/Communication/Inc/can_protocol.h for all CAN message ID definitions */
 
 /*============================================================================*/
 /* INPUT CONFIGURATION                                                        */
@@ -242,6 +226,29 @@ extern "C" {
 #define FEATURE_OUTPUT_PWM            (1U)        /**< Enable PWM outputs */
 #define FEATURE_FAULT_LOGGING         (1U)        /**< Enable fault logging */
 #define FEATURE_CALIBRATION           (1U)        /**< Enable calibration */
+
+/*============================================================================*/
+/* LTC6811 BATTERY MONITOR CONFIGURATION (OPTIONAL)                           */
+/*============================================================================*/
+/**
+ * @brief Enable LTC6811 battery cell voltage monitoring
+ * @note Set to 0 if LTC6811 is not connected to avoid DMA interrupt issues
+ * @note When enabled, requires ISO-SPI connection to LTC6811 daisy chain
+ */
+#define FEATURE_LTC6811_ENABLE        (0U)        /**< 0=Disabled, 1=Enabled */
+
+#if (FEATURE_LTC6811_ENABLE == 1U)
+    #define LTC6811_CELL_COUNT        (12U)       /**< Cells per LTC6811 */
+    #define LTC6811_DAISY_CHAIN_SIZE  (1U)        /**< Number of LTC6811 in chain */
+    #define LTC6811_TOTAL_CELLS       (LTC6811_CELL_COUNT * LTC6811_DAISY_CHAIN_SIZE)
+    #define LTC6811_SAMPLE_PERIOD_MS  (100U)      /**< Cell voltage sample period */
+    #define LTC6811_TIMEOUT_MS        (50U)       /**< Communication timeout */
+    
+    /** @brief Cell voltage thresholds (millivolts) */
+    #define LTC6811_CELL_UV_THRESHOLD_MV  (2800U) /**< Under-voltage 2.8V */
+    #define LTC6811_CELL_OV_THRESHOLD_MV  (4200U) /**< Over-voltage 4.2V */
+    #define LTC6811_CELL_BALANCE_MV       (10U)   /**< Balance delta 10mV */
+#endif /* FEATURE_LTC6811_ENABLE */
 
 /*============================================================================*/
 /* FUNCTION PROTOTYPES                                                        */

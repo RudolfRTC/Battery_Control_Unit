@@ -1,0 +1,172 @@
+//==============================================================================
+// BUSMASTER CAN Database File
+// Project: Battery Control Unit (BCU)
+// Version: 1.0.0
+// Date: 2026-01-22
+//==============================================================================
+
+[DATABASE_VERSION] 1.0
+
+[PROTOCOL] CAN
+
+[BUSTYPE] CAN
+
+[BAUDRATE] 500000
+
+//==============================================================================
+// NODE DEFINITIONS
+//==============================================================================
+[NODE] BCU
+[NODE] Tester
+
+//==============================================================================
+// MESSAGE DEFINITIONS
+//==============================================================================
+
+[START_MSG] BCU_Status,0x100,8,1,BCU,100
+[START_SIGNALS]
+State,8,0,0,U,1,0,0,255,,"Application state: 0=Init,1=PostInit,2=Run,3=Standby,4=Fault,5=Shutdown,6=Error,7=Safe"
+PowerGood,8,1,0,U,1,0,0,1,,"System power good: 0=Fault, 1=OK"
+SafetyOK,8,2,0,U,1,0,0,1,,"Safety status: 0=Fault, 1=OK"
+ActiveErrors,8,3,0,U,1,0,0,255,,"Number of active errors"
+Uptime_B3,8,4,0,U,1,0,0,255,,"Uptime MSB (byte 3)"
+Uptime_B2,8,5,0,U,1,0,0,255,,"Uptime byte 2"
+Uptime_B1,8,6,0,U,1,0,0,255,,"Uptime byte 1"
+Uptime_B0,8,7,0,U,1,0,0,255,,"Uptime LSB (byte 0)"
+[END_MSG]
+
+[START_MSG] BCU_Current,0x101,8,1,BCU,50
+[START_SIGNALS]
+SensorID,8,0,0,U,1,0,0,255,,"Current sensor ID"
+Current_B3,8,1,0,S,1,0,-128,127,,"Current MSB (mA) byte 3"
+Current_B2,8,2,0,S,1,0,-128,127,,"Current byte 2"
+Current_B1,8,3,0,S,1,0,-128,127,,"Current byte 1"
+Current_B0,8,4,0,S,1,0,-128,127,,"Current LSB (mA) byte 0"
+Reserved1,8,5,0,U,1,0,0,255,,"Reserved"
+Reserved2,8,6,0,U,1,0,0,255,,"Reserved"
+Reserved3,8,7,0,U,1,0,0,255,,"Reserved"
+[END_MSG]
+
+[START_MSG] BCU_Voltage,0x102,8,1,BCU,100
+[START_SIGNALS]
+Voltage12V_H,8,0,0,U,1,0,0,255,,"12V rail voltage MSB (mV)"
+Voltage12V_L,8,1,0,U,1,0,0,255,,"12V rail voltage LSB (mV)"
+Voltage5V_H,8,2,0,U,1,0,0,255,,"5V rail voltage MSB (mV)"
+Voltage5V_L,8,3,0,U,1,0,0,255,,"5V rail voltage LSB (mV)"
+Voltage3V3D_H,8,4,0,U,1,0,0,255,,"3.3V digital rail MSB (mV)"
+Voltage3V3D_L,8,5,0,U,1,0,0,255,,"3.3V digital rail LSB (mV)"
+Voltage3V3A_H,8,6,0,U,1,0,0,255,,"3.3V analog rail MSB (mV)"
+Voltage3V3A_L,8,7,0,U,1,0,0,255,,"3.3V analog rail LSB (mV)"
+[END_MSG]
+
+[START_MSG] BCU_Temperature,0x103,8,1,BCU,1000
+[START_SIGNALS]
+Temp_B3,8,0,0,S,1,0,-128,127,,"Temperature MSB (mC) byte 3"
+Temp_B2,8,1,0,S,1,0,-128,127,,"Temperature byte 2"
+Temp_B1,8,2,0,S,1,0,-128,127,,"Temperature byte 1"
+Temp_B0,8,3,0,S,1,0,-128,127,,"Temperature LSB (mC) byte 0"
+Reserved1,8,4,0,U,1,0,0,255,,"Reserved"
+Reserved2,8,5,0,U,1,0,0,255,,"Reserved"
+Reserved3,8,6,0,U,1,0,0,255,,"Reserved"
+Reserved4,8,7,0,U,1,0,0,255,,"Reserved"
+[END_MSG]
+
+[START_MSG] BCU_Outputs,0x104,8,1,BCU,100
+[START_SIGNALS]
+Outputs_0_7,8,0,0,U,1,0,0,255,,"Output channels 0-7 bitmap"
+Outputs_8_15,8,1,0,U,1,0,0,255,,"Output channels 8-15 bitmap"
+Outputs_16_19,8,2,0,U,1,0,0,15,,"Output channels 16-19 bitmap (bits 0-3)"
+Reserved3,8,3,0,U,1,0,0,255,,"Reserved"
+Reserved4,8,4,0,U,1,0,0,255,,"Reserved"
+Reserved5,8,5,0,U,1,0,0,255,,"Reserved"
+Reserved6,8,6,0,U,1,0,0,255,,"Reserved"
+Reserved7,8,7,0,U,1,0,0,255,,"Reserved"
+[END_MSG]
+
+[START_MSG] BCU_Inputs,0x105,8,1,BCU,100
+[START_SIGNALS]
+Inputs_0_7,8,0,0,U,1,0,0,255,,"Digital inputs 0-7 bitmap"
+Inputs_8_15,8,1,0,U,1,0,0,255,,"Digital inputs 8-15 bitmap"
+Inputs_16_19,8,2,0,U,1,0,0,15,,"Digital inputs 16-19 bitmap (bits 0-3)"
+Reserved3,8,3,0,U,1,0,0,255,,"Reserved"
+Reserved4,8,4,0,U,1,0,0,255,,"Reserved"
+Reserved5,8,5,0,U,1,0,0,255,,"Reserved"
+Reserved6,8,6,0,U,1,0,0,255,,"Reserved"
+Reserved7,8,7,0,U,1,0,0,255,,"Reserved"
+[END_MSG]
+
+[START_MSG] BCU_Faults,0x106,8,1,BCU,0
+[START_SIGNALS]
+FaultCount,8,0,0,U,1,0,0,255,,"Number of active faults"
+FaultCode1_H,8,1,0,U,1,0,0,255,,"Fault code 1 MSB"
+FaultCode1_L,8,2,0,U,1,0,0,255,,"Fault code 1 LSB"
+FaultCode2_H,8,3,0,U,1,0,0,255,,"Fault code 2 MSB"
+FaultCode2_L,8,4,0,U,1,0,0,255,,"Fault code 2 LSB"
+FaultCode3_H,8,5,0,U,1,0,0,255,,"Fault code 3 MSB"
+FaultCode3_L,8,6,0,U,1,0,0,255,,"Fault code 3 LSB"
+Reserved,8,7,0,U,1,0,0,255,,"Reserved"
+[END_MSG]
+
+[START_MSG] BCU_Diagnostics,0x107,8,1,BCU,0
+[START_SIGNALS]
+DiagData0,8,0,0,U,1,0,0,255,,"Diagnostic data byte 0"
+DiagData1,8,1,0,U,1,0,0,255,,"Diagnostic data byte 1"
+DiagData2,8,2,0,U,1,0,0,255,,"Diagnostic data byte 2"
+DiagData3,8,3,0,U,1,0,0,255,,"Diagnostic data byte 3"
+DiagData4,8,4,0,U,1,0,0,255,,"Diagnostic data byte 4"
+DiagData5,8,5,0,U,1,0,0,255,,"Diagnostic data byte 5"
+DiagData6,8,6,0,U,1,0,0,255,,"Diagnostic data byte 6"
+DiagData7,8,7,0,U,1,0,0,255,,"Diagnostic data byte 7"
+[END_MSG]
+
+[START_MSG] UDS_Request,0x7E0,8,0,Tester,0
+[START_SIGNALS]
+ServiceID,8,0,0,U,1,0,0,255,,"UDS Service ID"
+SubFunction,8,1,0,U,1,0,0,255,,"UDS Sub-function"
+Data1,8,2,0,U,1,0,0,255,,"Request data byte 1"
+Data2,8,3,0,U,1,0,0,255,,"Request data byte 2"
+Data3,8,4,0,U,1,0,0,255,,"Request data byte 3"
+Data4,8,5,0,U,1,0,0,255,,"Request data byte 4"
+Data5,8,6,0,U,1,0,0,255,,"Request data byte 5"
+Data6,8,7,0,U,1,0,0,255,,"Request data byte 6"
+[END_MSG]
+
+[START_MSG] UDS_Response,0x7E8,8,1,BCU,0
+[START_SIGNALS]
+ServiceID,8,0,0,U,1,0,0,255,,"UDS Response Service ID (SID + 0x40)"
+SubFunction,8,1,0,U,1,0,0,255,,"UDS Sub-function / NRC"
+Data1,8,2,0,U,1,0,0,255,,"Response data byte 1"
+Data2,8,3,0,U,1,0,0,255,,"Response data byte 2"
+Data3,8,4,0,U,1,0,0,255,,"Response data byte 3"
+Data4,8,5,0,U,1,0,0,255,,"Response data byte 4"
+Data5,8,6,0,U,1,0,0,255,,"Response data byte 5"
+Data6,8,7,0,U,1,0,0,255,,"Response data byte 6"
+[END_MSG]
+
+//==============================================================================
+// VALUE DESCRIPTIONS
+//==============================================================================
+[START_VALUE_DESC] BCU_Status,State
+0 "Init"
+1 "PostInit"
+2 "Running"
+3 "Standby"
+4 "Fault"
+5 "Shutdown"
+6 "Error"
+7 "Safe"
+[END_VALUE_DESC]
+
+[START_VALUE_DESC] BCU_Status,PowerGood
+0 "Fault"
+1 "OK"
+[END_VALUE_DESC]
+
+[START_VALUE_DESC] BCU_Status,SafetyOK
+0 "Fault"
+1 "OK"
+[END_VALUE_DESC]
+
+//==============================================================================
+// END OF FILE
+//==============================================================================
